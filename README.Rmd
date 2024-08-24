@@ -15,7 +15,7 @@ opts_chunk$set(warning = FALSE, message = FALSE, eval=F)
 
 **flexPaths**: flexible causal path-specific effect
 
--   two decomposition strategy
+-   two decomposition strategies
 
 -   flexible paths
 
@@ -26,8 +26,12 @@ opts_chunk$set(warning = FALSE, message = FALSE, eval=F)
 Install this package:
 
 ```{r}
+install.packages("devtools")
+
 library(devtools)
+
 install_github("xxou/flexPaths")
+library(flexPaths)
 ```
 
 

@@ -5,18 +5,20 @@
 # Y: outcome variable
 # args: for
 fl_template <- function(
-    data, X = c(""), Y = " ", args  # do not change
+    data, X = c(""), Y = " ", fl_call  # do not change these inputs
     ) {
 
   # prepare for dataX
   dataX <- data[, X,drop = FALSE]
 
   # Fit the model
-  # Write the call for your model as the character
-  fl_call <- paste0(" ....  ")
+  # Write the needed call for your model
+  # fl_call$data =  quote(data)
+  # fl_call$needed_elments = .....
+
 
   # run the model
-  model <- eval(parse(text = fl_call))
+  model <- eval(fl_call)
 
   # Output
   out <- list(model = model,dataX=dataX) # pred = model$fitted.values
