@@ -15,7 +15,7 @@ Xiaxian Ou
 
 **flexPaths**: flexible causal path-specific effect
 
-- two decomposition strategy
+- two decomposition strategies
 
 - flexible paths
 
@@ -26,8 +26,12 @@ Xiaxian Ou
 Install this package:
 
 ``` r
+install.packages("devtools")
+
 library(devtools)
+
 install_github("xxou/flexPaths")
+library(flexPaths)
 ```
 
 # 1. single treatment
