@@ -99,7 +99,7 @@ flexPotential <-  function(
   out.fit_names <- map(out.details, ~ paste0("fl_", .x$fit_name))
   out.calls <- map(out.details, "model_call")
 
-  Imodel <- Omodel.lists[c(1,unique(M.index[M.index!=0])+1)][-K]
+  Imodel <- Imodel.lists[c(1, unique(M.index[M.index!=0])[-(K-1)]+1)]
   iter.details<- map(Imodel,extract_model_details)
   iter.fit_names <- map(iter.details, ~ paste0("fl_", .x$fit_name))
   iter.calls <- map(iter.details, "model_call")
