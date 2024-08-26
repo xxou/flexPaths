@@ -1,7 +1,7 @@
 README
 ================
 Xiaxian Ou
-2024-08-24
+2024-08-26
 
 - [1. single treatment](#1-single-treatment)
   - [path fit](#path-fit)
@@ -9,7 +9,7 @@ Xiaxian Ou
     mediator](#mediation-effects-through-each-mediator)
   - [flexible paths for single
     treatment](#flexible-paths-for-single-treatment)
-- [multiple treatments](#multiple-treatments)
+- [2. multiple treatments](#2-multiple-treatments)
   - [flexible paths for multiple
     treatments](#flexible-paths-for-multiple-treatments)
 
@@ -74,7 +74,7 @@ flex_results1 <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
                             p0 = potential_outcome0, scale = "diff", CI_level = 0.95,nboot = 5)
 ```
 
-# multiple treatments
+# 2. multiple treatments
 
 ## flexible paths for multiple treatments
 
@@ -101,7 +101,29 @@ mfit<- pathsFit(data = multiTreat,
 )
 ```
 
-potential outcome for active setting
+The length of the active list corresponds to the number of treatments.
+In active1 example, each vector in $a_1, a_2, a_3$ represents values
+assigned to $M_1, M_2, ..., M_6$ and $Y$. The first three values are
+NAs, indicating that the $a_3$ is between $M_3$ and $M_4$. The longest
+path in this scenario is
+$A_1 \rightarrow A_2 \rightarrow M_1 \rightarrow M_2 \rightarrow M_3 \rightarrow A_3 \rightarrow M_4 \rightarrow M_5 \rightarrow M_6 \rightarrow Y$.
+
+For active2, the longest path is
+$A_1  \rightarrow M_1 \rightarrow M_2 \rightarrow A_2 \rightarrow M_3  \rightarrow M_4 \rightarrow A_3 \rightarrow M_5 \rightarrow M_6 \rightarrow Y$.
+
+``` r
+active1 = list(a1=c(0,1,0,0,1,0,0),
+               a2=c(1,0,1,1,1,0,0),
+               a3=c(NA,NA,NA,1,0,0,0))
+
+
+
+active2 = list(a1=c(0,1,0,0,1,0,0),
+               a2=c(NA,NA,1,1,1,0,0),
+               a3=c(NA,NA,NA,NA,0,0,0))
+```
+
+Potential outcome for active1 setting.
 
 ``` r
 mp1<-mflexPotential(active = list(a1=c(0,1,0,0,1,0,0),
@@ -112,7 +134,7 @@ mp2<-mflexPotential(active = list(a1=c(0,0,0,0,1,0,0),
                                   a3=c(NA,NA,NA,1,0,0,0)),mfit)
 ```
 
-PSE
+PSE : mp1 - mp2
 
 ``` r
 flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =2 , m.cores = 8)
