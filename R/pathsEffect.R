@@ -109,11 +109,11 @@ pathsEffect<-function(
         boot.CI.lower = quantile(Effect, probs = (1-CI_level)/2,na.rm = T),
         boot.CI.upper = quantile(Effect, probs = 1-(1-CI_level)/2,na.rm = T)) %>%
       mutate(Effect = out$results$Effect,
-             boot.P.value = round(2*(1-pnorm(abs(Effect)/boot.SE)),4),
              # p value for risk and ratio???
              nboot = nboot) %>%
       relocate(Effect, .after = Path) %>% as.data.frame()
 
+    if(scale =="diff"){output$boot.P.value = round(2*(1-pnorm(abs(output$Effect)/output$boot.SE)),4)}
     out$boot_results <- output
   }
 

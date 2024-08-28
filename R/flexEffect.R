@@ -174,9 +174,10 @@ flexEffect<-function(
       boot.CI.lower = quantile(Effect, probs = (1-CI_level)/2),
       boot.CI.upper = quantile(Effect, probs = 1-(1-CI_level)/2)) %>%
     full_join(select(results, active, Effect), by = join_by(active)) %>%
-    mutate(boot.P.value = round(2*(1-pnorm(abs(Effect)/boot.SE)),4),
-           nboot = nboot) %>%
+    mutate(nboot = nboot) %>%
     relocate(Effect, .after = active) %>% as.data.frame()
+
+  if(scale =="diff"){output$boot.P.value = round(2*(1-pnorm(abs(output$Effect)/output$boot.SE)),4)}
 
   out$boot_results <- output
 
