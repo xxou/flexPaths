@@ -79,9 +79,9 @@ The effect of specific pathway can be defined as a contrast against
 $Y(0)$ on a mean scale, and these effects are also called natural
 path-specific effect:
 
-- $\rho_{A \rightarrow M_1 \leadsto Y} = \mathbb{E} (\phi(1,0,0)) - \mathbb{E} (Y(0))$
-- $\rho_{A \rightarrow M_2 \rightarrow Y} = \mathbb{E} (\phi(0,1,0)) - \mathbb{E} (Y(0))$
-- $\rho_{A \rightarrow Y} = \mathbb{E} (\phi(0,0,1)) - \mathbb{E} (Y(0))$
+- $\rho_{A \rightarrow M_1 \leadsto Y} = \mathbb{E} (\phi(1,0,0)) - \mathbb{E} (\phi(0,0,0))$
+- $\rho_{A \rightarrow M_2 \rightarrow Y} = \mathbb{E} (\phi(0,1,0)) - \mathbb{E} (\phi(0,0,0))$
+- $\rho_{A \rightarrow Y} = \mathbb{E} (\phi(0,0,1)) - \mathbb{E} (\phi(0,0,0))$
 
 Another way to represent PSEs is to decompose the total effect
 sequentially, and these effects are called cumulative path-specific
@@ -90,7 +90,7 @@ $\mathbb{E}(Y(1)) -  \mathbb{E}(Y(1)) =\rho_{A \rightarrow M_1 \leadsto Y}  + \r
 
 - $\rho_{A \rightarrow M_1 \leadsto Y} = \mathbb{E} (\phi(1,1,1)) - \mathbb{E} (\phi(0,1,1))$
 - $\rho_{A \rightarrow M_2 \rightarrow Y} = \mathbb{E} (\phi(0,1,1)) - \mathbb{E} (\phi(0,0,1))$
-- $\rho_{A \rightarrow Y} = \mathbb{E} (\phi(0,0,1)) - \mathbb{E} (Y(0))$
+- $\rho_{A \rightarrow Y} = \mathbb{E} (\phi(0,0,1)) - \mathbb{E} (\phi(0,0,0))$
 
 In the absence of interactions between $A$ and $M$, natural PSEs and
 cumulative PSEs yield identical results. However, when interactions are
@@ -117,9 +117,7 @@ $A \rightarrow Y$ and $A \rightarrow M_k \leadsto Y$
 captures all the effect through $M_k$. The identification formula of
 $\mathbb{E}(\phi(a_1, \ldots,a_K, a))$ is
 
-$$
-\int y \Big\{ dP(y \mid \overline{m}_K, A=a,x) \prod_{k=1}^K dP(m_k \mid \overline{m}_{k-1},A=a_k,x)  \Big\} dP(x) 
-$$
+$$ \int y \Big\{ dP(y \mid \overline{m}_K, A=a,x) \prod_{k=1}^K dP(m_k \mid \overline{m}_{k-1},A=a_k,x)  \Big\} dP(x) $$
 
 **Models for Estimation**:
 
@@ -176,6 +174,12 @@ flex_results1 <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
 # 2. PSEs for Multiple Treatments
 
 <img src="pic/DAG_multiT.jpg" width="500" />
+
+**Decomposition**:
+
+**Identified pathways**:
+
+**Models for Estimation**:
 
 ## 2.1 `pathFit`
 
