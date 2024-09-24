@@ -136,12 +136,13 @@ $\mathbb{E}(\phi(a_1, \ldots,a_K, a))$ is
 ## 1.1 `pathsFit`: input needed information for PSEs calculation
 
 We provide data `singTreat` for one treatment with 3 ordered mediators,
-following the sequence : \$ A M_1 M_2 M_3 Y\$
+following the sequence :
+$A  \rightarrow M_1  \rightarrow M_2 \rightarrow M_3 \rightarrow Y$
 
 - A: treat
-- M_1: med1
-- M_2: med2_1 and med2_2
-- M_3: med3
+- $M_1$: med1
+- $M_2$: med2_1 and med2_2
+- $M_3$: med3
 - Y: outcome1 is continuous and outcome2 is binary
 
 ``` r
@@ -268,15 +269,15 @@ results_boot
     ## boot strap results: 
     ## 
     ##                      Path       Effect    boot.SE boot.CI.lower boot.CI.upper
-    ## 1           A->M1->...->Y  0.159502029 0.03412906    0.09944731    0.19437867
-    ## 2           A->M2->...->Y  0.080741578 0.02573704    0.04847968    0.12332795
-    ## 3           A->M3->...->Y -0.004023294 0.01195713   -0.02194956    0.01247454
-    ## 4                    A->Y  0.513165676 0.05193713    0.43720360    0.59526141
-    ## 5 total effect: A->...->Y  0.749385989 0.06032048    0.63984323    0.81201205
+    ## 1           A->M1->...->Y  0.159502029 0.03853573    0.12646325    0.23135742
+    ## 2           A->M2->...->Y  0.080741578 0.01920228    0.05110720    0.10597920
+    ## 3           A->M3->...->Y -0.004023294 0.01001601   -0.01822355    0.01134485
+    ## 4                    A->Y  0.513165676 0.08024319    0.36125442    0.60060472
+    ## 5 total effect: A->...->Y  0.749385989 0.06593466    0.63213446    0.83461173
     ##   boot.P.value nboot
     ## 1       0.0000    10
-    ## 2       0.0017    10
-    ## 3       0.7365    10
+    ## 2       0.0000    10
+    ## 3       0.6879    10
     ## 4       0.0000    10
     ## 5       0.0000    10
 
@@ -303,8 +304,9 @@ potential_outcome3 <- flexPotential(pathsFit = EIF_fit, active = c(1, 0, 0, 0))
 After obtaining the potential outcomes from `flexPotential`, we can use
 the `flexEffect` to calculate the effects by comparing p1 and p2. For
 example, flex_results1 represents the PSEs:
-$\E(\phi(1,0,1,1)) - \E(\phi(0, 0, 0, 0))$ which captures the effect
-mediated through $M_1$, $M_3$ and direct effect $A \rightarrow Y$:
+$\mathbb{E}(\phi(1,0,1,1)) - \mathbb{E}(\phi(0, 0, 0, 0))$ which
+captures the effect mediated through $M_1$, $M_3$ and direct effect
+$A \rightarrow Y$:
 
 ``` r
 flex_results1 <- flexEffect(p1 = potential_outcome1,
@@ -322,7 +324,7 @@ flex_results1
     ## boot strap results: 
     ## 
     ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1011 vs 0000 0.674418 0.06624831     0.5969797     0.7674647            0
+    ## 1 1011 vs 0000 0.674418 0.06166664     0.5577032     0.7295351            0
     ##   nboot
     ## 1    10
 
@@ -351,8 +353,8 @@ flex_results
     ## boot strap results: 
     ## 
     ##         active    Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 1000 0.4894581 0.06572490     0.3947622     0.5617030            0
-    ## 2 1011 vs 0000 0.6744180 0.07026542     0.5555502     0.7131635            0
+    ## 1 1001 vs 1000 0.4894581 0.03825933     0.4900618     0.5738998            0
+    ## 2 1011 vs 0000 0.6744180 0.02876417     0.6912680     0.7598707            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -379,8 +381,8 @@ flex_results
     ## boot strap results: 
     ## 
     ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 0000 0.677621 0.06014557     0.6594442     0.7756425            0
-    ## 2 1011 vs 0000 0.674418 0.05812812     0.6479677     0.7698373            0
+    ## 1 1001 vs 0000 0.677621 0.09651718     0.5350698     0.7502836            0
+    ## 2 1011 vs 0000 0.674418 0.09716670     0.5215431     0.7446116            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -405,11 +407,11 @@ flex_results
     ## boot strap results: 
     ## 
     ##         active       Effect     boot.SE boot.CI.lower boot.CI.upper
-    ## 1 1011 vs 1000  0.486255031 0.063314278    0.42177251   0.563896585
-    ## 2 1011 vs 1001 -0.003203024 0.007625497   -0.01461819   0.003087022
+    ## 1 1011 vs 1000  0.486255031 0.038288771    0.43923004    0.52643475
+    ## 2 1011 vs 1001 -0.003203024 0.009309218   -0.02271642   -0.00196915
     ##   boot.P.value nboot
     ## 1       0.0000     5
-    ## 2       0.6745     5
+    ## 2       0.7308     5
 
 # 2. PSEs for Multiple Treatments
 
@@ -564,7 +566,7 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =2 , m.cor
     ## 
     ## boot strap results: 
     ## 
-    ##                                         active    Effect   boot.SE
-    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.2208101
+    ##                                         active    Effect    boot.SE
+    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.04168024
     ##   boot.CI.lower boot.CI.upper boot.P.value nboot
-    ## 1     0.2226933     0.5193523       0.2757     2
+    ## 1     0.1704035      0.226401            0     2
