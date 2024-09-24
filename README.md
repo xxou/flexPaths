@@ -19,9 +19,10 @@ Xiaxian Ou
     pathway(s)](#22-flexeffect-pse-for-flexible-pathways)
 
 This package is built for estimating the causal **path-specific
-effects** (PSEs) in mediation analysis with multiple ordered mediators
-for one binary treatments or multiple binary treatments. It provides
-robust estimators based on influence function theory.
+effects** (PSEs) in mediation analysis with
+<span style="color:red">multiple ordered mediators for one binary
+treatment or multiple binary treatments</span>. It provides robust
+estimators based on influence function theory.
 
 Primary advantages of the package include:
 
@@ -33,10 +34,9 @@ Primary advantages of the package include:
   outcome for any identified paths, as well as the average causal effect
   by comparing the average potential outcome.
 
-- **flexible model fitting**: he package supports model fitting using
-  `glm/lm`, `twopart`, `bart` from dbarts, `Superlearner` now. Users can
-  also integrate new models for estimation by modifying the
-  `fl_model_template`.
+- **flexible model fitting**: The package supports model fitting using
+  `glm/lm`, `dbarts`, `SuperLearner` now. Users can also integrate new
+  models for estimation by modifying the `fl_model_template`.
 
 - **flexible estimators**: Three estimator approaches are
   available—Inverse Probability Weighting (IPW), plug-in G-computation,
@@ -87,7 +87,7 @@ path-specific effect:
 Another way to represent PSEs is to decompose the total effect
 sequentially, and these effects are called cumulative path-specific
 effect:
-$\mathbb{E}(Y(1)) -  \mathbb{E}(Y(1)) =\rho_{A \rightarrow M_1 \leadsto Y}  + \rho_{A \rightarrow M_2 \rightarrow Y} + \rho_{A \rightarrow Y}$
+$\mathbb{E}(Y(1)) - \mathbb{E}(Y(1)) =\rho_{A \rightarrow M_1 \leadsto Y} + \rho_{A \rightarrow M_2 \rightarrow Y} + \rho_{A \rightarrow Y}$
 
 - $\rho_{A \rightarrow M_1 \leadsto Y} = \mathbb{E} (\phi(1,1,1)) - \mathbb{E} (\phi(0,1,1))$
 - $\rho_{A \rightarrow M_2 \rightarrow Y} = \mathbb{E} (\phi(0,1,1)) - \mathbb{E} (\phi(0,0,1))$
@@ -138,7 +138,7 @@ $\mathbb{E}(\phi(a_1, \ldots,a_K, a))$ is
 
 We provide data `singTreat` for one treatment with 3 ordered mediators,
 following the sequence :
-$A  \rightarrow M_1  \rightarrow M_2 \rightarrow M_3 \rightarrow Y$
+$A \rightarrow M_1 \rightarrow M_2 \rightarrow M_3 \rightarrow Y$
 
 - A: treat
 - $M_1$: med1
@@ -269,16 +269,16 @@ results_boot
     ## 
     ## boot strap results: 
     ## 
-    ##                      Path       Effect     boot.SE boot.CI.lower boot.CI.upper
-    ## 1           A->M1->...->Y  0.159502029 0.023184560    0.10539743     0.1697868
-    ## 2           A->M2->...->Y  0.080741578 0.010759812    0.07545817     0.1040069
-    ## 3           A->M3->...->Y -0.004023294 0.005427812   -0.01205165     0.0028993
-    ## 4                    A->Y  0.513165676 0.047894231    0.42125790     0.5742911
-    ## 5 total effect: A->...->Y  0.749385989 0.046835229    0.64730404     0.7961643
+    ##                      Path       Effect    boot.SE boot.CI.lower boot.CI.upper
+    ## 1           A->M1->...->Y  0.159502029 0.02929434    0.11436785   0.192735916
+    ## 2           A->M2->...->Y  0.080741578 0.02292482    0.04917614   0.106212207
+    ## 3           A->M3->...->Y -0.004023294 0.01073169   -0.02307365   0.009912811
+    ## 4                    A->Y  0.513165676 0.07384394    0.42732451   0.635252674
+    ## 5 total effect: A->...->Y  0.749385989 0.09143694    0.62398925   0.870241970
     ##   boot.P.value nboot
     ## 1       0.0000    10
-    ## 2       0.0000    10
-    ## 3       0.4585    10
+    ## 2       0.0004    10
+    ## 3       0.7077    10
     ## 4       0.0000    10
     ## 5       0.0000    10
 
@@ -325,7 +325,7 @@ flex_results1
     ## boot strap results: 
     ## 
     ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1011 vs 0000 0.674418 0.05958431     0.5904757     0.7770134            0
+    ## 1 1011 vs 0000 0.674418 0.05481736     0.5814665     0.7437894            0
     ##   nboot
     ## 1    10
 
@@ -353,9 +353,9 @@ flex_results
     ## 
     ## boot strap results: 
     ## 
-    ##         active    Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 1000 0.4894581 0.06442672     0.4031085     0.5612199            0
-    ## 2 1011 vs 0000 0.6744180 0.07747431     0.5745700     0.7695518            0
+    ##         active    Effect   boot.SE boot.CI.lower boot.CI.upper boot.P.value
+    ## 1 1001 vs 1000 0.4894581 0.0967967     0.3402982     0.5714916            0
+    ## 2 1011 vs 0000 0.6744180 0.1338147     0.4766037     0.8133921            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -381,9 +381,9 @@ flex_results
     ## 
     ## boot strap results: 
     ## 
-    ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 0000 0.677621 0.07604500     0.5506095     0.7412413            0
-    ## 2 1011 vs 0000 0.674418 0.08163048     0.5327752     0.7361775            0
+    ##         active   Effect   boot.SE boot.CI.lower boot.CI.upper boot.P.value
+    ## 1 1001 vs 0000 0.677621 0.1129864     0.4905606     0.7578548            0
+    ## 2 1011 vs 0000 0.674418 0.1060173     0.4875768     0.7331411            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -407,12 +407,12 @@ flex_results
     ## 
     ## boot strap results: 
     ## 
-    ##         active       Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1011 vs 1000  0.486255031 0.05771213    0.41971947    0.54648521       0.0000
-    ## 2 1011 vs 1001 -0.003203024 0.01270263   -0.01639075    0.01093889       0.8009
-    ##   nboot
-    ## 1     5
-    ## 2     5
+    ##         active       Effect     boot.SE boot.CI.lower boot.CI.upper
+    ## 1 1011 vs 1000  0.486255031 0.089862418    0.34630802   0.547205945
+    ## 2 1011 vs 1001 -0.003203024 0.008346773   -0.01956305   0.001322856
+    ##   boot.P.value nboot
+    ## 1       0.0000     5
+    ## 2       0.7012     5
 
 # 2. PSEs for Multiple Treatments
 
@@ -424,7 +424,7 @@ denote the covariates.
 <img src="pic/DAG_multiT.png" width="400" />
 
 The sequence of treatments and mediators follows the order:
-$A \rightarrow M_1 \rightarrow A_2 \rightarrow M_2  \rightarrow Y$.
+$A \rightarrow M_1 \rightarrow A_2 \rightarrow M_2 \rightarrow Y$.
 
 Denote the counterfactual outcome
 $\phi(a_{11}, a_{12}, a_{10}, a_{22}, a_{20} ) = Y(a_{10}, a_{20},M_1(a_{11}),M_2(a_{12}, a_{22},M_1(a_{11})))$,
@@ -531,7 +531,7 @@ and mediators is
 $A_1 \rightarrow A_2 \rightarrow M_1 \rightarrow M_2 \rightarrow M_3 \rightarrow A_3 \rightarrow M_4 \rightarrow M_5 \rightarrow M_6 \rightarrow Y$.
 The counterfactual values matrix can be expressed as:
 
-<img src="pic/multi_matrix_eg.png" width="600" />
+<img src="pic/multi_matrix_eg.png" width="700" />
 
 In the function `mflexPotential`, inputs of counterfactual values are
 specified using a list. Within the list `active`, each element is named
@@ -565,6 +565,6 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.co
     ## boot strap results: 
     ## 
     ##                                         active    Effect   boot.SE
-    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.3686581
+    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.2517658
     ##   boot.CI.lower boot.CI.upper boot.P.value nboot
-    ## 1     0.1383253      1.221401       0.5138    10
+    ## 1     -0.174371     0.5686913       0.3391    10
