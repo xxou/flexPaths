@@ -151,8 +151,16 @@ flexEffect<-function(
   # bootstrap
   if (is.numeric(m.cores)) {
     m.cores.detected <- parallel::detectCores()
-    if(m.cores > m.cores.detected) m.cores <- m.cores.detected
+    if(m.cores > m.cores.detected){m.cores <- m.cores.detected}
 
+    # windows, m.cores = 1
+    os <- tolower(Sys.info()[['sysname']])
+    if (os == "windows") {
+      m.cores <- 1
+      message("Running on Windows. Setting cores to 1 since mclapply is not available.")
+    }
+
+    # run
     boot.list <- parallel::mclapply(seq_len(nboot), function(i) {
       one_boot.flexEffect(data_raw, pathsFit, call_all, index_p1, index_p0)}, mc.cores = m.cores)
   }else{

@@ -95,6 +95,13 @@ pathsEffect<-function(
       m.cores.detected <- parallel::detectCores()
       if(m.cores > m.cores.detected){m.cores <- m.cores.detected}
 
+      # windows, m.cores = 1
+      os <- tolower(Sys.info()[['sysname']])
+      if (os == "windows") {
+        m.cores <- 1
+        message("Running on Windows. Setting cores to 1 since mclapply is not available.")
+      }
+
       boot.list <- parallel::mclapply(seq_len(nboot), function(i) {
         one_boot.pathsEffect(out)}, mc.cores = m.cores)
     }else{
