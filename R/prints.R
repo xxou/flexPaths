@@ -4,7 +4,7 @@ print.pathsFit <- function(x){
   cat("\n")
   cat("Paths Parameters")
   cat("\n\n")
-  cat("treatment:",x$A,"; outcome:", x$Y,"; covariates:", x$cov_x)
+  cat(x$type,":",x$A,"; outcome:", x$Y,"; covariates:", x$cov_x)
   cat("\n\n")
   cat("mediators:")
   cat("\n\n")

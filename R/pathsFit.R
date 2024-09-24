@@ -112,6 +112,7 @@ pathsFit<-function(
   Pmodel.lists = Omodel.lists = Imodel.lists = NULL
    ## (1) single treatment scenario ------
   if(length(A) ==1){
+    type = "single treatment"
     # number of model.propensity
     if(length(model.propensity)==1){
       # a list of one formula --> get list of Nk models
@@ -144,6 +145,8 @@ pathsFit<-function(
 
   ## (2) multiple treatments scenario ------
   if(length(A)>1){
+    type = "multiple treatments"
+
     if(length(model.propensity)==1){
       Pmodel.lists = model.propensity
       }
@@ -186,6 +189,7 @@ pathsFit<-function(
  # output for next calculation for paths effect
   output <- list(
     data = data,
+    type = type,
     A = A,
     Y = Y,
     cov_x = cov_x,

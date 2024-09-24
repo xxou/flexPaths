@@ -74,6 +74,9 @@ pathsEffect<-function(
   Call <- match.call()
   list2env(pathsFit, envir = environment())
 
+  if(type != "single treatment"){
+    stop("This function is only used for single treatment")
+  }
   #### PSE decomposition -----
   if(decomposition == "refer0"){
     out<- refer0_effect(data = data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,

@@ -10,12 +10,13 @@ Xiaxian Ou
     calculation](#11-pathsfit-input-needed-information-for-pses-calculation)
   - [1.2 `pathsEffect`: PSEs through each
     mediator](#12-pathseffect-pses-through-each-mediator)
-  - [1.3 `flexEffect`: PSE for flexible combined
-    paths](#13-flexeffect-pse-for-flexible-combined-paths)
+  - [1.3 `flexEffect`: PSE for flexible
+    pathway(s)](#13-flexeffect-pse-for-flexible-pathways)
 - [2. PSEs for Multiple Treatments](#2-pses-for-multiple-treatments)
-  - [2.1 `pathsFit`](#21-pathsfit)
-  - [2.2 `mpathEffect`](#22-mpatheffect)
-  - [2.3 `mflexEffect`](#23-mflexeffect)
+  - [2.1 `pathsFit`: input needed information for PSEs
+    calculation](#21-pathsfit-input-needed-information-for-pses-calculation)
+  - [2.2 `flexEffect`: PSE for flexible
+    pathway(s)](#22-flexeffect-pse-for-flexible-pathways)
 
 This package is built for estimating the causal **path-specific
 effects** (PSEs) in mediation analysis with multiple ordered mediators
@@ -268,20 +269,20 @@ results_boot
     ## 
     ## boot strap results: 
     ## 
-    ##                      Path       Effect    boot.SE boot.CI.lower boot.CI.upper
-    ## 1           A->M1->...->Y  0.159502029 0.03853573    0.12646325    0.23135742
-    ## 2           A->M2->...->Y  0.080741578 0.01920228    0.05110720    0.10597920
-    ## 3           A->M3->...->Y -0.004023294 0.01001601   -0.01822355    0.01134485
-    ## 4                    A->Y  0.513165676 0.08024319    0.36125442    0.60060472
-    ## 5 total effect: A->...->Y  0.749385989 0.06593466    0.63213446    0.83461173
+    ##                      Path       Effect     boot.SE boot.CI.lower boot.CI.upper
+    ## 1           A->M1->...->Y  0.159502029 0.023184560    0.10539743     0.1697868
+    ## 2           A->M2->...->Y  0.080741578 0.010759812    0.07545817     0.1040069
+    ## 3           A->M3->...->Y -0.004023294 0.005427812   -0.01205165     0.0028993
+    ## 4                    A->Y  0.513165676 0.047894231    0.42125790     0.5742911
+    ## 5 total effect: A->...->Y  0.749385989 0.046835229    0.64730404     0.7961643
     ##   boot.P.value nboot
     ## 1       0.0000    10
     ## 2       0.0000    10
-    ## 3       0.6879    10
+    ## 3       0.4585    10
     ## 4       0.0000    10
     ## 5       0.0000    10
 
-## 1.3 `flexEffect`: PSE for flexible combined paths
+## 1.3 `flexEffect`: PSE for flexible pathway(s)
 
 The `flexEffect` function can get effect for any identified path or
 combined path by comparing two potential outcome form the function
@@ -324,7 +325,7 @@ flex_results1
     ## boot strap results: 
     ## 
     ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1011 vs 0000 0.674418 0.06166664     0.5577032     0.7295351            0
+    ## 1 1011 vs 0000 0.674418 0.05958431     0.5904757     0.7770134            0
     ##   nboot
     ## 1    10
 
@@ -353,8 +354,8 @@ flex_results
     ## boot strap results: 
     ## 
     ##         active    Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 1000 0.4894581 0.03825933     0.4900618     0.5738998            0
-    ## 2 1011 vs 0000 0.6744180 0.02876417     0.6912680     0.7598707            0
+    ## 1 1001 vs 1000 0.4894581 0.06442672     0.4031085     0.5612199            0
+    ## 2 1011 vs 0000 0.6744180 0.07747431     0.5745700     0.7695518            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -381,8 +382,8 @@ flex_results
     ## boot strap results: 
     ## 
     ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 0000 0.677621 0.09651718     0.5350698     0.7502836            0
-    ## 2 1011 vs 0000 0.674418 0.09716670     0.5215431     0.7446116            0
+    ## 1 1001 vs 0000 0.677621 0.07604500     0.5506095     0.7412413            0
+    ## 2 1011 vs 0000 0.674418 0.08163048     0.5327752     0.7361775            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -406,12 +407,12 @@ flex_results
     ## 
     ## boot strap results: 
     ## 
-    ##         active       Effect     boot.SE boot.CI.lower boot.CI.upper
-    ## 1 1011 vs 1000  0.486255031 0.038288771    0.43923004    0.52643475
-    ## 2 1011 vs 1001 -0.003203024 0.009309218   -0.02271642   -0.00196915
-    ##   boot.P.value nboot
-    ## 1       0.0000     5
-    ## 2       0.7308     5
+    ##         active       Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
+    ## 1 1011 vs 1000  0.486255031 0.05771213    0.41971947    0.54648521       0.0000
+    ## 2 1011 vs 1001 -0.003203024 0.01270263   -0.01639075    0.01093889       0.8009
+    ##   nboot
+    ## 1     5
+    ## 2     5
 
 # 2. PSEs for Multiple Treatments
 
@@ -442,7 +443,7 @@ treatment 2 $A_2=0$).
 This can be represented in matrix form, where rows represent treatments
 and columns represent mediators:
 
-<img src="pic/multi_matrix.png" width="280" />
+<img src="pic/multi_matrix.png" width="300" />
 
 **Models for Estimation**: Given the complexity of models involving
 multiple treatments, this package applies a consistent modeling
@@ -457,7 +458,7 @@ regression models.
   propensity models and a separate technique for all outcome regression
   models.
 
-## 2.1 `pathsFit`
+## 2.1 `pathsFit`: input needed information for PSEs calculation
 
 We provide data `multiTreat` for 3 treatments with 6 ordered mediators,
 following the sequence:
@@ -492,6 +493,9 @@ head(multiTreat)
     ## 5 -0.12227943  0.6170001
     ## 6  0.38646757  2.0241894
 
+The `pathsFit` function operates the same way as in the single treatment
+case, except when a vector of treatments is provided in A.
+
 ``` r
 mfit<- pathsFit(data = multiTreat,
                 Y = "Y",
@@ -514,33 +518,26 @@ mfit<- pathsFit(data = multiTreat,
 
     ## [34m Input checks passed successfully.
 
-## 2.2 `mpathEffect`
+## 2.2 `flexEffect`: PSE for flexible pathway(s)
 
-## 2.3 `mflexEffect`
+It is the same function as the single treatment case. It can also get
+effect for any identified path or combined path by comparing two
+potential outcome form the function `mflexPotential`.
 
-The length of the active list corresponds to the number of treatments.
-In active1 example, each vector in $a_1, a_2, a_3$ represents values
-assigned to $M_1, M_2, ..., M_6$ and $Y$. The first three values are
-NAs, indicating that the $a_3$ is between $M_3$ and $M_4$. The longest
-path in this scenario is
+The `mflexPotential` will calculate the **potential outcome** for
+user-specified counterfactual values in the scenario of multiple
+treatments. In the example data multiTreat, the sequence of treatments
+and mediators is
 $A_1 \rightarrow A_2 \rightarrow M_1 \rightarrow M_2 \rightarrow M_3 \rightarrow A_3 \rightarrow M_4 \rightarrow M_5 \rightarrow M_6 \rightarrow Y$.
+The counterfactual values matrix can be expressed as:
 
-For active2, the longest path is
-$A_1 \rightarrow M_1 \rightarrow M_2 \rightarrow A_2 \rightarrow M_3 \rightarrow M_4 \rightarrow A_3 \rightarrow M_5 \rightarrow M_6 \rightarrow Y$.
+<img src="pic/multi_matrix_eg.png" width="600" />
 
-``` r
-active1 = list(a1=c(0,1,0,0,1,0,0),
-               a2=c(1,0,1,1,1,0,0),
-               a3=c(NA,NA,NA,1,0,0,0))
-
-
-
-active2 = list(a1=c(0,1,0,0,1,0,0),
-               a2=c(NA,NA,1,1,1,0,0),
-               a3=c(NA,NA,NA,NA,0,0,0))
-```
-
-Potential outcome for active1 setting.
+In the function `mflexPotential`, inputs of counterfactual values are
+specified using a list. Within the list `active`, each element is named
+according to the corresponding treatment order $a_i$, and should contain
+a vector of values for $M_1, \cdots,M_6,Y$. Since treatment 3 is after
+$M_3$, the first three values in the `a3` vector are set to **NA**.
 
 ``` r
 mp1<-mflexPotential(active = list(a1=c(0,1,0,0,1,0,0),
@@ -551,22 +548,23 @@ mp2<-mflexPotential(active = list(a1=c(0,0,0,0,1,0,0),
                                   a3=c(NA,NA,NA,1,0,0,0)),mfit)
 ```
 
-The same setting as single treatment.
+We can use the `flexEffect` to calculate the effects by comparing p1 and
+p2. The flexible inputs of p1 and p2 are the same as in section 1.3.
 
 ``` r
-flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =2 , m.cores = 8)
+flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.cores = 6)
 ```
 
     ## 
     ## Flexible Paths Analysis 
     ## 
     ## Call: flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, 
-    ##     nboot = 2, m.cores = 8)
+    ##     nboot = 10, m.cores = 6)
     ## 
     ## 
     ## boot strap results: 
     ## 
-    ##                                         active    Effect    boot.SE
-    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.04168024
+    ##                                         active    Effect   boot.SE
+    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.3686581
     ##   boot.CI.lower boot.CI.upper boot.P.value nboot
-    ## 1     0.1704035      0.226401            0     2
+    ## 1     0.1383253      1.221401       0.5138    10
