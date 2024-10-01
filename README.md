@@ -2,7 +2,7 @@ flexPaths: A R Package for Causal Path-Specific Effect Estimation with
 Flexible Settings
 ================
 Xiaxian Ou
-2024-09-24
+2024-10-01
 
 - [0. Installation:](#0-installation)
 - [1. PSEs for Single Treatment](#1-pses-for-single-treatment)
@@ -167,19 +167,87 @@ head(singTreat)
     ## 6  2.1553060        1
 
 The `pathsFit` function takes the necessary input information and
-verifies whether the inputs meet the specified requirements. **detailed
-introduction about model setting is to be added**
+verifies whether the inputs meet the specified requirements.
+
+- Data and variables: The input data is specified using `data`, with the
+  treatment variable designated as `A` and the outcome variable as `Y`.
+  Covariates are provided as a vector in `cov_x` while mediators are
+  supplied as an ordered list in `M.list`. Users can reference mediators
+  using indices such as $M_1, \cdots, M_k$ or input them directly in the
+  specified order `M.list=list("med1", c('med2_1', 'med2_2'), 'med3')`.
+  High-dimensional mediators should be represented within a vector.
+- Estimation Approach: estimation = “EIF”, “G” or “IPW” for efficient
+  influence function estimator, plug-in G computation estimator and IPW
+  estimator.
+- Model methods: Input the model.propensity for IPW; model.outcome for
+  plug-in G computation; model.propensity and model.outcome for EIF.
 
 ``` r
 EIF_fit <- pathsFit(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
                     estimation = "EIF",
-                    model.outcome = list(~ glm(family = gaussian())),
+                    model.outcome = ~SuperLearner(SL.library = c('randomForest','xgboost'),family = gaussian()),
                     model.propensity = ~ bart(verbose = FALSE, ndpost = 200)
 )
 ```
 
     ## [34m Input checks passed successfully.
+
+For `model.outcome` and `model.propensity` methods, you can input either
+a single formula or a list of formulas. When specifying a model, clearly
+define the arguments in the corresponding function, except for data, x,
+y, and formula, which are already provided. In the following example, we
+use a single formula,
+`SuperLearner(SL.library = c('randomForest', 'xgboost'), family = gaussian())`,
+to fit all outcome regression models: $\mathbb{E}(Y|X)$,
+$\mathbb{E}(Y|X, M_1)$, $\mathbb{E}(Y|X, M_1, M_2)$, and
+$\mathbb{E}(Y|X, M_1, M_2, M_3)$.
+
+For the propensity models, models are specified in the following
+order: - `bart(verbose = FALSE, ndpost = 200)` for $P(A|X)$, -
+`glm(family = binomial())` for $P(A|X, M_1)$, -
+`SuperLearner(SL.library = c('randomForest', 'xgboost'), family = binomial())`
+for $P(A|X, M_1, M_2)$, - `glm(family = binomial())` for
+$P(A|X, M_1, M_2, M_3)$.
+
+``` r
+EIF_fit <- pathsFit(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+                    estimation = "EIF",
+                    model.outcome = ~ SuperLearner(SL.library = c('randomForest','xgboost'),family = gaussian()),
+                    model.propensity = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
+                                            M1 = ~ glm(family = binomial()),
+                                            M2 = ~ SuperLearner(SL.library = c('randomForest','xgboost'),family = binomial()),
+                                            M3 = ~ glm(family = binomial()))
+)
+```
+
+    ## [34m Input checks passed successfully.
+
+To specify the formula in a glm model, use the `formula` argument within
+the glm function. This allows you to define the relationship between the
+outcome and predictor variables clearly.
+
+``` r
+EIF_fit <- pathsFit(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+                    estimation = "EIF",
+                    model.outcome = list(cov_x = ~ glm(formula = outcome1 ~X1*X2 ,family = gaussian()),
+                                            M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian()),
+                                            M2 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+X1*X2, family = gaussian()),
+                                            M3 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+med3+X1*X2, family = gaussian())),
+                    model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200))
+)
+```
+
+    ## [34m Input checks passed successfully.
+
+The `model.iter` parameter is set to `NULL` by default. In this case,
+the iterative model is constructed based on model.outcome, with the
+family argument replaced by `gaussian` if your function includes a
+family argument. If you wish to define your own `model.iter`, you can
+provide either a single formula or a list of formulas ($k-1$) for
+$E(\cdot| X), E(\cdot| X, M_1), E(\cdot| X, M_1,\cdots,M_{k-1})$.
 
 ## 1.2 `pathsEffect`: PSEs through each mediator
 
@@ -269,16 +337,16 @@ results_boot
     ## 
     ## boot strap results: 
     ## 
-    ##                      Path       Effect    boot.SE boot.CI.lower boot.CI.upper
-    ## 1           A->M1->...->Y  0.159502029 0.02929434    0.11436785   0.192735916
-    ## 2           A->M2->...->Y  0.080741578 0.02292482    0.04917614   0.106212207
-    ## 3           A->M3->...->Y -0.004023294 0.01073169   -0.02307365   0.009912811
-    ## 4                    A->Y  0.513165676 0.07384394    0.42732451   0.635252674
-    ## 5 total effect: A->...->Y  0.749385989 0.09143694    0.62398925   0.870241970
+    ##                      Path       Effect     boot.SE boot.CI.lower boot.CI.upper
+    ## 1           A->M1->...->Y  0.159502029 0.027121311    0.12006705   0.204621133
+    ## 2           A->M2->...->Y  0.080741578 0.015490728    0.05952652   0.105333888
+    ## 3           A->M3->...->Y -0.004023294 0.008408753   -0.01964511   0.002814307
+    ## 4                    A->Y  0.513165676 0.070926400    0.44826551   0.681867673
+    ## 5 total effect: A->...->Y  0.749385989 0.058128235    0.72613038   0.897874399
     ##   boot.P.value nboot
     ## 1       0.0000    10
-    ## 2       0.0004    10
-    ## 3       0.7077    10
+    ## 2       0.0000    10
+    ## 3       0.6323    10
     ## 4       0.0000    10
     ## 5       0.0000    10
 
@@ -325,7 +393,7 @@ flex_results1
     ## boot strap results: 
     ## 
     ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1011 vs 0000 0.674418 0.05481736     0.5814665     0.7437894            0
+    ## 1 1011 vs 0000 0.674418 0.05787659     0.5888124     0.7642701            0
     ##   nboot
     ## 1    10
 
@@ -353,9 +421,9 @@ flex_results
     ## 
     ## boot strap results: 
     ## 
-    ##         active    Effect   boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 1000 0.4894581 0.0967967     0.3402982     0.5714916            0
-    ## 2 1011 vs 0000 0.6744180 0.1338147     0.4766037     0.8133921            0
+    ##         active    Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
+    ## 1 1001 vs 1000 0.4894581 0.01363128     0.4556195     0.4857088            0
+    ## 2 1011 vs 0000 0.6744180 0.02332382     0.6484224     0.7012691            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -381,9 +449,9 @@ flex_results
     ## 
     ## boot strap results: 
     ## 
-    ##         active   Effect   boot.SE boot.CI.lower boot.CI.upper boot.P.value
-    ## 1 1001 vs 0000 0.677621 0.1129864     0.4905606     0.7578548            0
-    ## 2 1011 vs 0000 0.674418 0.1060173     0.4875768     0.7331411            0
+    ##         active   Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
+    ## 1 1001 vs 0000 0.677621 0.08595885     0.6108150     0.8058730            0
+    ## 2 1011 vs 0000 0.674418 0.09307413     0.6071959     0.8258109            0
     ##   nboot
     ## 1     5
     ## 2     5
@@ -407,12 +475,12 @@ flex_results
     ## 
     ## boot strap results: 
     ## 
-    ##         active       Effect     boot.SE boot.CI.lower boot.CI.upper
-    ## 1 1011 vs 1000  0.486255031 0.089862418    0.34630802   0.547205945
-    ## 2 1011 vs 1001 -0.003203024 0.008346773   -0.01956305   0.001322856
-    ##   boot.P.value nboot
-    ## 1       0.0000     5
-    ## 2       0.7012     5
+    ##         active       Effect    boot.SE boot.CI.lower boot.CI.upper boot.P.value
+    ## 1 1011 vs 1000  0.486255031 0.05553176     0.4142694    0.54099797       0.0000
+    ## 2 1011 vs 1001 -0.003203024 0.01335747    -0.0197176    0.01003066       0.8105
+    ##   nboot
+    ## 1     5
+    ## 2     5
 
 # 2. PSEs for Multiple Treatments
 
@@ -465,12 +533,12 @@ following the sequence:
 $A_1 \rightarrow A_2 \rightarrow M_1 \rightarrow M_2 \rightarrow M_3 \rightarrow A_3 \rightarrow M_4 \rightarrow M_5 \rightarrow M_6 \rightarrow Y$.
 
 - A: t1, t2, t3
-- M_1: m1
-- M_2: m2
-- M_3: m3
-- M_4: m4
-- M_5: m5
-- M_6: m6
+- $M_1$: m1
+- $M_2$: m2
+- $M_3$: m3
+- $M_4$: m4
+- $M_5$: m5
+- $M_6$: m6
 - Y: continuous Y
 
 ``` r
@@ -565,6 +633,6 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.co
     ## boot strap results: 
     ## 
     ##                                         active    Effect   boot.SE
-    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.2517658
+    ## 1 0100100;1011100;1000 vs 0000100;0001100;1000 0.2406978 0.2051931
     ##   boot.CI.lower boot.CI.upper boot.P.value nboot
-    ## 1     -0.174371     0.5686913       0.3391    10
+    ## 1   -0.08920173     0.4913683       0.2408    10
