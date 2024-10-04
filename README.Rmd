@@ -122,6 +122,9 @@ The `flexEffect` function can get effect for any identified pathway or combined 
 
 The `flexPotential` will calculate the **potential outcome** for user-specified counterfactual values.The argument active = $c(a_1, a_2, a)$ specifies the counterfatual value of $A$ for $M_1$, $M_2$, and $Y$ orderly.
 
+By comparing $\mathbb{E} (\phi(1,0,1))$ and $\mathbb{E} (\phi(0,0,0))$, we get the combined effect through $A \rightarrow M_1 \rightarrow Y$ and $A \rightarrow Y$
+
+
 ```{r}
 potential_outcome0 <- flexPotential(pathsInfo = EIF_fit, active = c(0, 0, 0))
 potential_outcome1 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 1))
@@ -136,24 +139,27 @@ flex_results <- flexEffect(p1 = potential_outcome1,
 flex_results
 ```
 
-By comparing $\mathbb{E} (\phi(1,0,1))$ and $\mathbb{E} (\phi(0,0,0))$, we get the combined effect through $A \rightarrow M_1 \rightarrow Y$ and $A \rightarrow Y$
-
-```{r, eval=FALSE}
-flex_results1 <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
-                            p0 = list(potential_outcome0, potential_outcome3), 
-                            scale = "diff", CI_level = 0.95, nboot = 50, m.cores = 5)
-
-
-flex_results2 <- flexEffect(p1 = list(potential_outcome1),
-                            p0 = list(potential_outcome2,potential_outcome3), 
-                            scale = "diff", CI_level = 0.95,nboot = 50, m.cores = 5)
-```
 
 To simplify multiple comparisons, p1 and p2 can be provided as lists. Note the following:
 
 1.  When p1 and p2 have the same length, `flexEffect` will compare each element of p1 with the corresponding element of p0. For instance, flex_results1 will compare potential_outcome1 with potential_outcome0, and potential_outcome2 with potential_outcome3 here.
 
-2.  When either p1 or p2 contains a single input and the other is a list, flexEffect will compare that single element with each element in the list. For example, flex_results2 will compare potential_outcome1 with potential_outcome0, and potential_outcome1 with potential_outcome3.
+2.  When either p1 or p2 contains a single input and the other is a list, `flexEffect` will compare that single element with each element in the list. For example, flex_results2 will compare potential_outcome1 with potential_outcome0, and potential_outcome1 with potential_outcome3.
+
+```{r,}
+flex_results1 <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
+                            p0 = list(potential_outcome0, potential_outcome3), 
+                            scale = "diff", CI_level = 0.95, nboot = 50, m.cores = 5)
+
+flex_results1
+
+
+flex_results2 <- flexEffect(p1 = list(potential_outcome1),
+                            p0 = list(potential_outcome2,potential_outcome3), 
+                            scale = "diff", CI_level = 0.95,nboot = 50, m.cores = 5)
+flex_results2
+```
+
 
 
 # 2. Quick example: Multiple Treatments
@@ -180,7 +186,7 @@ This can be represented in matrix form, where rows represent treatments and colu
 
 `flexEffect` is the same function as in the single treatment case. It can get effect for any identified pathway or combined pathways by comparing two potential outcome from the function `mflexPotential`.
 
-The `mflexPotential` will calculate the **potential outcome** for user-specified counterfactual values in the scenario of multiple treatments. Inputs of counterfactual values are specified using a list.
+The `mflexPotential` will calculate the **potential outcome** for user-specified counterfactual values in the scenario of multiple treatments. Inputs of counterfactual values are specified using a list. (The `mflexPotential` function can also be applied to single treatment scenarios; however, it may require more processing time compared to `flexPotential`.)
 
 ```{r}
 data("multiTreat")
@@ -215,7 +221,7 @@ Use the `flexEffect` to calculate the effects by comparing p1 and p2. The flexib
 flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.cores = 6)
 ```
 
-# 3. Flexible models setting
+# 3. Further instructions for flexible models
 
 For `model.outcome` and `model.propensity` methods in **single treatment analysis**, you can input either a single formula or a list of formulas of the models. When specifying a model, it is essential to define the arguments in the corresponding function as per its original use, except for data, x, y, and formula, which are pre-specified.
 
@@ -227,7 +233,7 @@ For the propensity models, models are specified in the following order:
 
 - `bart(verbose = FALSE, ndpost = 200)` for $P(A|X)$,
 - `glm(family = binomial())` for $P(A|X, M_1)$,
-- `SuperLearner(SL.library = c('randomForest', 'xgboost'), family = binomial())` for $P(A|X, M_1, M_2)$,
+- `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'), family = binomial())` for $P(A|X, M_1, M_2)$,
 
 ```{r}
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
@@ -240,6 +246,8 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 )
 
 ```
+
+**Example 2:** 
 
 To specify the formula in a glm model, use the `formula` argument within the glm function. This allows you to define the relationship between the outcome and predictor variables clearly.
 
@@ -254,6 +262,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 )
 ```
 
+**Example 3:** 
 
 The `model.iter` parameter is set to `NULL` by default. In this case, the iterative model is constructed based on `model.outcome`, with the family argument replaced by `gaussian` if your function includes a family argument. If you wish to define your own `model.iter`, you can provide either a single formula or a list of formulas  ($k-1$) for $E(\cdot| X), E(\cdot| X, M_1), E(\cdot| X, M_1,\cdots,M_{k-1})$. 
 
@@ -268,3 +277,8 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                                      )
 )
 ```
+
+**Extend model** : User can modify `fl_model_template.R` to integrate more models.
+
+
+
