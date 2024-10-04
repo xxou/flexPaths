@@ -4,10 +4,10 @@
 \alias{flexPotential}
 \title{Causal Path-Specific Potential Outcome Calculation for Single Treatment}
 \usage{
-flexPotential(pathsFit, active)
+flexPotential(pathsInfo, active)
 }
 \arguments{
-\item{pathsFit}{An object of class \code{pathsFit}, which is the output from the \code{pathsFit} function, containing the necessary fitted models and data.}
+\item{pathsInfo}{An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models and data.}
 
 \item{active}{A vector specifying the active values for each mediator (M1 to Mk) and the direct value setting for the outcome (Y) in order.
 The last value in the vector corresponds to the treatment value for Y. The length of this vector should be equal to the number of mediators plus one (for the direct effect on Y).}
@@ -18,7 +18,7 @@ The last value in the vector corresponds to the treatment value for Y. The lengt
 An object of class \code{flexPotential}, which includes the following components:
 \describe{
 \item{\code{call}}{The matched call to the \code{flexPotential} function.}
-\item{\code{pathsFit}}{The original \code{pathsFit} object used for the analysis.}
+\item{\code{pathsInfo}}{The original \code{pathsInfo} object used for the analysis.}
 \item{\code{active}}{A vector representing the active values used for each mediator and the direct outcome.}
 \item{\code{results}}{A data frame containing the calculated potential outcome (value) and its standard error (SE).}
 \item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
@@ -30,18 +30,23 @@ Users can specify different levels of the treatment for each mediator (M1, M2, .
 The function supports various estimation methods, including EIF (Efficient Influence Function), IPW (Inverse Probability Weighting), and G-computation.
 }
 \examples{
-# Example usage
+# ******************************************************************************
+#    Potential outcome for flexible pathway in one single treatment
+# ******************************************************************************
+
 data("singTreat")
 
-fit <- pathsFit(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
-                estimation = "EIF",
-                model.outcome = list(~ glm(family = gaussian())),
-                model.propensity = ~ bart(verbose = FALSE, ndpost = 200))
-
-potential_outcome <- flexPotential(
-  pathsFit = fit,
-  active = c(1, 0, 1, 1)  # Setting active values for M1, M2, M3, and Y
+# input information for PSE
+EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+                     estimation = "EIF",
+                     model.outcome = ~ glm(family = gaussian()),
+                     model.propensity = ~ glm(family = binomial())
 )
 
+
+potential_outcome0 <- flexPotential(pathsInfo = EIF_fit, active = c(0, 0, 0, 0))
+potential_outcome1 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 1, 1))
+potential_outcome2 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 0, 1))
+potential_outcome3 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 0, 0))
 }

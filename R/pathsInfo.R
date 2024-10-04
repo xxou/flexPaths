@@ -30,7 +30,7 @@
 #' }
 #' @param data A data frame containing all variables.
 #'
-#' @return An object of class \code{pathsFit}, which is a list containing the following elements:
+#' @return An object of class \code{pathsInfo}, which is a list containing the following elements:
 #' \describe{
 #'   \item{\code{data}}{The original data frame used for the analysis.}
 #'   \item{\code{A}}{A vector or list representing the treatment(s) in the causal analysis.}
@@ -47,27 +47,9 @@
 #'
 #' @export
 #'
-#' @examples
-#' data("singTreat")
-#' EIF_fit <- pathsFit(
-#'   data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-#'   M.list = list(M1 = "med1", M2 = c("med2_1", "med2_2"), M3 = "med3"),
-#'   estimation = "EIF",
-#'   model.outcome = list(
-#'     ~ glm(family = gaussian()),
-#'     ~ SuperLearner(SL.library = c("SL.mean"), family = gaussian()),
-#'     ~ glm(family = gaussian()),
-#'     ~ bart(family = gaussian())
-#'   ),
-#'   model.propensity = ~ bart(verbose = FALSE, ndpost = 200),
-#'   model.iter = list(
-#'     ~ glm(family = gaussian()),
-#'     ~ SuperLearner(SL.library = c("SL.mean"), family = gaussian()),
-#'     ~ glm(family = gaussian())
-#'   )
-#' )
+#' @example examples/pathsInfo-example.R
 #'
-pathsFit<-function(
+pathsInfo<-function(
     A , Y,cov_x,
     data,
     M.list = list(),
@@ -202,7 +184,7 @@ pathsFit<-function(
 
   # Return a message confirming that the checks passed (optional)
   cat("\033[34m", "Input checks passed successfully.")
-  class(output) <- "pathsFit"
+  class(output) <- "pathsInfo"
   return(output)
 
 }

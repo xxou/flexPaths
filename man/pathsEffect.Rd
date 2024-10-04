@@ -5,7 +5,7 @@
 \title{Causal Path-Specific Effect Estimation for Single Treatment}
 \usage{
 pathsEffect(
-  pathsFit,
+  pathsInfo,
   decomposition = "refer0",
   scale = "diff",
   CI_level = 0.95,
@@ -14,7 +14,7 @@ pathsEffect(
 )
 }
 \arguments{
-\item{pathsFit}{An object of class \code{pathsFit}, which is the output from the \code{pathsFit} function, containing the necessary fitted models and data.}
+\item{pathsInfo}{An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models and data.}
 
 \item{decomposition}{A character string specifying the method of decomposition to use for effect calculation. Options are "refer0" (aligned with CPSE) and "sequential" (aligned with NPSE). The default is "refer0".}
 
@@ -30,7 +30,7 @@ pathsEffect(
 An object of class \code{pathsEffect}, containing the following components:
 \describe{
 \item{\code{call}}{The matched call to the \code{pathsEffect} function.}
-\item{\code{pathsFit}}{The original \code{pathsFit} object that was used as input.}
+\item{\code{pathsInfo}}{The original \code{pathsInfo} object that was used as input.}
 \item{\code{decomposition}}{A character string indicating the method of decomposition used ("refer0" or "sequential decomposition").}
 \item{\code{estimation}}{The type of estimation method used, such as "EIF", "IPW", or "G-computation".}
 \item{\code{scale}}{The scale used for the effect estimation, such as "diff", "risk", or "oddsratio".}
@@ -44,7 +44,7 @@ An object of class \code{pathsEffect}, containing the following components:
 \description{
 This function estimates causal path-specific effects (PSE) for a single treatment,
 focusing on specific pathways through which the treatment influences the outcome.
-The estimation is based on the fitted models and data provided by the \code{pathsFit} function.
+The estimation is based on the fitted models and data provided by the \code{pathsInfo} function.
 }
 \details{
 \strong{Decomposition Methods}:
@@ -65,25 +65,34 @@ This function supports two primary methods of decomposition:
 }
 }
 \examples{
+# ******************************************************************************
+#    Path specific effects via each mediator in one single treatment
+# ******************************************************************************
+
 data("singTreat")
-EIF_fit <- pathsFit(
-  data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-  M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
-  estimation = "EIF",
-  model.outcome = list(~ glm(family = gaussian())),
-  model.propensity = ~ bart(verbose = FALSE, ndpost = 200)
+
+# input information for PSE
+EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+                     estimation = "EIF",
+                     model.outcome = ~ glm(family = gaussian()),
+                     model.propensity = ~ glm(family = binomial())
 )
-effect_results1 <- pathsEffect(
-  pathsFit = EIF_fit, decomposition = "refer0", scale = "diff", CI_level = 0.95
-)
-effect_results2 <- pathsEffect(
-  pathsFit = EIF_fit, decomposition = "refer0", scale = "diff", CI_level = 0.95,
-  nboot = 100, m.cores = 2
-)
-effect_results3 <- pathsEffect(
-  pathsFit = EIF_fit, decomposition = "sequential", scale = "diff", CI_level = 0.95,
-  nboot = 100, m.cores = 2
-)
+
+# 0 reference decomposition
+results_refer0 <- pathsEffect(pathsInfo = EIF_fit, decomposition = "refer0", scale = "diff", CI_level = 0.95)
+results_refer0
+
+# sequential sequential
+results_seq <- pathsEffect(pathsInfo = EIF_fit, decomposition = "sequential", scale = "diff", CI_level = 0.95)
+results_seq
+
+# bootstrap and parallel computation
+results_boot <- pathsEffect(pathsInfo = EIF_fit, decomposition = "sequential",
+                            scale = "diff", CI_level = 0.95, nboot = 10, m.cores = NULL)
+
+results_parallel <- pathsEffect(pathsInfo = EIF_fit, decomposition = "sequential",
+                                scale = "diff", CI_level = 0.95, nboot = 10, m.cores = 3)
 
 
 }

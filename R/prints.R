@@ -1,6 +1,6 @@
 
 #' @export
-print.pathsFit <- function(x){
+print.pathsInfo <- function(x){
   cat("\n")
   cat("Paths Parameters")
   cat("\n\n")

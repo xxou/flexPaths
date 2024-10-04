@@ -14,35 +14,21 @@
 #'
 #' @return An object of class \code{flexEffect}, which includes the following components:
 #' \describe{
-#'   \item{\code{pathsFit}}{The original \code{pathsFit} object used for the analysis.}
+#'   \item{\code{pathsInfo}}{The original \code{pathsInfo} object used for the analysis.}
 #'   \item{\code{results}}{A data frame containing the estimated effects for each path, including the effect size, standard error, confidence intervals, and p-values (for the "diff" scale).}
 #'   \item{\code{data}}{The original data frame used for the analysis.}
 #'   \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing the bootstrap estimates of the effects, including standard errors, confidence intervals, and p-values.}
 #'   \item{\code{call}}{The matched call to the \code{flexEffect} function.}
 #' }
 #'
-#' @examples
-#' # Example usage
-#' data("singTreat")
-#'
-#' fit <- pathsFit(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-#'                 M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
-#'                 estimation = "EIF",
-#'                 model.outcome = list(~ glm(family = gaussian())),
-#'                 model.propensity = ~ bart(verbose = FALSE, ndpost = 200))
-#'
-#' potential_outcome1 <- flexPotential( pathsFit = fit, active = c(1, 0, 1, 1))
-#' potential_outcome2 <- flexPotential( pathsFit = fit, active = c(0, 1, 0, 1))
-#' potential_outcome0 <- flexPotential( pathsFit = fit, active = c(0, 0, 0, 0))
-#'
-#' effect_results <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
-#'                              p0 = potential_outcome0, scale = "diff", CI_level = 0.95)
 #'
 #' @import stats purrr dplyr
 #' @import SuperLearner dbarts
 #' @importFrom parallel mclapply detectCores
 #'
 #' @export
+#'
+#' @example examples/flexEffect-example.R
 #'
 flexEffect<-function(
     p1 ,
@@ -87,12 +73,12 @@ flexEffect<-function(
    }
 
 
-  # they have the pathsFit
-  pathsFit_p1 <- map(p1, ~.x$pathsFit)
-  pathsFit_p0 <- map(p0, ~.x$pathsFit)
+  # they have the pathsInfo
+  pathsInfo_p1 <- map(p1, ~.x$pathsInfo)
+  pathsInfo_p0 <- map(p0, ~.x$pathsInfo)
 
-  if (!all(map_lgl(pathsFit_p1, ~identical(.x, pathsFit_p0[[1]])))) {
-    stop("All inputs in p1 and p0 must have the same 'pathsFit' in their Call component.")
+  if (!all(map_lgl(pathsInfo_p1, ~identical(.x, pathsInfo_p0[[1]])))) {
+    stop("All inputs in p1 and p0 must have the same 'pathsInfo' in their Call component.")
   }
 
   # 2. the results of EIF
@@ -127,8 +113,8 @@ flexEffect<-function(
 
     return(out) })
 
-  data_raw = p1[[1]]$pathsFit$data; pathsFit = p1[[1]]$pathsFit
-  out<- list(pathsFit =pathsFit,
+  data_raw = p1[[1]]$pathsInfo$data; pathsInfo = p1[[1]]$pathsInfo
+  out<- list(pathsInfo =pathsInfo,
              results =arrange(results,by=active),
              data = data_raw)
 
@@ -162,10 +148,10 @@ flexEffect<-function(
 
     # run
     boot.list <- parallel::mclapply(seq_len(nboot), function(i) {
-      one_boot.flexEffect(data_raw, pathsFit, call_all, index_p1, index_p0)}, mc.cores = m.cores)
+      one_boot.flexEffect(data_raw, pathsInfo, call_all, index_p1, index_p0)}, mc.cores = m.cores)
   }else{
     boot.list = map(seq_len(nboot),
-                    ~one_boot.flexEffect(data_raw, pathsFit, call_all, index_p1, index_p0))
+                    ~one_boot.flexEffect(data_raw, pathsInfo, call_all, index_p1, index_p0))
   }
 
   results.combine <- map_dfr(boot.list, ~ .x , .id = "source")

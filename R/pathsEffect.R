@@ -2,7 +2,7 @@
 #'
 #' This function estimates causal path-specific effects (PSE) for a single treatment,
 #' focusing on specific pathways through which the treatment influences the outcome.
-#' The estimation is based on the fitted models and data provided by the \code{pathsFit} function.
+#' The estimation is based on the fitted models and data provided by the \code{pathsInfo} function.
 #'
 #' **Decomposition Methods**:
 #' Path-specific effects can be decomposed in various ways to reveal how a treatment's effect is mediated through different pathways.
@@ -17,7 +17,7 @@
 #'    - For example, NPSEs can be interpreted as the average change in the outcome Y if a marginalized group had the same mediator values as a privileged group.
 #'    - Unlike CPSEs, NPSEs cannot be simply summed to represent the total effect in the presence of interactions between the treatment and mediators.
 #'
-#' @param pathsFit An object of class \code{pathsFit}, which is the output from the \code{pathsFit} function, containing the necessary fitted models and data.
+#' @param pathsInfo An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models and data.
 #' @param decomposition A character string specifying the method of decomposition to use for effect calculation. Options are "refer0" (aligned with CPSE) and "sequential" (aligned with NPSE). The default is "refer0".
 #' @param scale A character string specifying the scale of the effect. Options are \code{"diff"}, \code{"risk"}, and \code{"oddsratio"}. Only the "diff" scale will provide standard errors and p-values directly from the estimated data. To obtain these for the other two scales, bootstrapping should be used.
 #' @param CI_level A numeric value indicating the confidence level for confidence intervals, typically set between 0 and 1. The default is 0.95, which corresponds to 95% confidence intervals.
@@ -27,7 +27,7 @@
 #' @return An object of class \code{pathsEffect}, containing the following components:
 #' \describe{
 #'   \item{\code{call}}{The matched call to the \code{pathsEffect} function.}
-#'   \item{\code{pathsFit}}{The original \code{pathsFit} object that was used as input.}
+#'   \item{\code{pathsInfo}}{The original \code{pathsInfo} object that was used as input.}
 #'   \item{\code{decomposition}}{A character string indicating the method of decomposition used ("refer0" or "sequential decomposition").}
 #'   \item{\code{estimation}}{The type of estimation method used, such as "EIF", "IPW", or "G-computation".}
 #'   \item{\code{scale}}{The scale used for the effect estimation, such as "diff", "risk", or "oddsratio".}
@@ -45,34 +45,15 @@
 #'
 #' @export
 #'
-#' @examples
-#' data("singTreat")
-#' EIF_fit <- pathsFit(
-#'   data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-#'   M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
-#'   estimation = "EIF",
-#'   model.outcome = list(~ glm(family = gaussian())),
-#'   model.propensity = ~ bart(verbose = FALSE, ndpost = 200)
-#' )
-#' effect_results1 <- pathsEffect(
-#'   pathsFit = EIF_fit, decomposition = "refer0", scale = "diff", CI_level = 0.95
-#' )
-#' effect_results2 <- pathsEffect(
-#'   pathsFit = EIF_fit, decomposition = "refer0", scale = "diff", CI_level = 0.95,
-#'   nboot = 100, m.cores = 2
-#' )
-#' effect_results3 <- pathsEffect(
-#'   pathsFit = EIF_fit, decomposition = "sequential", scale = "diff", CI_level = 0.95,
-#'   nboot = 100, m.cores = 2
-#' )
+#' @example examples/pathsEffect-example.R
 #'
 #'
 pathsEffect<-function(
-    pathsFit , decomposition = "refer0", scale = "diff",
+    pathsInfo , decomposition = "refer0", scale = "diff",
     CI_level = 0.95 , nboot = NULL, m.cores = NULL){
   # evironment
   Call <- match.call()
-  list2env(pathsFit, envir = environment())
+  list2env(pathsInfo, envir = environment())
 
   if(type != "single treatment"){
     stop("This function is only used for single treatment")
@@ -127,7 +108,7 @@ pathsEffect<-function(
     out$boot_results <- output
   }
 
-  out$call <- Call; out$pathsFit = pathsFit
+  out$call <- Call; out$pathsInfo = pathsInfo
   class(out) <- "pathsEffect"
   return(out)
 }
