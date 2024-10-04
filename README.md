@@ -47,7 +47,7 @@ Primary advantages of the package include:
   robustness against model misspecification, ensuring more reliable
   results.
 
-Quick instructions are provided below. For more details, see the html.
+Quick instructions are provided below. For more details, see the html in examples folder.
 
 # 0. Installation:
 
