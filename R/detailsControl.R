@@ -208,17 +208,17 @@ one_boot.pathsEffect <- function(object){
 
 # object = call_all
 # data = emdata
-# fit = pathsFit
+# fit = pathsInfo
 #' @import stats purrr
 #' @import SuperLearner dbarts
-one_boot.flexEffect <- function(data, pathsFit, call_all, index_p1, index_p0){
+one_boot.flexEffect <- function(data, pathsInfo, call_all, index_p1, index_p0){
   # replaced sample for boot
   index <- sample(1:dim(data)[1], replace = TRUE)
   boot_data = data[index,]
-  pathsFit$data <- boot_data
+  pathsInfo$data <- boot_data
 
   # call for boot_data
-  object<-map(call_all, ~ {.x$pathsFit <- substitute(pathsFit); return(.x)})
+  object<-map(call_all, ~ {.x$pathsInfo <- substitute(pathsInfo); return(.x)})
 
   boot_sim = map_dfr(object, function(x){
     sim = eval(x)
