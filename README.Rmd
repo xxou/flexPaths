@@ -27,7 +27,7 @@ Primary advantages of the package include:
 
 - **Flexible estimators**: This package includes three estimators—Inverse Probability Weighting (IPW), plug-in G-computation, and Efficient Influence Function (EIF). The EIF estimator enhances robustness against model misspecification, ensuring more reliable results.
 
-Quick instructions are provided below. For more details, see the html in vignettes.
+Quick instructions are provided below. For more details, see the html.
 
 # 0. Installation:
 
