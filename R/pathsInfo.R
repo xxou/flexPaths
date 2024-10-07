@@ -41,6 +41,8 @@
 #'   \item{\code{Pmodel.lists}}{A list of formulas for the propensity score models corresponding to each mediator in the causal pathway.}
 #'   \item{\code{Omodel.lists}}{A list of formulas for the outcome models corresponding to each mediator in the causal pathway.}
 #'   \item{\code{Imodel.lists}}{A list of formulas for potential iterative models used in estimation procedures.}
+#'   \item{\code{Imodel.source}}{A character for source of iterative model}
+
 #' }
 #'
 #' @import stats purrr
@@ -114,7 +116,9 @@ pathsInfo<-function(
     }
 
     # number of model.iter
+    Imodel.source = "user input"
     if(is.null(model.iter)){
+      Imodel.source = "default"
       Imodel.lists = Omodel.lists[-Nk]
       # a list of (Nk - 1) model from Omodel.lists or NULL
     }else if(length(model.iter) == 1){
@@ -137,7 +141,9 @@ pathsInfo<-function(
       Omodel.lists = model.outcome
       }
     #
+    Imodel.source = "user input"
     if(is.null(model.iter)){
+      Imodel.source = "default"
       Imodel.lists = Omodel.lists
     }else if(length(model.iter) == 1){
       Imodel.lists = model.iter
@@ -179,7 +185,8 @@ pathsInfo<-function(
     estimation =estimation,
     Pmodel.lists = Pmodel.lists,  # list
     Omodel.lists = Omodel.lists,  # list
-    Imodel.lists = Imodel.lists   # list
+    Imodel.lists = Imodel.lists,  # list
+    Imodel.source = Imodel.source
   )
 
   # Return a message confirming that the checks passed (optional)

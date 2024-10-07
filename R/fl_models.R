@@ -4,7 +4,7 @@
 # of the orginial model for run
 
 
-## SL ------------
+#  SL ------------
 #' @import stats
 #' @import SuperLearner
 #' @export
@@ -41,7 +41,7 @@ predict.fl_SuperLearner <- function(object, newdata) {
 # just input whole data, it will directly get the predictors.name
 
 
-## glm ------------
+# glm ------------
 #' @import stats
 #' @export
 #'
@@ -86,7 +86,53 @@ predict.fl_glm <- function(object, newdata) {
 }
 
 
-## fl_dbarts ------------
+
+# lm ------------
+#' @import stats
+#' @export
+#'
+fl_lm <- function(data, X = c(""), Y = " ", fl_call) {
+
+  # Fit the model
+  dataX <- data[, X,drop = FALSE]
+  data <- data[,c(X,Y)]
+
+  if ("formula" %in% names(fl_call)) {
+    # Extract the current formula
+
+    # Modify the formula by replacing the left-hand side with Y
+    fl_call$formula <- substitute(Y ~ predictors, list(Y = as.name(Y), predictors = fl_call$formula[[3]]))
+
+  }else{
+    # Replace the formula in the original call
+    fl_call$formula <- as.formula(paste0(Y, "~ ."))
+  }
+
+  fl_call$data = quote(data)
+  model <- eval(fl_call)
+
+  # Output
+  out <- list(model = model,dataX=dataX) # pred = model$fitted.values
+  class(out) <- "fl_lm"
+  return(out)
+}
+
+
+
+# Define the prediction function for fl_glm
+#' @export
+predict.fl_lm <- function(object, newdata) {
+  # Extract the fitted model object from the input
+  model <- object$model
+
+  # Predict using the fitted model
+  pred <- predict(model, newdata = newdata)
+
+  return(pred)
+}
+
+
+# fl_dbarts ------------
 #' @import stats  dbarts
 #' @export
 fl_bart <- function(data, X = c(""), Y = " ", fl_call) {

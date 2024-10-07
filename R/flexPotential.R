@@ -90,7 +90,7 @@ flexPotential <-  function(
   iter.details<- map(Imodel,extract_model_details)
   iter.fit_names <- map(iter.details, ~ paste0("fl_", .x$fit_name))
   iter.calls <- map(iter.details, "model_call")
-  iter.calls <-map(iter.calls, ~ replace_family(.x))
+  if(Imodel.source == "default"){iter.calls <-map(iter.calls, ~ replace_family(.x))}
 
   fit_names <- c(iter.fit_names, out.fit_names)
   mu.calls <- c(iter.calls, out.calls)

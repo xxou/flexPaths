@@ -14,7 +14,8 @@
 refer0_effect <- function(
     data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
     CI_level = 0.95, scale = "diff", estimation =estimation,
-    Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists
+    Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists,
+    Imodel.source = Imodel.source
 ){
   cl <- match.call()
 
@@ -82,7 +83,7 @@ refer0_effect <- function(
   iter.details<- purrr::map(Imodel.lists,extract_model_details)
   iter.fit_names <- purrr::map(iter.details, ~ paste0("fl_", .x$fit_name))
   iter.calls <- purrr::map(iter.details, "model_call")
-  iter.calls <-purrr::map(iter.calls, replace_family)
+  if(Imodel.source == "default"){iter.calls <-purrr::map(iter.calls, replace_family)}
 
 
   integrate_mk_1 <- purrr::pmap(list(cum_mediators[-K], iter.fit_names, iter.calls, EY_A0_Mk_X.list[-1]),
@@ -231,7 +232,8 @@ refer0_effect <- function(
                  decomposition = "0 reference decomposition",
                  results = out,data = data,potential_data = Y_via_i, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
                  estimation =estimation,scale = scale, CI_level=CI_level,
-                 Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists)
+                 Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists,
+                 Imodel.source = Imodel.source)
   class(output) <- "pathsEffect"
   return(output)
 }
@@ -247,7 +249,8 @@ refer0_effect <- function(
 sequential_effect <-  function(
     data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
     CI_level = 0.95, scale = "diff", estimation =estimation,
-    Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists
+    Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists,
+    Imodel.source = Imodel.source
 ){
 
   cl <- match.call()
@@ -318,7 +321,7 @@ sequential_effect <-  function(
   iter.details<- purrr::map(Imodel.lists,extract_model_details)
   iter.fit_names <- purrr::map(iter.details, ~ paste0("fl_", .x$fit_name))
   iter.calls <- purrr::map(iter.details, "model_call")
-  iter.calls <-purrr::map(iter.calls, ~ replace_family(.x))
+  if(Imodel.source == "default"){iter.calls <-purrr::map(iter.calls, ~ replace_family(.x))}
 
   # E(E(Y|M1, a,X)|a',X); ...; E(E(Y|M1,..., Mk, a,X)|a',X)
   integrate_m <-purrr::pmap(list(iter.fit_names[1], iter.calls[1], EY_A1_Mk_X.list[-1]),
@@ -418,7 +421,8 @@ sequential_effect <-  function(
                  decomposition = "sequential decomposition",
                  results = out,data = data,potential_data = potential_outcome, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
                  estimation =estimation,scale = scale, CI_level=CI_level,
-                 Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists)
+                 Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists,
+                 Imodel.source = Imodel.source)
   class(output) <- "pathsEffect"
   return(output)
 }

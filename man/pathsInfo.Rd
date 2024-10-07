@@ -64,6 +64,7 @@ An object of class \code{pathsInfo}, which is a list containing the following el
 \item{\code{Pmodel.lists}}{A list of formulas for the propensity score models corresponding to each mediator in the causal pathway.}
 \item{\code{Omodel.lists}}{A list of formulas for the outcome models corresponding to each mediator in the causal pathway.}
 \item{\code{Imodel.lists}}{A list of formulas for potential iterative models used in estimation procedures.}
+\item{\code{Imodel.source}}{A character for source of iterative model}
 }
 }
 \description{

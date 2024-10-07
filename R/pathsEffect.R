@@ -62,12 +62,18 @@ pathsEffect<-function(
   if(decomposition == "refer0"){
     out<- refer0_effect(data = data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
                         CI_level = CI_level, scale = scale, estimation =estimation,
-                        Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists)
+                        Pmodel.lists = Pmodel.lists,
+                        Omodel.lists = Omodel.lists,
+                        Imodel.lists = Imodel.lists,
+                        Imodel.source = Imodel.source)
   }
   if(decomposition == "sequential"){
     out<- sequential_effect(data = data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
                             CI_level = CI_level, scale = scale, estimation =estimation,
-                            Pmodel.lists = Pmodel.lists, Omodel.lists = Omodel.lists, Imodel.lists = Imodel.lists)
+                            Pmodel.lists = Pmodel.lists,
+                            Omodel.lists = Omodel.lists,
+                            Imodel.lists = Imodel.lists,
+                            Imodel.source = Imodel.source)
   }
 
 

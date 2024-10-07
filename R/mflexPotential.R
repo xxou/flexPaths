@@ -33,7 +33,9 @@ mflexPotential <-  function(
   cl <- match.call()
   list2env(pathsInfo, envir = environment())
 
-  #### 1. data preparation ---------
+  # **********************************
+  #    1. data preparation ---------
+  # **********************************
   ## cov_x and mediators
   N= nrow(data)
   Km <- length(M.list)
@@ -57,7 +59,9 @@ mflexPotential <-  function(
 
   K = length(cum_mediators)
 
-  #### 2. outcome model  ----------
+  # **********************************
+  #     2. outcome model  ----------
+  # **********************************
   if(estimation != "IPW"){
   out.details<- map(Omodel.lists,extract_model_details)
   out.fit_names <- map(out.details, ~ paste0("fl_", .x$fit_name))
@@ -66,7 +70,7 @@ mflexPotential <-  function(
   iter.details<- map(Imodel.lists,extract_model_details)
   iter.fit_names <- map(iter.details, ~ paste0("fl_", .x$fit_name))
   iter.calls <- map(iter.details, "model_call")
-  iter.calls <-map(iter.calls, ~ replace_family(.x))
+  if(Imodel.source == "default"){iter.calls <-map(iter.calls, ~ replace_family(.x))}
 
   fit_names <- c(rep(iter.fit_names,K-1), out.fit_names)
   mu.calls <- c(rep(iter.calls,K-1), out.calls)
@@ -89,8 +93,11 @@ mflexPotential <-  function(
     mu.all[,i] <- predict(modelfit, Ai_data[,c(a.list[[i]],cum_mediators[[i]])])
   }
 
-}
-  #### 3. propensity model ----------
+  }
+
+  # **********************************
+  #    3. propensity model ----------
+  # **********************************
   if(estimation !="G"){
   pro.details<- extract_model_details(Pmodel.lists[[1]])
   pro.fit_names <-paste0("fl_", pro.details$fit_name)
@@ -118,7 +125,9 @@ mflexPotential <-  function(
   }
 
 
-  #### 4. potential outcome data --------------
+  # **********************************
+  # 4. potential outcome data --------
+  # **********************************
   if(estimation == "EIF"){
   phi.all <- matrix(NA,nc=K+1, nr=N) # calculation from muK to mu1
   phi.all[,1] <- mu.all[,1]
@@ -196,8 +205,9 @@ mflexPotential <-  function(
       potential_data = I/product.I*product.Bayes*data[,Y]
   }
 
-
-  #### 5. results --------------
+  # **********************************
+  #       5. results --------------
+  # **********************************
   out = data.frame(active = paste0(map_chr(active, ~ paste0(na.omit(.x), collapse = "")),
                                    collapse = ";"),
                    value = mean(potential_data,na.rm=T),
