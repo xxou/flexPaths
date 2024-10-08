@@ -2,7 +2,7 @@ flexPaths: A R Package for Causal Path-Specific Effect Estimation with
 Flexible Settings
 ================
 Xiaxian Ou
-2024-10-04
+2024-10-08
 
 - [0. Installation:](#0-installation)
 - [1. Quick example: Single
@@ -38,8 +38,9 @@ Primary advantages of the package include:
   effect by comparing two potential outcome.
 
 - **Flexible models**: The package supports model fitting using
-  `glm/lm`, `dbarts`, `SuperLearner` now. Users can also integrate new
-  models for estimation by modifying the `fl_model_template.R`.
+  `glm/lm`, `glmer/lmer` in package `lme4`, `bart` in package `dbarts`,
+  `SuperLearner` in package `SuperLearner` now. Users can also integrate
+  new models for estimation by modifying the `fl_model_template.R`.
 
 - **Flexible estimators**: This package includes three
   estimators—Inverse Probability Weighting (IPW), plug-in G-computation,
@@ -47,7 +48,7 @@ Primary advantages of the package include:
   robustness against model misspecification, ensuring more reliable
   results.
 
-Quick instructions are provided below. For more details, see the html in examples folder.
+Quick instructions are provided below. For more details, see the html.
 
 # 0. Installation:
 
@@ -71,7 +72,7 @@ Denote the counterfactual outcome
 $\phi(a_1, a_2, a) = Y(a,M_1(a_1),M_2(a_2,M_1(a_1)))$ that would be
 observed if $A$ were set to $a$ and $M_1$ and $M_2$ were set to the
 natural value they would have taken if $A$ had been $a_1$ and $a_2$,
-where $(a_1, a_2, a) \in {0,1}^3$.
+where $(a_1, a_2, a) \in \{0,1\}^3$.
 
 **Identified pathways**:
 
@@ -113,12 +114,12 @@ effect. Therefore, these proportions are not analogous to the
   $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$.
 - For plug-in G computation: To estimate $K+1$ PSEs, we need to fit
   $K+1$ models for outcome regression
-  $\mathbb{E}(Y|X), \mathbb{E}(Y|X,M_1), \ldots, \mathbb{E}(Y|X,M_1,\ldots,M_K)$.
+  $\mathbb{E}(Y|A, X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
 - For EIF approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models
   to estimate both propensity score
   $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$ and $K+1$ outcome
   regression
-  $\mathbb{E}(Y|X), \mathbb{E}(Y|X,M_1), \ldots, \mathbb{E}(Y|X,M_1,\ldots,M_K)$.
+  $\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
 
 ## 1.1 `pathsEffect`: PSEs through each mediator
 
@@ -173,10 +174,10 @@ results_refer0
 ## Causal Paths Estimates: 
 ## 
 ##                      Path     Effect         SE   CI.lower  CI.upper P.value
-## 1           A->M1->...->Y 0.17136615 0.03345040 0.10580457 0.2369277  0.0000
-## 2           A->M2->...->Y 0.07477427 0.02445024 0.02685268 0.1226959  0.0022
-## 3                    A->Y 0.49577941 0.06650480 0.36543240 0.6261264  0.0000
-## 4 total effect: A->...->Y 0.73497393 0.06885475 0.60002110 0.8699268  0.0000
+## 1           A->M1->...->Y 0.17162960 0.03321725 0.10652498 0.2367342  0.0000
+## 2           A->M2->...->Y 0.07653372 0.02445895 0.02859507 0.1244724  0.0018
+## 3                    A->Y 0.50142114 0.06617818 0.37171429 0.6311280  0.0000
+## 4 total effect: A->...->Y 0.73077910 0.06837237 0.59677173 0.8647865  0.0000
 ```
 
 ``` r
@@ -191,10 +192,10 @@ results_seq
 ## Causal Paths Estimates: 
 ## 
 ##                      Path     Effect         SE   CI.lower  CI.upper P.value
-## 1           A->M1->...->Y 0.15537771 0.03274633 0.09119607 0.2195593   0e+00
-## 2           A->M2->...->Y 0.08399011 0.02148322 0.04188377 0.1260965   1e-04
-## 3                    A->Y 0.49537010 0.06601655 0.36598004 0.6247602   0e+00
-## 4 total effect: A->...->Y 0.73473792 0.06855284 0.60037682 0.8690990   0e+00
+## 1           A->M1->...->Y 0.15730137 0.03241953 0.09376026 0.2208425   0e+00
+## 2           A->M2->...->Y 0.08304217 0.02163326 0.04064176 0.1254426   1e-04
+## 3                    A->Y 0.49609387 0.06621661 0.36631171 0.6258760   0e+00
+## 4 total effect: A->...->Y 0.73643741 0.06834335 0.60248691 0.8703879   0e+00
 ```
 
 ## 1.2 `flexEffect`: PSE for flexible pathway(s)
@@ -234,7 +235,7 @@ flex_results
 ## boot strap results: 
 ## 
 ##       active    Effect    boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 101 vs 000 0.6605727 0.07322863     0.5455105     0.8089348    50
+## 1 101 vs 000 0.6630624 0.06864458     0.5699143     0.8067611    50
 ##   boot.P.value
 ## 1            0
 ```
@@ -271,11 +272,11 @@ flex_results1
 ## boot strap results: 
 ## 
 ##       active     Effect    boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 101 vs 000 0.66057268 0.05772938    0.57401061     0.7728804    50
-## 2 110 vs 100 0.06096311 0.02595601    0.01814351     0.1166397    50
+## 1 101 vs 000 0.66306243 0.06422451   0.551805455     0.7839977    50
+## 2 110 vs 100 0.06057361 0.03251889   0.001898817     0.1252999    50
 ##   boot.P.value
 ## 1       0.0000
-## 2       0.0188
+## 2       0.0625
 
 
 flex_results2 <- flexEffect(p1 = list(potential_outcome1),
@@ -293,8 +294,8 @@ flex_results2
 ## boot strap results: 
 ## 
 ##       active    Effect    boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 101 vs 100 0.4910334 0.06631209     0.3722760     0.6275602    50
-## 2 101 vs 110 0.4300703 0.06386123     0.3135046     0.5589217    50
+## 1 101 vs 100 0.4900225 0.07599673     0.3736221     0.6259867    50
+## 2 101 vs 110 0.4294489 0.08148228     0.2724293     0.5445331    50
 ##   boot.P.value
 ## 1            0
 ## 2            0
@@ -414,25 +415,27 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.co
 ## boot strap results: 
 ## 
 ##             active    Effect   boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 001;01 vs 000;00 0.7780504 0.4114598    0.09431069      1.274545    10
+## 1 001;01 vs 000;00 0.7774692 0.2767993     0.4294159      1.214279    10
 ##   boot.P.value
-## 1       0.0586
+## 1        0.005
 ```
 
 # 3. Further instructions for flexible models
 
-For `model.outcome` and `model.propensity` methods in **single treatment
-analysis**, you can input either a single formula or a list of formulas
-of the models. When specifying a model, it is essential to define the
-arguments in the corresponding function as per its original use, except
-for data, x, y, and formula, which are pre-specified.
+For `model.outcome` and `model.propensity` methods, you can input either
+a single formula or a list of formulas of the models in **single
+treatment analysis** and only one single model in each input for in
+**multiple treatments analysis**. When specifying a model, it is
+essential to define the arguments in the corresponding function as per
+its original use, except for data, x, y, and formula, which are
+pre-specified.
 
 **Example 1:**
 
 For the outcome models:
 `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian())`
 will be used to fit
-$\mathbb{E}(Y|X), \mathbb{E}(Y|M_1,X), \mathbb{E}(Y|M_1,M_2,X)$.
+$\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,M_1,X), \mathbb{E}(Y|A,M_1,M_2,X)$.
 
 For the propensity models, models are specified in the following order:
 
@@ -463,9 +466,9 @@ outcome and predictor variables clearly.
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
-                    model.outcome = list(cov_x = ~ glm(formula = outcome1 ~X1*X2 ,family = gaussian()),
-                                            M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian()),
-                                            M2 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+X1*X2, family = gaussian())),
+                    model.outcome = list(cov_x = ~ glm(formula = outcome1 ~treat+ X1*X2 ,family = gaussian()),
+                                            M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian()),
+                                            M2 = ~ glm(formula = outcome1 ~treat+med1+med2_1*med2_1+X1*X2, family = gaussian())),
                     model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 ## [34m Input checks passed successfully.
@@ -478,7 +481,7 @@ the iterative model is constructed based on `model.outcome`, with the
 family argument replaced by `gaussian` if your function includes a
 family argument. If you wish to define your own `model.iter`, you can
 provide either a single formula or a list of formulas ($k-1$) for
-$E(\cdot| X), E(\cdot| X, M_1), E(\cdot| X, M_1,\cdots,M_{k-1})$.
+$E(\cdot| A,X), E(\cdot| A,X, M_1), E(\cdot|A, X, M_1,\cdots,M_{k-1})$.
 
 ``` r
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
@@ -486,12 +489,50 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     estimation = "EIF",
                     model.outcome = list( ~ bart(verbose = FALSE, ndpost = 200)),
                     model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200)),
-                    model.iter = list(cov_x = ~ glm(formula = outcome1 ~X1*X2 ,family = gaussian()),
-                                         M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian())
+                    model.iter = list(cov_x = ~ glm(formula = outcome1 ~treat+X1*X2 ,family = gaussian()),
+                                         M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian())
                                      )
+)
+## [34m Input checks passed successfully.
+```
+
+**Example 4:**
+
+In **multiple treatment analysis**, you can specify a partial formula in
+the model using the structure `formula = ~ . + vars`, where `~ .`
+represents the remaining variables as defined by the function’s default,
+and `vars` allows you to add specific terms that apply across all
+models.
+
+``` r
+mfit<- pathsInfo(data = multiTreat,
+                 Y = "Y",
+                 A = c("t1","t2"),
+                 cov_x = "X",
+                 M.list = list(
+                   M1 = 'm1',
+                   M2 = 'm2'
+                 ),
+                 estimation = "EIF",
+                 model.propensity =list(~ glm(formula = Y~ . + I(X^2),family = binomial())),
+                 model.outcome = list(~ glm(formula = Y~ . + I(X^0.5),family = gaussian()))
+                 
 )
 ## [34m Input checks passed successfully.
 ```
 
 **Extend model** : User can modify `fl_model_template.R` to integrate
 more models.
+
+<br>
+
+**Summary for models and the arguments**
+
+| Function | Required Arguments |
+|:--:|:---|
+| `lm` | None |
+| `glm` | `family` |
+| `lmer` | Partial formula including random intercept: `formula = Y ~ . + ( . \|ID)` (please include “ID” in `cov_x`) |
+| `glmer` | Partial formula including random intercept: `formula = Y ~ . + ( . \|ID)` (please include “ID” in `cov_x`); `family` |
+| `bart` | None |
+| `SuperLearner` | `SL.library`;`family`; If applied to clustered data, also specify `id = 'ID'` (please include “ID” in `cov_x`) |

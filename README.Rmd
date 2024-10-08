@@ -23,7 +23,7 @@ Primary advantages of the package include:
 
 -   **Flexible pathways**: User can calculate the average potential outcome for any identified pathway(s), as well as the average causal effect by comparing two potential outcome.
 
--   **Flexible models**: The package supports model fitting using `glm/lm`, `dbarts`, `SuperLearner` now. Users can also integrate new models for estimation by modifying the `fl_model_template.R`.
+-   **Flexible models**: The package supports model fitting using `glm/lm`, `glmer/lmer` in package `lme4`, `bart` in package `dbarts`, `SuperLearner` in package `SuperLearner` now. Users can also integrate new models for estimation by modifying the `fl_model_template.R`.
 
 -   **Flexible estimators**: This package includes three estimators—Inverse Probability Weighting (IPW), plug-in G-computation, and Efficient Influence Function (EIF). The EIF estimator enhances robustness against model misspecification, ensuring more reliable results.
 
@@ -76,8 +76,8 @@ In the absence of interactions between $A$ and $M$, natural PSEs and cumulative 
 **Models for Estimation**:
 
 -   For IPW approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models to estimate propensity score $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$.
--   For plug-in G computation: To estimate $K+1$ PSEs, we need to fit $K+1$ models for outcome regression $\mathbb{E}(Y|X), \mathbb{E}(Y|X,M_1), \ldots, \mathbb{E}(Y|X,M_1,\ldots,M_K)$.
--   For EIF approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models to estimate both propensity score $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$ and $K+1$ outcome regression $\mathbb{E}(Y|X), \mathbb{E}(Y|X,M_1), \ldots, \mathbb{E}(Y|X,M_1,\ldots,M_K)$.
+-   For plug-in G computation: To estimate $K+1$ PSEs, we need to fit $K+1$ models for outcome regression $\mathbb{E}(Y|A, X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
+-   For EIF approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models to estimate both propensity score $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$ and $K+1$ outcome regression $\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
 
 ## 1.1 `pathsEffect`: PSEs through each mediator
 
@@ -216,11 +216,11 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.co
 
 # 3. Further instructions for flexible models
 
-For `model.outcome` and `model.propensity` methods in **single treatment analysis**, you can input either a single formula or a list of formulas of the models. When specifying a model, it is essential to define the arguments in the corresponding function as per its original use, except for data, x, y, and formula, which are pre-specified.
+For `model.outcome` and `model.propensity` methods, you can input either a single formula or a list of formulas of the models in **single treatment analysis** and only one single model in each input for in **multiple treatments analysis**. When specifying a model, it is essential to define the arguments in the corresponding function as per its original use, except for data, x, y, and formula, which are pre-specified.
 
 **Example 1:**
 
-For the outcome models: `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian())` will be used to fit $\mathbb{E}(Y|X), \mathbb{E}(Y|M_1,X), \mathbb{E}(Y|M_1,M_2,X)$.
+For the outcome models: `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian())` will be used to fit $\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,M_1,X), \mathbb{E}(Y|A,M_1,M_2,X)$.
 
 For the propensity models, models are specified in the following order:
 
@@ -248,16 +248,16 @@ To specify the formula in a glm model, use the `formula` argument within the glm
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
-                    model.outcome = list(cov_x = ~ glm(formula = outcome1 ~X1*X2 ,family = gaussian()),
-                                            M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian()),
-                                            M2 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+X1*X2, family = gaussian())),
+                    model.outcome = list(cov_x = ~ glm(formula = outcome1 ~treat+ X1*X2 ,family = gaussian()),
+                                            M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian()),
+                                            M2 = ~ glm(formula = outcome1 ~treat+med1+med2_1*med2_1+X1*X2, family = gaussian())),
                     model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 ```
 
 **Example 3:**
 
-The `model.iter` parameter is set to `NULL` by default. In this case, the iterative model is constructed based on `model.outcome`, with the family argument replaced by `gaussian` if your function includes a family argument. If you wish to define your own `model.iter`, you can provide either a single formula or a list of formulas ($k-1$) for $E(\cdot| X), E(\cdot| X, M_1), E(\cdot| X, M_1,\cdots,M_{k-1})$.
+The `model.iter` parameter is set to `NULL` by default. In this case, the iterative model is constructed based on `model.outcome`, with the family argument replaced by `gaussian` if your function includes a family argument. If you wish to define your own `model.iter`, you can provide either a single formula or a list of formulas ($k-1$) for $E(\cdot| A,X), E(\cdot| A,X, M_1), E(\cdot|A, X, M_1,\cdots,M_{k-1})$.
 
 ```{r}
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
@@ -265,11 +265,33 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     estimation = "EIF",
                     model.outcome = list( ~ bart(verbose = FALSE, ndpost = 200)),
                     model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200)),
-                    model.iter = list(cov_x = ~ glm(formula = outcome1 ~X1*X2 ,family = gaussian()),
-                                         M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian())
+                    model.iter = list(cov_x = ~ glm(formula = outcome1 ~treat+X1*X2 ,family = gaussian()),
+                                         M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian())
                                      )
 )
 ```
+
+**Example 4:**
+
+In **multiple treatment analysis**, you can specify a partial formula in the model using the structure `formula = ~ . + vars`, where `~ .` represents the remaining variables as defined by the function's default, and `vars` allows you to add specific terms that apply across all models.
+```{r}
+mfit<- pathsInfo(data = multiTreat,
+                 Y = "Y",
+                 A = c("t1","t2"),
+                 cov_x = "X",
+                 M.list = list(
+                   M1 = 'm1',
+                   M2 = 'm2'
+                 ),
+                 estimation = "EIF",
+                 model.propensity =list(~ glm(formula = Y~ . + I(X^2),family = binomial())),
+                 model.outcome = list(~ glm(formula = Y~ . + I(X^0.5),family = gaussian()))
+                 
+)
+
+```
+ 
+
 
 **Extend model** : User can modify `fl_model_template.R` to integrate more models.
 
@@ -277,5 +299,12 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 
 **Summary for models and the arguments**
 
-model | required arguments | default corresponding iterative model
+| Function      | Required Arguments                                                                                                                 |
+|:-------------:|:-----------------------------------------------------------------------------------------------------------------------------------|
+| `lm`          | None                                                                                                                               |
+| `glm`         | `family`                                                                                                                           |
+| `lmer`        | Partial formula including random intercept: `formula = Y ~ . + ( . \|ID)`  (please include "ID" in  `cov_x`)                       |
+| `glmer`       | Partial formula including random intercept: `formula = Y ~ . + ( . \|ID)`  (please include "ID" in  `cov_x`); `family`             |
+| `bart`        | None                                                                                                                               |
+| `SuperLearner`| `SL.library`;`family`; If applied to clustered data, also specify `id = 'ID'` (please include "ID" in  `cov_x`)                    |
 

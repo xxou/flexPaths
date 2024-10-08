@@ -111,7 +111,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 #   multiple treatments fit example
 # ***************************************
 data("multiTreat")
-mfit<- pathsFit(data=multiTreat,
+mfit<- pathsInfo(data=multiTreat,
                 Y = "Y",
                 A = c("t1","t2","t3"),
                 cov_x = "X",

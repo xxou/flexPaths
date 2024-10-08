@@ -45,7 +45,7 @@ mflexPotential <-  function(
   active_m <- do.call(rbind, active)
   M.index <- mcreate_index(active_m)[-(Km + 1)]
   M.list_s <- combine_item(M.list, M.index)
-  cum_mediators <- cumulate_vars(c(cov_x,M.list_s))
+  cum_mediators <- cumulate_vars(c(list(cov_x),M.list_s))
 
   # treatment value for model
   active_s <- simplify_active(active_m)
@@ -89,7 +89,7 @@ mflexPotential <-  function(
     model_fun <- match.fun(fit_names[[i]])
     modelfit <- model_fun(data, X = c(a.list[[i]],cum_mediators[[i]]),Y = "mu", fl_call=mu.calls[[i]])
 
-    # print(modelfit)
+    # print(modelfit$model)
     mu.all[,i] <- predict(modelfit, Ai_data[,c(a.list[[i]],cum_mediators[[i]])])
   }
 
