@@ -13,7 +13,9 @@ library(knitr)
 opts_chunk$set(warning = FALSE, message = FALSE, eval= T,collapse = T)
 ```
 
-This package is built for estimating the causal **path-specific effects** (PSEs) in mediation analysis with [multiple ordered mediators for one binary treatment or multiple binary treatments]{style="color:red"}. It provides robust estimators based on influence function theory.
+This package is built for estimating the causal **path-specific effects** (PSEs) in mediation analysis with [multiple ordered mediators for one binary treatment or multiple binary treatments]{style="color:red"}. It provides robust estimators based on influence function theory. This is a schematic illustration of the flexPaths workflow:
+
+![](pic/flow.jpeg){width="800"}
 
 Primary advantages of the package include:
 
@@ -89,7 +91,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
                     model.outcome = ~ SuperLearner(SL.library = c('SL.glm','SL.mean'),family = gaussian()),
-                    model.propensity = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
+                    model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
                                             M1 = ~ glm(family = binomial()),
                                             M2 = ~ SuperLearner(SL.library = c('SL.gam','SL.glm'),family = binomial()))
 )
@@ -194,7 +196,7 @@ mfit<- pathsInfo(data = multiTreat,
                    M2 = 'm2'
                  ),
                  estimation = "EIF",
-                 model.propensity =list(~ glm(family = binomial())),
+                 model.treatment =list(~ glm(family = binomial())),
                  model.outcome = list( ~SuperLearner(SL.library = c("SL.mean", "SL.gam"),family = gaussian()))
                  
 )
@@ -216,7 +218,9 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.co
 
 # 3. Further instructions for flexible models
 
-For `model.outcome` and `model.propensity` methods, you can input either a single formula or a list of formulas of the models in **single treatment analysis** and only one single model in each input for in **multiple treatments analysis**. When specifying a model, it is essential to define the arguments in the corresponding function as per its original use, except for data, x, y, and formula, which are pre-specified.
+For `model.outcome` and `model.treatment` methods, you can input either a single formula or a list of formulas of the models in **single treatment analysis** and only one single model in each input for in **multiple treatments analysis**. When specifying a model, it is the same to define the arguments in the corresponding function as per its original use, except for data, x, y, and formula, which are pre-specified.
+
+## 3.1 Examples for model specification
 
 **Example 1:**
 
@@ -233,7 +237,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
                     model.outcome = ~ SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian()),
-                    model.propensity = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
+                    model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
                                             M1 = ~ glm(family = binomial()),
                                             M2 = ~ SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = binomial()))
 )
@@ -251,7 +255,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     model.outcome = list(cov_x = ~ glm(formula = outcome1 ~treat+ X1*X2 ,family = gaussian()),
                                             M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian()),
                                             M2 = ~ glm(formula = outcome1 ~treat+med1+med2_1*med2_1+X1*X2, family = gaussian())),
-                    model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200))
+                    model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 ```
 
@@ -264,7 +268,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
                     model.outcome = list( ~ bart(verbose = FALSE, ndpost = 200)),
-                    model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200)),
+                    model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200)),
                     model.iter = list(cov_x = ~ glm(formula = outcome1 ~treat+X1*X2 ,family = gaussian()),
                                          M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian())
                                      )
@@ -284,7 +288,7 @@ mfit<- pathsInfo(data = multiTreat,
                    M2 = 'm2'
                  ),
                  estimation = "EIF",
-                 model.propensity =list(~ glm(formula = Y~ . + I(X^2),family = binomial())),
+                 model.treatment =list(~ glm(formula = Y~ . + I(X^2),family = binomial())),
                  model.outcome = list(~ glm(formula = Y~ . + I(X^0.5),family = gaussian()))
                  
 )
@@ -297,14 +301,19 @@ mfit<- pathsInfo(data = multiTreat,
 
 <br>
 
-**Summary for models and the arguments**
 
-| Function      | Required Arguments                                                                                                                 |
-|:-------------:|:-----------------------------------------------------------------------------------------------------------------------------------|
-| `lm`          | None                                                                                                                               |
-| `glm`         | `family`                                                                                                                           |
-| `lmer`        | Partial formula including random intercept: `formula = Y ~ . + ( . \|ID)`  (please include "ID" in  `cov_x`)                       |
-| `glmer`       | Partial formula including random intercept: `formula = Y ~ . + ( . \|ID)`  (please include "ID" in  `cov_x`); `family`             |
-| `bart`        | None                                                                                                                               |
-| `SuperLearner`| `SL.library`;`family`; If applied to clustered data, also specify `id = 'ID'` (please include "ID" in  `cov_x`)                    |
+## 3.2 Summary for models and the required arguments
+
+- The usage of arguments follows their implementation in the respective original packages.
+- When specifying arguments, ensure that both the argument name and value are provided. For example, rather than using `glm(binomial())`, explicitly state `glm(family = binomial())` with `family =`.
+
+| Package       | Function      | Required Arguments                                                                                                              |
+|---------------|---------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `stats`       | `lm`          | No additional arguments required.                                                                                               |
+| `stats`       | `glm`         | `family`: Specifies the error distribution and link function.                                                                   |
+| `lme4`        | `lmer`        | Formula with random intercept: `formula = Y ~ . + ( . \| ID)` (ensure "ID" is included in `cov_x`).                             |
+| `lme4`        | `glmer`       | - Formula with random intercept: `formula = Y ~ . + ( . \| ID)` (ensure "ID" is included in `cov_x`); <br> - `family`: Defines the error distribution. |
+| `dbarts`      | `bart`        | No additional arguments required.                                                                                               |
+| `SuperLearner`| `SuperLearner`| - `SL.library`: A list of learner algorithms available in `SuperLearner` (ensure the necessary packages are loaded); <br> - `family`: Defines the outcome type (e.g., binomial, gaussian); <br> - For clustered data, specify `id = 'ID'` (ensure "ID" is included in `cov_x`). |
+
 

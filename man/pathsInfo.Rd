@@ -11,7 +11,7 @@ pathsInfo(
   data,
   M.list = list(),
   estimation = "EIF",
-  model.propensity = NULL,
+  model.treatment = NULL,
   model.outcome = NULL,
   model.iter = NULL
 )
@@ -20,11 +20,11 @@ pathsInfo(
 \item{A}{A character string or a vector of character strings representing the name(s) of one or more treatments.
 The treatments should be binary variables taking values of either 0 or 1.}
 
-\item{Y}{A character string indicating the name of the outcome variable.}
+\item{Y}{A character string indicating the name of the outcome variable. Y should be numeric variable.}
 
 \item{cov_x}{A vector of character strings indicating the name(s) of covariates.}
 
-\item{data}{A data frame containing all variables.}
+\item{data}{A data frame to be checked for missing values and validated for variable requirements. Rows with missing values will be dropped, and a summary of dropped rows and final sample size will be provided.}
 
 \item{M.list}{A list of \eqn{K} mediators, where \eqn{K} is the number of mediators. Each mediator can be multivariate.
 Use the form \code{list(M1 = c("mediator1_1", "mediator1_2"), M2 = c("mediator2"), ... )}, with \code{M_i} to index the order of mediators.
@@ -33,7 +33,7 @@ Alternatively, you can list them in order using \code{list(c("mediator1_1", "med
 \item{estimation}{A character string indicating the type of estimation to be used. Choose from "EIF" (Efficient Influence Function),
 "IPW" (Inverse Probability Weighting), or "G" (G-computation).}
 
-\item{model.propensity}{If you select "G" for estimation, this parameter is not needed. Otherwise, provide a formula or list of formulas for modeling the propensity score
+\item{model.treatment}{If you select "G" for estimation, this parameter is not needed. Otherwise, provide a formula or list of formulas for modeling the propensity score
 (for \eqn{K} mediators, you need \eqn{K+1} models for \eqn{P(A|X)}, \eqn{P(A|M_1, X)}, ..., \eqn{P(A|M_K, X)}).
 \itemize{
 \item Provide a single formula or a list containing one formula. This formula will be applied to all propensity models.
@@ -42,7 +42,7 @@ Alternatively, you can list them in order using \code{list(c("mediator1_1", "med
 }}
 
 \item{model.outcome}{If you select "IPW" for estimation, this parameter is not needed. Otherwise, provide the model for outcome regression
-(e.g., \eqn{E(Y|A,X)}, \eqn{E(Y|M_1, A,X)}, ..., \eqn{E(Y|M_1, M_2, ..., M_K, A, X)}). This parameter follows the same logic as \code{model.propensity}.}
+(e.g., \eqn{E(Y|A,X)}, \eqn{E(Y|M_1, A,X)}, ..., \eqn{E(Y|M_1, M_2, ..., M_K, A, X)}). This parameter follows the same logic as \code{model.treatment}.}
 
 \item{model.iter}{If you select "IPW" for estimation, this parameter is not needed. This parameter is used for modeling the iterative outcome regression
 (e.g., \eqn{E(Y|M_1, X)}, ..., \eqn{E(Y|M_1, M_2, ..., M_K, X)}) with predictors \eqn{(A,X)}, \eqn{(M_1, A,X)}, ..., \eqn{(\overline{M}_{k-1}, A,X)}, and for higher layers of iterative modeling.
@@ -55,9 +55,9 @@ Alternatively, you can list them in order using \code{list(c("mediator1_1", "med
 \value{
 An object of class \code{pathsInfo}, which is a list containing the following elements:
 \describe{
-\item{\code{data}}{The original data frame used for the analysis.}
+\item{\code{data}}{The data frame used for the analysis.}
 \item{\code{A}}{A vector or list representing the treatment(s) in the causal analysis.}
-\item{\code{Y}}{A vector representing the outcome variable.}
+\item{\code{Y}}{A character representing the outcome variable.}
 \item{\code{cov_x}}{A vector of covariates to be adjusted for in the models.}
 \item{\code{M.list}}{A list of mediators in the causal pathway, reordered if necessary.}
 \item{\code{estimation}}{A character string indicating the type of estimation to be used, such as "EIF" (Efficient Influence Function), "IPW" (Inverse Probability Weighting), or "G" (G-computation).}
