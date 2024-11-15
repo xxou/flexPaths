@@ -9,7 +9,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                      M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
                      estimation = "EIF",
                      model.outcome = ~ glm(family = gaussian()),
-                     model.propensity = ~ glm(family = binomial())
+                     model.treatment = ~ glm(family = binomial())
 )
 
 # 0 reference decomposition

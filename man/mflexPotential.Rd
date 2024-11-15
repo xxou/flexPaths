@@ -49,7 +49,7 @@ mfit<- pathsInfo(data = multiTreat,
                    M6 = 'm6'
                  ),
                  estimation = "EIF",
-                 model.propensity =list( ~  glm(family = binomial())),
+                 model.treatment =list( ~  glm(family = binomial())),
                  model.outcome = list( ~SuperLearner(SL.library = "SL.mean",family = gaussian())),
                  model.iter  = list(~glm(family = gaussian()))
 )

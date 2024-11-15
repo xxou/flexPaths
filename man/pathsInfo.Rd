@@ -81,7 +81,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                      M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
                      estimation = "EIF",
                      model.outcome = ~SuperLearner(SL.library = c('randomForest','xgboost'),family = gaussian()),
-                     model.propensity = ~ bart(verbose = FALSE, ndpost = 200)
+                     model.treatment = ~ bart(verbose = FALSE, ndpost = 200)
 )
 
 
@@ -90,7 +90,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                      M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
                      estimation = "EIF",
                      model.outcome = ~ SuperLearner(SL.library = c('randomForest','xgboost'),family = gaussian()),
-                     model.propensity = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
+                     model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
                                              M1 = ~ glm(family = binomial()),
                                              M2 = ~ SuperLearner(SL.library = c('randomForest','xgboost'),family = binomial()),
                                              M3 = ~ glm(family = binomial()))
@@ -104,7 +104,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                                           M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian()),
                                           M2 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+X1*X2, family = gaussian()),
                                           M3 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+med3+X1*X2, family = gaussian())),
-                     model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200))
+                     model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 
 # ***************************************
@@ -124,7 +124,7 @@ mfit<- pathsInfo(data=multiTreat,
                   M6 = 'm6'
                 ),
                 estimation = "EIF",
-                model.propensity =list( ~  glm(family = binomial())),
+                model.treatment =list( ~  glm(family = binomial())),
                 model.outcome = list( ~SuperLearner(SL.library = "SL.mean",family = gaussian())),
                 model.iter  = list(~glm(family = gaussian()))
 )
