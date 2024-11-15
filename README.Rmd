@@ -15,7 +15,7 @@ opts_chunk$set(warning = FALSE, message = FALSE, eval= T,collapse = T)
 
 This package is built for estimating the causal **path-specific effects** (PSEs) in mediation analysis with [multiple ordered mediators for one binary treatment or multiple binary treatments]{style="color:red"}. It provides robust estimators based on influence function theory. This is a schematic illustration of the flexPaths workflow:
 
-![](pic/flow.jpeg){width="800"}
+![](pic/flow.jpeg){width="1000"}
 
 Primary advantages of the package include:
 
@@ -35,9 +35,8 @@ Quick instructions are provided below. For more details, see the html.
 
 ```{r, eval=FALSE}
 install.packages("devtools")
-library(devtools)
 
-install_github("xxou/flexPaths")
+devtools::install_github("xxou/flexPaths")
 library(flexPaths)
 ```
 
@@ -311,9 +310,9 @@ mfit<- pathsInfo(data = multiTreat,
 |---------------|---------------|--------------------------------------------------------------------------------------------------------------------------------|
 | `stats`       | `lm`          | No additional arguments required.                                                                                               |
 | `stats`       | `glm`         | `family`: Specifies the error distribution and link function.                                                                   |
-| `lme4`        | `lmer`        | Formula with random intercept: `formula = Y ~ . + ( . \| ID)` (ensure "ID" is included in `cov_x`).                             |
-| `lme4`        | `glmer`       | - Formula with random intercept: `formula = Y ~ . + ( . \| ID)` (ensure "ID" is included in `cov_x`); <br> - `family`: Defines the error distribution. |
 | `dbarts`      | `bart`        | No additional arguments required.                                                                                               |
 | `SuperLearner`| `SuperLearner`| - `SL.library`: A list of learner algorithms available in `SuperLearner` (ensure the necessary packages are loaded); <br> - `family`: Defines the outcome type (e.g., binomial, gaussian); <br> - For clustered data, specify `id = 'ID'` (ensure "ID" is included in `cov_x`). |
+| `lme4`        | `lmer`        | to be added                          |
+| `lme4`        | `glmer`       | to be added                          |
 
 

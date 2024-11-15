@@ -2,7 +2,7 @@ flexPaths: A R Package for Causal Path-Specific Effect Estimation with
 Flexible Settings
 ================
 Xiaxian Ou
-2024-10-08
+2024-11-15
 
 - [0. Installation:](#0-installation)
 - [1. Quick example: Single
@@ -26,7 +26,10 @@ This package is built for estimating the causal **path-specific
 effects** (PSEs) in mediation analysis with
 <span style="color:red">multiple ordered mediators for one binary
 treatment or multiple binary treatments</span>. It provides robust
-estimators based on influence function theory.
+estimators based on influence function theory. This is a schematic
+illustration of the flexPaths workflow:
+
+<img src="pic/flow.jpeg" width="1000" />
 
 Primary advantages of the package include:
 
@@ -58,9 +61,8 @@ Quick instructions are provided below. For more details, see the html.
 
 ``` r
 install.packages("devtools")
-library(devtools)
 
-install_github("xxou/flexPaths")
+devtools::install_github("xxou/flexPaths")
 library(flexPaths)
 ```
 
@@ -149,7 +151,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
                     model.outcome = ~ SuperLearner(SL.library = c('SL.glm','SL.mean'),family = gaussian()),
-                    model.propensity = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
+                    model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
                                             M1 = ~ glm(family = binomial()),
                                             M2 = ~ SuperLearner(SL.library = c('SL.gam','SL.glm'),family = binomial()))
 )
@@ -178,10 +180,10 @@ results_refer0
 ## Causal Paths Estimates: 
 ## 
 ##                      Path     Effect         SE   CI.lower  CI.upper P.value
-## 1           A->M1->...->Y 0.17059919 0.03320447 0.10551963 0.2356788   0e+00
-## 2           A->M2->...->Y 0.07958858 0.02383352 0.03287573 0.1263014   8e-04
-## 3                    A->Y 0.49851146 0.06616867 0.36882324 0.6281997   0e+00
-## 4 total effect: A->...->Y 0.73216237 0.06856749 0.59777256 0.8665522   0e+00
+## 1           A->M1->...->Y 0.17099386 0.03306295 0.10619166 0.2357961   0e+00
+## 2           A->M2->...->Y 0.08138394 0.02393085 0.03448035 0.1282875   7e-04
+## 3                    A->Y 0.49694286 0.06593332 0.36771592 0.6261698   0e+00
+## 4 total effect: A->...->Y 0.73440229 0.06862682 0.59989620 0.8689084   0e+00
 ```
 
 ``` r
@@ -196,10 +198,10 @@ results_seq
 ## Causal Paths Estimates: 
 ## 
 ##                      Path     Effect         SE   CI.lower  CI.upper P.value
-## 1           A->M1->...->Y 0.15573821 0.03233753 0.09235782 0.2191186   0e+00
-## 2           A->M2->...->Y 0.08354994 0.02165028 0.04111617 0.1259837   1e-04
-## 3                    A->Y 0.49605603 0.06662290 0.36547755 0.6266345   0e+00
-## 4 total effect: A->...->Y 0.73534418 0.06847876 0.60112828 0.8695601   0e+00
+## 1           A->M1->...->Y 0.15997138 0.03228410 0.09669571 0.2232471   0e+00
+## 2           A->M2->...->Y 0.08314747 0.02145742 0.04109169 0.1252032   1e-04
+## 3                    A->Y 0.49526891 0.06585991 0.36618585 0.6243520   0e+00
+## 4 total effect: A->...->Y 0.73838775 0.06827504 0.60457113 0.8722044   0e+00
 ```
 
 ## 1.2 `flexEffect`: PSE for flexible pathway(s)
@@ -239,7 +241,7 @@ flex_results
 ## boot strap results: 
 ## 
 ##       active    Effect    boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 101 vs 000 0.6626455 0.07391435     0.5178311     0.7923982    50
+## 1 101 vs 000 0.6612755 0.07064497     0.5478025     0.7769868    50
 ##   boot.P.value
 ## 1            0
 ```
@@ -276,11 +278,11 @@ flex_results1
 ## boot strap results: 
 ## 
 ##       active     Effect    boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 101 vs 000 0.66264549 0.06741941     0.4994180     0.7774812    50
-## 2 110 vs 100 0.06393016 0.02349809     0.0234325     0.1049898    50
+## 1 101 vs 000 0.66127547 0.06908203    0.54128695     0.8121787    50
+## 2 110 vs 100 0.05762447 0.02391001    0.02062306     0.1129063    50
 ##   boot.P.value
-## 1       0.0000
-## 2       0.0065
+## 1        0.000
+## 2        0.016
 
 
 flex_results2 <- flexEffect(p1 = list(potential_outcome1),
@@ -298,8 +300,8 @@ flex_results2
 ## boot strap results: 
 ## 
 ##       active    Effect    boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 101 vs 100 0.4923198 0.06862475     0.3696984     0.6055540    50
-## 2 101 vs 110 0.4283896 0.06564792     0.3005904     0.5559578    50
+## 1 101 vs 100 0.4869192 0.07010638     0.3761030     0.6059376    50
+## 2 101 vs 110 0.4292947 0.07951660     0.2969336     0.5599513    50
 ##   boot.P.value
 ## 1            0
 ## 2            0
@@ -389,7 +391,7 @@ mfit<- pathsInfo(data = multiTreat,
                    M2 = 'm2'
                  ),
                  estimation = "EIF",
-                 model.propensity =list(~ glm(family = binomial())),
+                 model.treatment =list(~ glm(family = binomial())),
                  model.outcome = list( ~SuperLearner(SL.library = c("SL.mean", "SL.gam"),family = gaussian()))
                  
 )
@@ -418,15 +420,15 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.co
 ## 
 ## boot strap results: 
 ## 
-##             active    Effect   boot.SE boot.CI.lower boot.CI.upper nboot
-## 1 001;01 vs 000;00 0.7777732 0.2268417     0.4862332      1.138526    10
+##             active   Effect   boot.SE boot.CI.lower boot.CI.upper nboot
+## 1 001;01 vs 000;00 0.780583 0.3533582     0.3930168      1.360147    10
 ##   boot.P.value
-## 1        6e-04
+## 1       0.0272
 ```
 
 # 3. Further instructions for flexible models
 
-For `model.outcome` and `model.propensity` methods, you can input either
+For `model.outcome` and `model.treatment` methods, you can input either
 a single formula or a list of formulas of the models in **single
 treatment analysis** and only one single model in each input for in
 **multiple treatments analysis**. When specifying a model, it is the
@@ -455,7 +457,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
                     model.outcome = ~ SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian()),
-                    model.propensity = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
+                    model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
                                             M1 = ~ glm(family = binomial()),
                                             M2 = ~ SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = binomial()))
 )
@@ -475,7 +477,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     model.outcome = list(cov_x = ~ glm(formula = outcome1 ~treat+ X1*X2 ,family = gaussian()),
                                             M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian()),
                                             M2 = ~ glm(formula = outcome1 ~treat+med1+med2_1*med2_1+X1*X2, family = gaussian())),
-                    model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200))
+                    model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 ## [34m Input checks passed successfully.
 ```
@@ -494,7 +496,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
                     estimation = "EIF",
                     model.outcome = list( ~ bart(verbose = FALSE, ndpost = 200)),
-                    model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200)),
+                    model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200)),
                     model.iter = list(cov_x = ~ glm(formula = outcome1 ~treat+X1*X2 ,family = gaussian()),
                                          M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian())
                                      )
@@ -520,7 +522,7 @@ mfit<- pathsInfo(data = multiTreat,
                    M2 = 'm2'
                  ),
                  estimation = "EIF",
-                 model.propensity =list(~ glm(formula = Y~ . + I(X^2),family = binomial())),
+                 model.treatment =list(~ glm(formula = Y~ . + I(X^2),family = binomial())),
                  model.outcome = list(~ glm(formula = Y~ . + I(X^0.5),family = gaussian()))
                  
 )
@@ -544,7 +546,7 @@ more models.
 |----|----|----|
 | `stats` | `lm` | No additional arguments required. |
 | `stats` | `glm` | `family`: Specifies the error distribution and link function. |
-| `lme4` | `lmer` | Formula with random intercept: `formula = Y ~ . + ( . \| ID)` (ensure “ID” is included in `cov_x`). |
-| `lme4` | `glmer` | \- Formula with random intercept: `formula = Y ~ . + ( . \| ID)` (ensure “ID” is included in `cov_x`); <br> - `family`: Defines the error distribution. |
 | `dbarts` | `bart` | No additional arguments required. |
 | `SuperLearner` | `SuperLearner` | \- `SL.library`: A list of learner algorithms available in `SuperLearner` (ensure the necessary packages are loaded); <br> - `family`: Defines the outcome type (e.g., binomial, gaussian); <br> - For clustered data, specify `id = 'ID'` (ensure “ID” is included in `cov_x`). |
+| `lme4` | `lmer` | to be added |
+| `lme4` | `glmer` | to be added |
