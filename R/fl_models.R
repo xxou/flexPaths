@@ -39,7 +39,7 @@ predict.fl_SuperLearner <- function(object, newdata) {
   # Extract the fitted model object from the input
   model <- object$model
   # Predict using the fitted model
-  pred <- predict(model, newdata = newdata)$pred
+  pred <- predict(model, newdata = newdata, onlySL = T)$pred
 
   return(pred)
 }

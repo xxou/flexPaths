@@ -175,9 +175,13 @@ prod_assign_modellist <- function(model_list,a_vars, a_values){
                  Ai_data = model$dataX
                  # print( head(Ai_data))
                  if(!is.null(Xa_var)){
-                   Ai_data[,Xa_var] = suppressMessages({map_dfc(Xa_value, ~rep(.x, dim(Ai_data)[1]))})
+                   Ai_data[ ,Xa_var] = suppressMessages({map_dfc(Xa_value, ~rep(.x, dim(Ai_data)[1]))})
                  }
-                 # print( head(Ai_data)); cat(Xa_var,',',Xa_value,",",Y_value,'\n')
+
+                 # print( head(Ai_data));
+                 # cat('Xa_var:', Xa_var,',',"Xa_value:", Xa_value,",", "Y_value:",Y_value,'\n')
+                 # print(model$model)
+                 # cat("-----------------------------\n")
 
                  predY1 <-predict(model, newdata = Ai_data )
                  pred <- predY1*Y_value + (1-predY1)*(1-Y_value)
