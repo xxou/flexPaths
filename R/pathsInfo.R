@@ -65,13 +65,13 @@ pathsInfo<-function(
   na_rows <- which(rowSums(is.na(data)) > 0)
   # Report and drop rows with NA
   if (length(na_rows) > 0) {
-    message(sprintf("Dropping %d rows due to missing values. Final sample size: %d.",
-                    length(na_rows), nrow(data) - length(na_rows)))
+    cat("\033[34m", sprintf("Dropping %d rows due to missing values. Final sample size: %d.",
+                            length(na_rows), nrow(data) - length(na_rows)), "\033[39m", sep = "")
     data <- data[-na_rows, ]
   } else {
-    message(sprintf("No missing values found. Final sample size: %d.", nrow(data)))
+    cat("\033[34m", sprintf("No missing values found. Final sample size: %d.", nrow(data)), "\033[39m", sep = "")
   }
-
+ cat("\n")
 
   if (!is.data.frame(data)) {stop("'data' must be a data.frame.")}
 
@@ -205,7 +205,13 @@ pathsInfo<-function(
   )
 
   # Return a message confirming that the checks passed (optional)
-  cat("\033[34m", "Input checks passed successfully.")
+  cat("\033[34m", "\nInput checks passed successfully.", sep = "")
+
+  if(estimation != "EIF"){
+  cat("\033[31m", "\nReminder: \nDo not rely on naive standard errors and p-values when using G or IPW. \nPlease add the bootstrapping argument in effect functions then.\033[39m",  sep = "")
+  }
+
+
   class(output) <- "pathsInfo"
   return(output)
 
