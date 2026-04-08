@@ -409,7 +409,7 @@ sequential_effect <-  function(
     out <- data.frame(Path = rep(NA,K+1), Effect = rep(NA,K+1))
     for (i in 1:K ) {
       out$Effect[i] = (mean(potential_outcome[,i],na.rm=T)/(1-mean(potential_outcome[,i],na.rm=T)))/
-                      (mean(potential_outcome[,i+1],na.rm=T)/1-mean(potential_outcome[,i+1],na.rm=T))
+                      (mean(potential_outcome[,i+1],na.rm=T)/(1-mean(potential_outcome[,i+1],na.rm=T) ))
     }
     out$Effect[K+1] = (mean(Y_A1,na.rm=T)/(1-mean(Y_A1,na.rm=T)))/
                       (mean(Y_A0,na.rm=T)/(1-mean(Y_A0,na.rm=T)))
