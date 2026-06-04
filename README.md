@@ -1,4 +1,4 @@
-flexPaths: A R Package for Causal Path-Specific Effect Estimation with
+flexPaths: An R Package for Causal Path-Specific Effect Estimation with
 Flexible Settings
 ================
 Xiaxian Ou
