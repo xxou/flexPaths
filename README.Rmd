@@ -1,5 +1,5 @@
 ---
-title: "flexPaths: A R Package for Causal Path-Specific Effect Estimation with Flexible Settings"
+title: "flexPaths: An R Package for Causal Path-Specific Effect Estimation with Flexible Settings"
 author: "Xiaxian Ou"
 date: "`r Sys.Date()`"
 output: 
@@ -13,7 +13,20 @@ library(knitr)
 opts_chunk$set(warning = FALSE, message = FALSE, eval= T,collapse = T)
 ```
 
-This package is built for estimating the causal **path-specific effects** (PSEs) in mediation analysis with [multiple ordered mediators for one binary treatment or multiple binary treatments]{style="color:red"}. It provides robust estimators based on influence function theory. This is a schematic illustration of the flexPaths workflow:
+This package is built for estimating the causal **path-specific effects** (PSEs) in mediation analysis with [multiple ordered mediators for one binary treatment or multiple binary treatments]{style="color:red"}. It provides robust estimators based on influence function theory. 
+
+If you find this package useful, please cite [this paper](https://arxiv.org/abs/2610.34349):
+
+```bibtex
+@article{ou2026causalpse,
+  title   = {Inference for Causal Path-Specific Effects in Longitudinal Studies with Repeated Treatments and Multiple Mediators},
+  author  = {Ou, Xiaxian and He, Xinwei and Nabi, Razieh},
+  journal = {arXiv preprint arXiv:2610.34349},
+  year    = {2026}
+}
+```
+
+This is a schematic illustration of the flexPaths workflow:
 
 ![](pic/flow.jpeg){width="1000"}
 
@@ -21,7 +34,7 @@ Primary advantages of the package include:
 
 -   **Flexible model size**: The number of treatment(s) and mediator(s) is flexible.
 
--   **Flexible decomposition**: This package can return the Natural PSEs and Cumulative PSEs via each mediator ([Xiang Zhou, 2022](https://academic.oup.com/jrsssb/article/84/3/794/7056148)).
+-   **Flexible decomposition**: This package can return the Natural PSEs and Cumulative PSEs via each mediator.
 
 -   **Flexible pathways**: User can calculate the average potential outcome for any identified pathway(s), as well as the average causal effect by comparing two potential outcome.
 
