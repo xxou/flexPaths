@@ -1,4 +1,6 @@
-flexPaths: An R Package for Causal Path-Specific Effect Estimation with Flexible Settings ================ Xiaxian Ou 2024-11-15
+# flexPaths: An R Package for Causal Path-Specific Effect Estimation with Flexible Settings
+
+Xiaxian Ou 2024-11-15
 
 - [0. Installation:](#0-installation)
 - [1. Quick example: Single Treatment](#1-quick-example-single-treatment)
