@@ -1,59 +1,30 @@
-flexPaths: An R Package for Causal Path-Specific Effect Estimation with
-Flexible Settings
-================
-Xiaxian Ou
-2024-11-15
+flexPaths: An R Package for Causal Path-Specific Effect Estimation with Flexible Settings ================ Xiaxian Ou 2024-11-15
 
 - [0. Installation:](#0-installation)
-- [1. Quick example: Single
-  Treatment](#1-quick-example-single-treatment)
-  - [1.1 `pathsEffect`: PSEs through each
-    mediator](#11-pathseffect-pses-through-each-mediator)
-  - [1.2 `flexEffect`: PSE for flexible
-    pathway(s)](#12-flexeffect-pse-for-flexible-pathways)
-- [2. Quick example: Multiple
-  Treatments](#2-quick-example-multiple-treatments)
-  - [2.1 `flexEffect`: PSE for flexible
-    pathway(s)](#21-flexeffect-pse-for-flexible-pathways)
-- [3. Further instructions for flexible
-  models](#3-further-instructions-for-flexible-models)
-  - [3.1 Examples for model
-    specification](#31-examples-for-model-specification)
-  - [3.2 Summary for models and the required
-    arguments](#32-summary-for-models-and-the-required-arguments)
+- [1. Quick example: Single Treatment](#1-quick-example-single-treatment)
+  - [1.1 `pathsEffect`: PSEs through each mediator](#11-pathseffect-pses-through-each-mediator)
+  - [1.2 `flexEffect`: PSE for flexible pathway(s)](#12-flexeffect-pse-for-flexible-pathways)
+- [2. Quick example: Multiple Treatments](#2-quick-example-multiple-treatments)
+  - [2.1 `flexEffect`: PSE for flexible pathway(s)](#21-flexeffect-pse-for-flexible-pathways)
+- [3. Further instructions for flexible models](#3-further-instructions-for-flexible-models)
+  - [3.1 Examples for model specification](#31-examples-for-model-specification)
+  - [3.2 Summary for models and the required arguments](#32-summary-for-models-and-the-required-arguments)
 
-This package is built for estimating the causal **path-specific
-effects** (PSEs) in mediation analysis with
-<span style="color:red">multiple ordered mediators for one binary
-treatment or multiple binary treatments</span>. It provides robust
-estimators based on influence function theory. This is a schematic
-illustration of the flexPaths workflow:
+This package is built for estimating the causal **path-specific effects** (PSEs) in mediation analysis with [multiple ordered mediators for one binary treatment or multiple binary treatments]{style="color:red"}. It provides robust estimators based on influence function theory. This is a schematic illustration of the flexPaths workflow:
 
-<img src="pic/flow.jpeg" width="1000" />
+<img src="pic/flow.jpeg" width="1000"/>
 
 Primary advantages of the package include:
 
-- **Flexible model size**: The number of treatment(s) and mediator(s) is
-  flexible.
+- **Flexible model size**: The number of treatment(s) and mediator(s) is flexible.
 
-- **Flexible decomposition**: This package can return the Natural PSEs
-  and Cumulative PSEs via each mediator ([Xiang Zhou,
-  2022](https://academic.oup.com/jrsssb/article/84/3/794/7056148)).
+- **Flexible decomposition**: This package can return the Natural PSEs and Cumulative PSEs via each mediator ([Ou et al., 2026](https://arxiv.org/abs/2610.34349)).
 
-- **Flexible pathways**: User can calculate the average potential
-  outcome for any identified pathway(s), as well as the average causal
-  effect by comparing two potential outcome.
+- **Flexible pathways**: User can calculate the average potential outcome for any identified pathway(s), as well as the average causal effect by comparing two potential outcome.
 
-- **Flexible models**: The package supports model fitting using
-  `glm/lm`, `glmer/lmer` in package `lme4`, `bart` in package `dbarts`,
-  `SuperLearner` in package `SuperLearner` now. Users can also integrate
-  new models for estimation by modifying the `fl_model_template.R`.
+- **Flexible models**: The package supports model fitting using `glm/lm`, `glmer/lmer` in package `lme4`, `bart` in package `dbarts`, `SuperLearner` in package `SuperLearner` now. Users can also integrate new models for estimation by modifying the `fl_model_template.R`.
 
-- **Flexible estimators**: This package includes three
-  estimators—Inverse Probability Weighting (IPW), plug-in G-computation,
-  and Efficient Influence Function (EIF). The EIF estimator enhances
-  robustness against model misspecification, ensuring more reliable
-  results.
+- **Flexible estimators**: This package includes three estimators—Inverse Probability Weighting (IPW), plug-in G-computation, and Efficient Influence Function (EIF). The EIF estimator enhances robustness against model misspecification, ensuring more reliable results.
 
 Quick instructions are provided below. For more details, see the html.
 
@@ -68,64 +39,39 @@ library(flexPaths)
 
 # 1. Quick example: Single Treatment
 
-Here, we illustrate the case with two mediators $M_1$ and $M_2$ (the
-mediator can be high dimensional). Let $A$ denote the binary treatment
-(0 or 1), $Y$ denote the outcome, and $X$ denote the covariates.
+Here, we illustrate the case with two mediators $M_1$ and $M_2$ (the mediator can be high dimensional). Let $A$ denote the binary treatment (0 or 1), $Y$ denote the outcome, and $X$ denote the covariates.
 
-<img src="pic/DAG_oneT.png" width="400" />
+<img src="pic/DAG_oneT.png" width="400"/>
 
-Denote the counterfactual outcome
-$\phi(a_1, a_2, a) = Y(a,M_1(a_1),M_2(a_2,M_1(a_1)))$ that would be
-observed if $A$ were set to $a$ and $M_1$ and $M_2$ were set to the
-natural value they would have taken if $A$ had been $a_1$ and $a_2$,
-where $(a_1, a_2, a) \in \{0,1\}^3$.
+Denote the counterfactual outcome $\phi(a_1, a_2, a) = Y(a,M_1(a_1),M_2(a_2,M_1(a_1)))$ that would be observed if $A$ were set to $a$ and $M_1$ and $M_2$ were set to the natural value they would have taken if $A$ had been $a_1$ and $a_2$, where $(a_1, a_2, a) \in \{0,1\}^3$.
 
 **Identified pathways**:
 
-In the case of two mediators, we have three identified pathways. Using
-`pathsEffect`, we can obtain the effect via each mediator.
+In the case of two mediators, we have three identified pathways. Using `pathsEffect`, we can obtain the effect via each mediator.
 
-<img src="pic/oneT_identified_pathway.jpg" width="1067" />
+<img src="pic/oneT_identified_pathway.jpg" width="1067"/>
 
 **Decomposition**:
 
-`decomposition = "refer0"`: The effect of specific pathway can be
-defined as a contrast against $Y(0)$ on a mean scale, and these effects
-are also called natural path-specific effect:
+`decomposition = "refer0"`: The effect of specific pathway can be defined as a contrast against $Y(0)$ on a mean scale, and these effects are also called natural path-specific effect:
 
 - $\rho_{A \rightarrow M_1 \leadsto Y} = \mathbb{E} (\phi(1,0,0)) - \mathbb{E} (\phi(0,0,0))$
 - $\rho_{A \rightarrow M_2 \rightarrow Y} = \mathbb{E} (\phi(0,1,0)) - \mathbb{E} (\phi(0,0,0))$
 - $\rho_{A \rightarrow Y} = \mathbb{E} (\phi(0,0,1)) - \mathbb{E} (\phi(0,0,0))$
 
-`decomposition = "sequential"`: Decompose the total effect into PSEs
-sequentially, and these effects are also called cumulative path-specific
-effect:
-$\mathbb{E}(Y(1)) - \mathbb{E}(Y(1)) =\rho_{A \rightarrow M_1 \leadsto Y} + \rho_{A \rightarrow M_2 \rightarrow Y} + \rho_{A \rightarrow Y}$
+`decomposition = "sequential"`: Decompose the total effect into PSEs sequentially, and these effects are also called cumulative path-specific effect: $\mathbb{E}(Y(1)) - \mathbb{E}(Y(1)) =\rho_{A \rightarrow M_1 \leadsto Y} + \rho_{A \rightarrow M_2 \rightarrow Y} + \rho_{A \rightarrow Y}$
 
 - $\rho_{A \rightarrow M_1 \leadsto Y} = \mathbb{E} (\phi(1,1,1)) - \mathbb{E} (\phi(0,1,1))$
 - $\rho_{A \rightarrow M_2 \rightarrow Y} = \mathbb{E} (\phi(0,1,1)) - \mathbb{E} (\phi(0,0,1))$
 - $\rho_{A \rightarrow Y} = \mathbb{E} (\phi(0,0,1)) - \mathbb{E} (\phi(0,0,0))$
 
-In the absence of interactions between $A$ and $M$, natural PSEs and
-cumulative PSEs yield identical results. However, when interactions are
-present, they display different results except the same direct effect.
-Meanwhile, natural PSEs cannot be simply summed to represent the total
-effect. Therefore, these proportions are not analogous to the
-\`\`proportion mediated’’ typically.
+In the absence of interactions between $A$ and $M$, natural PSEs and cumulative PSEs yield identical results. However, when interactions are present, they display different results except the same direct effect. Meanwhile, natural PSEs cannot be simply summed to represent the total effect. Therefore, these proportions are not analogous to the \`\`proportion mediated’’ typically.
 
 **Models for Estimation**:
 
-- For IPW approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models
-  to estimate propensity score
-  $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$.
-- For plug-in G computation: To estimate $K+1$ PSEs, we need to fit
-  $K+1$ models for outcome regression
-  $\mathbb{E}(Y|A, X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
-- For EIF approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models
-  to estimate both propensity score
-  $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$ and $K+1$ outcome
-  regression
-  $\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
+- For IPW approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models to estimate propensity score $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$.
+- For plug-in G computation: To estimate $K+1$ PSEs, we need to fit $K+1$ models for outcome regression $\mathbb{E}(Y|A, X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
+- For EIF approach: To estimate $K+1$ PSEs, we need to fit $K+1$ models to estimate both propensity score $P(A|X), P(A|X,M_1), \ldots, P(A|X,M_1,\ldots,M_K)$ and $K+1$ outcome regression $\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,X,M_1), \ldots, \mathbb{E}(Y|A,X,M_1,\ldots,M_K)$.
 
 ## 1.1 `pathsEffect`: PSEs through each mediator
 
@@ -155,7 +101,7 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                                             M1 = ~ glm(family = binomial()),
                                             M2 = ~ SuperLearner(SL.library = c('SL.gam','SL.glm'),family = binomial()))
 )
-## [34m Input checks passed successfully.
+## [34m Input checks passed successfully.
 
 # Natural PSEs
 results_refer0 <- pathsEffect(pathsInfo = EIF_fit, decomposition = "refer0", scale = "diff", 
@@ -206,18 +152,11 @@ results_seq
 
 ## 1.2 `flexEffect`: PSE for flexible pathway(s)
 
-The `flexEffect` function can get effect for any identified pathway or
-combined pathways by comparing two potential outcome from the function
-`flexPotential`.
+The `flexEffect` function can get effect for any identified pathway or combined pathways by comparing two potential outcome from the function `flexPotential`.
 
-The `flexPotential` will calculate the **potential outcome** for
-user-specified counterfactual values.The argument active =
-$c(a_1, a_2, a)$ specifies the counterfatual value of $A$ for $M_1$,
-$M_2$, and $Y$ orderly.
+The `flexPotential` will calculate the **potential outcome** for user-specified counterfactual values.The argument active = $c(a_1, a_2, a)$ specifies the counterfatual value of $A$ for $M_1$, $M_2$, and $Y$ orderly.
 
-By comparing $\mathbb{E} (\phi(1,0,1))$ and $\mathbb{E} (\phi(0,0,0))$,
-we get the combined effect through $A \rightarrow M_1 \rightarrow Y$ and
-$A \rightarrow Y$
+By comparing $\mathbb{E} (\phi(1,0,1))$ and $\mathbb{E} (\phi(0,0,0))$, we get the combined effect through $A \rightarrow M_1 \rightarrow Y$ and $A \rightarrow Y$
 
 ``` r
 potential_outcome0 <- flexPotential(pathsInfo = EIF_fit, active = c(0, 0, 0))
@@ -246,20 +185,11 @@ flex_results
 ## 1            0
 ```
 
-To simplify multiple comparisons, p1 and p2 can be provided as lists.
-Note the following:
+To simplify multiple comparisons, p1 and p2 can be provided as lists. Note the following:
 
-1.  When p1 and p2 have the same length, `flexEffect` will compare each
-    element of p1 with the corresponding element of p0. For instance,
-    flex_results1 will compare potential_outcome1 with
-    potential_outcome0, and potential_outcome2 with potential_outcome3
-    here.
+1.  When p1 and p2 have the same length, `flexEffect` will compare each element of p1 with the corresponding element of p0. For instance, flex_results1 will compare potential_outcome1 with potential_outcome0, and potential_outcome2 with potential_outcome3 here.
 
-2.  When either p1 or p2 contains a single input and the other is a
-    list, `flexEffect` will compare that single element with each
-    element in the list. For example, flex_results2 will compare
-    potential_outcome1 with potential_outcome0, and potential_outcome1
-    with potential_outcome3.
+2.  When either p1 or p2 contains a single input and the other is a list, `flexEffect` will compare that single element with each element in the list. For example, flex_results2 will compare potential_outcome1 with potential_outcome0, and potential_outcome1 with potential_outcome3.
 
 ``` r
 flex_results1 <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
@@ -309,60 +239,29 @@ flex_results2
 
 # 2. Quick example: Multiple Treatments
 
-Similarly, we illustrate the example of two treatments with three
-mediators (the mediator can be high dimensional). Let $A_1$ and $A_2$
-denote binary treatments (0 or 1), $Y$ denote the outcome, and $X$
-denote the covariates.
+Similarly, we illustrate the example of two treatments with three mediators (the mediator can be high dimensional). Let $A_1$ and $A_2$ denote binary treatments (0 or 1), $Y$ denote the outcome, and $X$ denote the covariates.
 
-<img src="pic/DAG_multiT.png" width="400" />
+<img src="pic/DAG_multiT.png" width="400"/>
 
-The sequence of treatments and mediators follows the order:
-$A \rightarrow M_1 \rightarrow A_2 \rightarrow M_2 \rightarrow Y$.
+The sequence of treatments and mediators follows the order: $A \rightarrow M_1 \rightarrow A_2 \rightarrow M_2 \rightarrow Y$.
 
-Denote the counterfactual outcome
-$\phi(a_{11}, a_{12}, a_{10}, a_{22}, a_{20} ) = Y(a_{10}, a_{20},M_1(a_{11}),M_2(a_{12}, a_{22},M_1(a_{11})))$,
-where $a_{ij}$ represents the counterfactual value of treatment $i$ for
-mediator $j$ ($j = 0$ represents outcome $Y$). Notably, since $M_1$
-occurs before $A_2$, thus there is no counterfactual value of $A_2$ for
-$M_1$, and thus $a_{21}$ is $NA$. Taking the direct effect of treatment
-$A_1$ and treatment $A_2$ as an example,
-$\phi(a_{11}=0, a_{12}=0, a_{10}=1, a_{22}=0, a_{20}=1 )$ means what the
-outcome would be when individuals were treated with both $A_1=1$ and
-$A_2=1$ and the mediator $M_1$ was set at its natural level for those
-without treatment 1 ($A_1=0$), as well as mediator $M_2$ was set at its
-natural level for those without both treatments 1 ($A_1=0$) and
-treatment 2 $A_2=0$).
+Denote the counterfactual outcome $\phi(a_{11}, a_{12}, a_{10}, a_{22}, a_{20} ) = Y(a_{10}, a_{20},M_1(a_{11}),M_2(a_{12}, a_{22},M_1(a_{11})))$, where $a_{ij}$ represents the counterfactual value of treatment $i$ for mediator $j$ ($j = 0$ represents outcome $Y$). Notably, since $M_1$ occurs before $A_2$, thus there is no counterfactual value of $A_2$ for $M_1$, and thus $a_{21}$ is $NA$. Taking the direct effect of treatment $A_1$ and treatment $A_2$ as an example, $\phi(a_{11}=0, a_{12}=0, a_{10}=1, a_{22}=0, a_{20}=1 )$ means what the outcome would be when individuals were treated with both $A_1=1$ and $A_2=1$ and the mediator $M_1$ was set at its natural level for those without treatment 1 ($A_1=0$), as well as mediator $M_2$ was set at its natural level for those without both treatments 1 ($A_1=0$) and treatment 2 $A_2=0$).
 
-This can be represented in matrix form, where rows represent treatments
-and columns represent mediators:
+This can be represented in matrix form, where rows represent treatments and columns represent mediators:
 
-<img src="pic/multi_matrix.png" width="300" />
+<img src="pic/multi_matrix.png" width="300"/>
 
-**Models for Estimation**: Given the complexity of models involving
-multiple treatments, this package applies a consistent modeling
-technique across all propensity models and another across all outcome
-regression models.
+**Models for Estimation**: Given the complexity of models involving multiple treatments, this package applies a consistent modeling technique across all propensity models and another across all outcome regression models.
 
-- IPW Approach: Users must select a single modeling technique to fit all
-  propensity models.
-- Plug-in G Computation: Users must choose one modeling technique to fit
-  all outcome regression models.
-- EIF Approach: Users must select one modeling technique for all
-  propensity models and a separate technique for all outcome regression
-  models.
+- IPW Approach: Users must select a single modeling technique to fit all propensity models.
+- Plug-in G Computation: Users must choose one modeling technique to fit all outcome regression models.
+- EIF Approach: Users must select one modeling technique for all propensity models and a separate technique for all outcome regression models.
 
 ## 2.1 `flexEffect`: PSE for flexible pathway(s)
 
-`flexEffect` is the same function as in the single treatment case. It
-can get effect for any identified pathway or combined pathways by
-comparing two potential outcome from the function `mflexPotential`.
+`flexEffect` is the same function as in the single treatment case. It can get effect for any identified pathway or combined pathways by comparing two potential outcome from the function `mflexPotential`.
 
-The `mflexPotential` will calculate the **potential outcome** for
-user-specified counterfactual values in the scenario of multiple
-treatments. Inputs of counterfactual values are specified using a list.
-(The `mflexPotential` function can also be applied to single treatment
-scenarios; however, it may require more processing time compared to
-`flexPotential`.)
+The `mflexPotential` will calculate the **potential outcome** for user-specified counterfactual values in the scenario of multiple treatments. Inputs of counterfactual values are specified using a list. (The `mflexPotential` function can also be applied to single treatment scenarios; however, it may require more processing time compared to `flexPotential`.)
 
 ``` r
 data("multiTreat")
@@ -395,7 +294,7 @@ mfit<- pathsInfo(data = multiTreat,
                  model.outcome = list( ~SuperLearner(SL.library = c("SL.mean", "SL.gam"),family = gaussian()))
                  
 )
-## [34m Input checks passed successfully.
+## [34m Input checks passed successfully.
 
 mp1<-mflexPotential(active = list(a1=c(0,0,1),
                                   a2=c(NA,0,1)),
@@ -405,9 +304,7 @@ mp2<-mflexPotential(active = list(a1=c(0,0,0),
                     mfit)
 ```
 
-Use the `flexEffect` to calculate the effects by comparing p1 and p2.
-The flexible inputs of p1 and p2 are the same as in the single
-treatment.
+Use the `flexEffect` to calculate the effects by comparing p1 and p2. The flexible inputs of p1 and p2 are the same as in the single treatment.
 
 ``` r
 flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.cores = 6)
@@ -428,29 +325,19 @@ flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =10 , m.co
 
 # 3. Further instructions for flexible models
 
-For `model.outcome` and `model.treatment` methods, you can input either
-a single formula or a list of formulas of the models in **single
-treatment analysis** and only one single model in each input for in
-**multiple treatments analysis**. When specifying a model, it is the
-same to define the arguments in the corresponding function as per its
-original use, except for data, x, y, and formula, which are
-pre-specified.
+For `model.outcome` and `model.treatment` methods, you can input either a single formula or a list of formulas of the models in **single treatment analysis** and only one single model in each input for in **multiple treatments analysis**. When specifying a model, it is the same to define the arguments in the corresponding function as per its original use, except for data, x, y, and formula, which are pre-specified.
 
 ## 3.1 Examples for model specification
 
 **Example 1:**
 
-For the outcome models:
-`SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian())`
-will be used to fit
-$\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,M_1,X), \mathbb{E}(Y|A,M_1,M_2,X)$.
+For the outcome models: `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian())` will be used to fit $\mathbb{E}(Y|A,X), \mathbb{E}(Y|A,M_1,X), \mathbb{E}(Y|A,M_1,M_2,X)$.
 
 For the propensity models, models are specified in the following order:
 
 - `bart(verbose = FALSE, ndpost = 200)` for $P(A|X)$,
 - `glm(family = binomial())` for $P(A|X, M_1)$,
-- `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'), family = binomial())`
-  for $P(A|X, M_1, M_2)$,
+- `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'), family = binomial())` for $P(A|X, M_1, M_2)$,
 
 ``` r
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
@@ -461,14 +348,12 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                                             M1 = ~ glm(family = binomial()),
                                             M2 = ~ SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = binomial()))
 )
-## [34m Input checks passed successfully.
+## [34m Input checks passed successfully.
 ```
 
 **Example 2:**
 
-To specify the formula in a glm model, use the `formula` argument within
-the glm function. This allows you to define the relationship between the
-outcome and predictor variables clearly.
+To specify the formula in a glm model, use the `formula` argument within the glm function. This allows you to define the relationship between the outcome and predictor variables clearly.
 
 ``` r
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
@@ -479,17 +364,12 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                                             M2 = ~ glm(formula = outcome1 ~treat+med1+med2_1*med2_1+X1*X2, family = gaussian())),
                     model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
-## [34m Input checks passed successfully.
+## [34m Input checks passed successfully.
 ```
 
 **Example 3:**
 
-The `model.iter` parameter is set to `NULL` by default. In this case,
-the iterative model is constructed based on `model.outcome`, with the
-family argument replaced by `gaussian` if your function includes a
-family argument. If you wish to define your own `model.iter`, you can
-provide either a single formula or a list of formulas ($k-1$) for
-$E(\cdot| A,X), E(\cdot| A,X, M_1), E(\cdot|A, X, M_1,\cdots,M_{k-1})$.
+The `model.iter` parameter is set to `NULL` by default. In this case, the iterative model is constructed based on `model.outcome`, with the family argument replaced by `gaussian` if your function includes a family argument. If you wish to define your own `model.iter`, you can provide either a single formula or a list of formulas ($k-1$) for $E(\cdot| A,X), E(\cdot| A,X, M_1), E(\cdot|A, X, M_1,\cdots,M_{k-1})$.
 
 ``` r
 EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
@@ -501,16 +381,12 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
                                          M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian())
                                      )
 )
-## [34m Input checks passed successfully.
+## [34m Input checks passed successfully.
 ```
 
 **Example 4:**
 
-In **multiple treatment analysis**, you can specify a partial formula in
-the model using the structure `formula = ~ . + vars`, where `~ .`
-represents the remaining variables as defined by the function’s default,
-and `vars` allows you to add specific terms that apply across all
-models.
+In **multiple treatment analysis**, you can specify a partial formula in the model using the structure `formula = ~ . + vars`, where `~ .` represents the remaining variables as defined by the function’s default, and `vars` allows you to add specific terms that apply across all models.
 
 ``` r
 mfit<- pathsInfo(data = multiTreat,
@@ -526,21 +402,17 @@ mfit<- pathsInfo(data = multiTreat,
                  model.outcome = list(~ glm(formula = Y~ . + I(X^0.5),family = gaussian()))
                  
 )
-## [34m Input checks passed successfully.
+## [34m Input checks passed successfully.
 ```
 
-**Extend model** : User can modify `fl_model_template.R` to integrate
-more models.
+**Extend model** : User can modify `fl_model_template.R` to integrate more models.
 
 <br>
 
 ## 3.2 Summary for models and the required arguments
 
-- The usage of arguments follows their implementation in the respective
-  original packages.
-- When specifying arguments, ensure that both the argument name and
-  value are provided. For example, rather than using `glm(binomial())`,
-  explicitly state `glm(family = binomial())` with `family =`.
+- The usage of arguments follows their implementation in the respective original packages.
+- When specifying arguments, ensure that both the argument name and value are provided. For example, rather than using `glm(binomial())`, explicitly state `glm(family = binomial())` with `family =`.
 
 | Package | Function | Required Arguments |
 |----|----|----|
