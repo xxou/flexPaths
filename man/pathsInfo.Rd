@@ -24,7 +24,7 @@ The treatments should be binary variables taking values of either 0 or 1.}
 
 \item{cov_x}{A vector of character strings indicating the name(s) of covariates.}
 
-\item{data}{A data frame to be checked for missing values and validated for variable requirements. Rows with missing values will be dropped, and a summary of dropped rows and final sample size will be provided.}
+\item{data}{A wide-format data frame with one row per individual. Treatments and mediators measured at different times must be stored in separate columns. The data are checked for missing values and validated for variable requirements. Rows with missing values will be dropped, and a summary of dropped rows and final sample size will be provided.}
 
 \item{M.list}{A list of \eqn{K} mediators, where \eqn{K} is the number of mediators. Each mediator can be multivariate.
 Use the form \code{list(M1 = c("mediator1_1", "mediator1_2"), M2 = c("mediator2"), ... )}, with \code{M_i} to index the order of mediators.
@@ -77,8 +77,8 @@ It prepares the data, estimation methods, and models required for further effect
 # ***************************************
 data("singTreat")
 # EIF estimation
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                      estimation = "EIF",
                      model.outcome = ~SuperLearner(SL.library = c('randomForest','xgboost'),family = gaussian()),
                      model.treatment = ~ bart(verbose = FALSE, ndpost = 200)
@@ -86,8 +86,8 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 
 
 
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                      estimation = "EIF",
                      model.outcome = ~ SuperLearner(SL.library = c('randomForest','xgboost'),family = gaussian()),
                      model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
@@ -97,13 +97,13 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 )
 
 
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                      estimation = "EIF",
-                     model.outcome = list(cov_x = ~ glm(formula = outcome1 ~X1*X2 ,family = gaussian()),
-                                          M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian()),
-                                          M2 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+X1*X2, family = gaussian()),
-                                          M3 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+med3+X1*X2, family = gaussian())),
+                     model.outcome = list(cov_x = ~ glm(formula = Outcome1 ~X1*X2 ,family = gaussian()),
+                                          M1 = ~ glm(formula = Outcome1 ~Med1+X1*X2, family = gaussian()),
+                                          M2 = ~ glm(formula = Outcome1 ~Med1+Med2_1*Med2_1+X1*X2, family = gaussian()),
+                                          M3 = ~ glm(formula = Outcome1 ~Med1+Med2_1*Med2_1+Med3+X1*X2, family = gaussian())),
                      model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 
@@ -113,15 +113,15 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 data("multiTreat")
 mfit<- pathsInfo(data=multiTreat,
                 Y = "Y",
-                A = c("t1","t2","t3"),
+                A = c("T1","T2","T3"),
                 cov_x = "X",
                 M.list = list(
-                  M1 = 'm1',
-                  M2 = 'm2',
-                  M3 = 'm3',
-                  M4 = 'm4',
-                  M5 = 'm5',
-                  M6 = 'm6'
+                  M1 = 'M1',
+                  M2 = 'M2',
+                  M3 = 'M3',
+                  M4 = 'M4',
+                  M5 = 'M5',
+                  M6 = 'M6'
                 ),
                 estimation = "EIF",
                 model.treatment =list( ~  glm(family = binomial())),

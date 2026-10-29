@@ -37,8 +37,8 @@ The function supports various estimation methods, including EIF (Efficient Influ
 data("singTreat")
 
 # input information for PSE
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                      estimation = "EIF",
                      model.outcome = ~ glm(family = gaussian()),
                      model.treatment = ~ glm(family = binomial())

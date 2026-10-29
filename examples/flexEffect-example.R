@@ -7,8 +7,8 @@
 ###########################
 data("singTreat")
 # input information for PSE
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                     M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                      estimation = "EIF",
                      model.outcome = ~ glm(family = gaussian()),
                      model.treatment = ~ glm(family = binomial())
@@ -40,15 +40,15 @@ data("multiTreat")
 
 mfit<- pathsInfo(data = multiTreat,
                   Y = "Y",
-                  A = c("t1","t2","t3"),
+                  A = c("T1","T2","T3"),
                   cov_x = "X",
                   M.list = list(
-                    M1 = 'm1',
-                    M2 = 'm2',
-                    M3 = 'm3',
-                    M4 = 'm4',
-                    M5 = 'm5',
-                    M6 = 'm6'
+                    M1 = 'M1',
+                    M2 = 'M2',
+                    M3 = 'M3',
+                    M4 = 'M4',
+                    M5 = 'M5',
+                    M6 = 'M6'
                   ),
                   estimation = "EIF",
                   model.treatment =list( ~  glm(family = binomial())),

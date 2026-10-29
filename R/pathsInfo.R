@@ -28,7 +28,7 @@
 #'   \item You can input a single formula or a list containing one formula, which will be applied to all iterative regression models.
 #'   \item Alternatively, input \eqn{K} models for \eqn{(A,X)}, \eqn{(M_1, A,X)}, ..., \eqn{(\overline{M}_{k-1}, A,X)}, which will be used as the predictors for iterative regression models.
 #' }
-#' @param data A data frame to be checked for missing values and validated for variable requirements. Rows with missing values will be dropped, and a summary of dropped rows and final sample size will be provided.
+#' @param data A wide-format data frame with one row per individual. Treatments and mediators measured at different times must be stored in separate columns. The data are checked for missing values and validated for variable requirements. Rows with missing values will be dropped, and a summary of dropped rows and final sample size will be provided.
 #'
 #' @return An object of class \code{pathsInfo}, which is a list containing the following elements:
 #' \describe{

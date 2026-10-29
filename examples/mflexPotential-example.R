@@ -6,15 +6,15 @@ data("multiTreat")
 
 mfit<- pathsInfo(data = multiTreat,
                  Y = "Y",
-                 A = c("t1","t2","t3"),
+                 A = c("T1","T2","T3"),
                  cov_x = "X",
                  M.list = list(
-                   M1 = 'm1',
-                   M2 = 'm2',
-                   M3 = 'm3',
-                   M4 = 'm4',
-                   M5 = 'm5',
-                   M6 = 'm6'
+                   M1 = 'M1',
+                   M2 = 'M2',
+                   M3 = 'M3',
+                   M4 = 'M4',
+                   M5 = 'M5',
+                   M6 = 'M6'
                  ),
                  estimation = "EIF",
                  model.treatment =list( ~  glm(family = binomial())),

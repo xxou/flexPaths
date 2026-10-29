@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 
 This package is built for estimating the causal **path-specific effects** (PSEs) in mediation analysis with [multiple ordered mediators for one binary treatment or multiple binary treatments]{style="color:red"}. It provides robust estimators based on influence function theory.
 
+The input data must be in **wide format**, with one row per individual. Treatments and mediators measured at different times are stored in separate columns.
+
 Primary advantages of the package include:
 
 -   **Flexible model size**: The number of treatment(s) and mediator(s) is flexible.
@@ -84,11 +86,11 @@ Considering the assumptions of identification, only three pathways above can be 
 
 We provide data `singTreat` for one treatment with 3 ordered mediators, following the sequence : $A \rightarrow M_1 \rightarrow M_2 \rightarrow M_3 \rightarrow Y$
 
--   A: treat
--   $M_1$: med1
--   $M_2$: med2_1 and med2_2
--   $M_3$: med3
--   Y: outcome1 is continuous and outcome2 is binary
+-   A: Treat
+-   $M_1$: Med1
+-   $M_2$: Med2_1 and Med2_2
+-   $M_3$: Med3
+-   Y: Outcome1 is continuous and Outcome2 is binary
 
 ```{r}
 data("singTreat")
@@ -97,13 +99,13 @@ head(singTreat)
 
 The `pathsInfo` function takes the necessary input information and verifies whether the inputs meet the specified requirements.
 
--   Data and variables: The input data is specified using `data`, with the treatment variable designated as `A` and the outcome variable as `Y`. Covariates are provided as a vector in `cov_x` while mediators are supplied as an ordered list in `M.list`. Users can reference mediators using indices such as $M_1, \cdots, M_k$ or input them directly in the specified order `M.list=list("med1", c('med2_1', 'med2_2'), 'med3')`. High-dimensional mediators should be represented within a vector.
+-   Data and variables: The input data is specified using `data`, with the treatment variable designated as `A` and the outcome variable as `Y`. Covariates are provided as a vector in `cov_x` while mediators are supplied as an ordered list in `M.list`. Users can reference mediators using indices such as $M_1, \cdots, M_k$ or input them directly in the specified order `M.list=list("Med1", c('Med2_1', 'Med2_2'), 'Med3')`. High-dimensional mediators should be represented within a vector.
 -   Estimation Approach: estimation = "EIF", "G" or "IPW" for efficient influence function estimator, plug-in G computation estimator and IPW estimator.
 -   Model methods: Input the model.propensity for IPW; model.outcome for plug-in G computation; model.propensity and model.outcome for EIF.
 
 ```{r}
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                     estimation = "EIF",
                     model.outcome = ~SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian()),
                     model.propensity = ~ bart(verbose = FALSE, ndpost = 200)
@@ -115,8 +117,8 @@ For `model.outcome` and `model.propensity` methods, you can input either a singl
 For the propensity models, models are specified in the following order: - `bart(verbose = FALSE, ndpost = 200)` for $P(A|X)$, - `glm(family = binomial())` for $P(A|X, M_1)$, - `SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian())` for $P(A|X, M_1, M_2)$, - `glm(family = binomial())` for $P(A|X, M_1, M_2, M_3)$.
 
 ```{r}
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                     estimation = "EIF",
                     model.outcome = ~ SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian()),
                     model.propensity = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
@@ -129,13 +131,13 @@ EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X
 To specify the formula in a glm model, use the `formula` argument within the glm function. This allows you to define the relationship between the outcome and predictor variables clearly.
 
 ```{r}
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                     estimation = "EIF",
-                    model.outcome = list(cov_x = ~ glm(formula = outcome1 ~X1*X2 ,family = gaussian()),
-                                            M1 = ~ glm(formula = outcome1 ~med1+X1*X2, family = gaussian()),
-                                            M2 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+X1*X2, family = gaussian()),
-                                            M3 = ~ glm(formula = outcome1 ~med1+med2_1*med2_1+med3+X1*X2, family = gaussian())),
+                    model.outcome = list(cov_x = ~ glm(formula = Outcome1 ~X1*X2 ,family = gaussian()),
+                                            M1 = ~ glm(formula = Outcome1 ~Med1+X1*X2, family = gaussian()),
+                                            M2 = ~ glm(formula = Outcome1 ~Med1+Med2_1*Med2_1+X1*X2, family = gaussian()),
+                                            M3 = ~ glm(formula = Outcome1 ~Med1+Med2_1*Med2_1+Med3+X1*X2, family = gaussian())),
                     model.propensity = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 ```
@@ -145,8 +147,8 @@ The `model.iter` parameter is set to `NULL` by default. In this case, the iterat
 ## 1.2 `pathsEffect`: PSEs through each mediator
 
 ```{r}
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2'), M3 = 'med3'),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                     estimation = "EIF",
                     model.outcome = ~ glm(family = gaussian()),
                     model.propensity = ~ glm(family = binomial())
@@ -245,13 +247,13 @@ This can be represented in matrix form, where rows represent treatments and colu
 
 We provide data `multiTreat` for 3 treatments with 6 ordered mediators, following the sequence: $A_1 \rightarrow A_2 \rightarrow M_1 \rightarrow M_2 \rightarrow M_3 \rightarrow A_3 \rightarrow M_4 \rightarrow M_5 \rightarrow M_6 \rightarrow Y$.
 
--   A: t1, t2, t3
--   $M_1$: m1
--   $M_2$: m2
--   $M_3$: m3
--   $M_4$: m4
--   $M_5$: m5
--   $M_6$: m6
+-   A: T1, T2, T3
+-   $M_1$: M1
+-   $M_2$: M2
+-   $M_3$: M3
+-   $M_4$: M4
+-   $M_5$: M5
+-   $M_6$: M6
 -   Y: continuous Y
 
 ```{r}
@@ -264,15 +266,15 @@ The `pathsInfo` function operates the same way as in the single treatment case, 
 ```{r}
 mfit<- pathsInfo(data = multiTreat,
                 Y = "Y",
-                A = c("t1","t2","t3"),
+                A = c("T1","T2","T3"),
                 cov_x = "X",
                 M.list = list(
-                  M1 = 'm1',
-                  M2 = 'm2',
-                  M3 = 'm3',
-                  M4 = 'm4',
-                  M5 = 'm5',
-                  M6 = 'm6'
+                  M1 = 'M1',
+                  M2 = 'M2',
+                  M3 = 'M3',
+                  M4 = 'M4',
+                  M5 = 'M5',
+                  M6 = 'M6'
                 ),
                 estimation = "EIF",
                 model.propensity =list( ~  glm(family = binomial())),

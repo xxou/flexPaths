@@ -28,6 +28,10 @@ effects** (PSEs) in mediation analysis with
 treatment or multiple binary treatments</span>. It provides robust
 estimators based on influence function theory.
 
+The input data must be in **wide format**, with one row per individual.
+Treatments and mediators measured at different times are stored in separate
+columns.
+
 If you find this package useful, please cite [this
 paper](https://arxiv.org/abs/2610.34349):
 
@@ -57,8 +61,8 @@ Primary advantages of the package include:
   effect by comparing two potential outcome.
 
 - **Flexible models**: The package supports model fitting using
-  `glm/lm`, `glmer/lmer` in package `lme4`, `bart` in package `dbarts`,
-  `SuperLearner` in package `SuperLearner` now. Users can also integrate
+  `glm/lm`, `bart` in package `dbarts`, and `SuperLearner` in package
+  `SuperLearner`. Users can also integrate
   new models for estimation by modifying the `fl_model_template.R`.
 
 - **Flexible estimators**: This package includes three
@@ -144,14 +148,14 @@ effect. Therefore, these proportions are not analogous to the
 ``` r
 data("singTreat")
 head(singTreat)
-##   treat          X1          X2       med1     med2_1     med2_2        med3
+##   Treat          X1          X2       Med1     Med2_1     Med2_2        Med3
 ## 1     1 -0.56047565 -0.99579872 -0.2909027  1.4214143  0.9080483 -0.48342238
 ## 2     0 -0.23017749 -1.03995504  0.5282772 -1.6131178 -0.6618017 -1.85925365
 ## 3     1  1.55870831 -0.01798024  0.1072271 -1.5679208  2.0982984 -0.53101464
 ## 4     0  0.07050839 -0.13217513 -0.5198824 -0.4209952 -1.0630016  0.46861537
 ## 5     1  0.12928774 -2.54934277  1.3002422  0.2256734  1.3468199  0.01871409
 ## 6     1  1.71506499  1.04057346  0.3673916  0.5568637  2.1457944  2.10776412
-##     outcome1 outcome2
+##     Outcome1 Outcome2
 ## 1  1.3885202        1
 ## 2 -0.7139441        1
 ## 3  1.8068598        0
@@ -159,8 +163,8 @@ head(singTreat)
 ## 5 -0.3632091        1
 ## 6  2.1553060        1
 
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2')),
                     estimation = "EIF",
                     model.outcome = ~ SuperLearner(SL.library = c('SL.glm','SL.mean'),family = gaussian()),
                     model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
@@ -381,14 +385,14 @@ scenarios; however, it may require more processing time compared to
 ``` r
 data("multiTreat")
 head(multiTreat)
-##            X t1 t2 t3         m1         m2         m3          m4          m5
+##            X T1 T2 T3         M1         M2         M3          M4          M5
 ## 1  0.5110004  1  1  1  1.9973170  0.6401092  0.4582243 -0.27523814 -0.09387742
 ## 2  1.8079928  0  1  0  1.1450254  0.8124416  2.1308472  1.64126511  1.37869655
 ## 3 -1.7026150  0  0  1 -1.1258939  1.1395740  1.2105479  0.40682505  0.67242152
 ## 4  0.2874488  0  0  1  0.1496110  0.2528034 -1.0118998  0.25536960  0.91400475
 ## 5 -0.2691142  0  1  0 -0.4372909 -0.9858409  0.0244613  0.53140872  0.35057702
 ## 6 -0.3795247  0  1  1  0.1966683  0.6989559  1.0743453  0.01092031  1.57590275
-##            m6          Y
+##            M6          Y
 ## 1 -0.07222626  0.8100211
 ## 2  3.74522822  9.7240020
 ## 3 -0.77182524 -0.7412953
@@ -398,11 +402,11 @@ head(multiTreat)
 
 mfit<- pathsInfo(data = multiTreat,
                  Y = "Y",
-                 A = c("t1","t2"),
+                 A = c("T1","T2"),
                  cov_x = "X",
                  M.list = list(
-                   M1 = 'm1',
-                   M2 = 'm2'
+                   M1 = 'M1',
+                   M2 = 'M2'
                  ),
                  estimation = "EIF",
                  model.treatment =list(~ glm(family = binomial())),
@@ -469,8 +473,8 @@ For the propensity models, models are specified in the following order:
   for $P(A|X, M_1, M_2)$,
 
 ``` r
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2')),
                     estimation = "EIF",
                     model.outcome = ~ SuperLearner(SL.library = c('SL.randomForest','SL.xgboost'),family = gaussian()),
                     model.treatment = list(cov_x = ~ bart(verbose = FALSE, ndpost = 200),
@@ -489,12 +493,12 @@ the glm function. This allows you to define the relationship between the
 outcome and predictor variables clearly.
 
 ``` r
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2')),
                     estimation = "EIF",
-                    model.outcome = list(cov_x = ~ glm(formula = outcome1 ~treat+ X1*X2 ,family = gaussian()),
-                                            M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian()),
-                                            M2 = ~ glm(formula = outcome1 ~treat+med1+med2_1*med2_1+X1*X2, family = gaussian())),
+                    model.outcome = list(cov_x = ~ glm(formula = Outcome1 ~Treat+ X1*X2 ,family = gaussian()),
+                                            M1 = ~ glm(formula = Outcome1 ~Treat+Med1+X1*X2, family = gaussian()),
+                                            M2 = ~ glm(formula = Outcome1 ~Treat+Med1+Med2_1*Med2_1+X1*X2, family = gaussian())),
                     model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200))
 )
 ## [34mNo missing values found. Final sample size: 1000.[39m
@@ -512,13 +516,13 @@ provide either a single formula or a list of formulas ($k-1$) for
 $E(\cdot| A,X), E(\cdot| A,X, M_1), E(\cdot|A, X, M_1,\cdots,M_{k-1})$.
 
 ``` r
-EIF_fit <- pathsInfo(data = singTreat, A = "treat", Y = "outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "med1", M2 = c('med2_1', 'med2_2')),
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+                    M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2')),
                     estimation = "EIF",
                     model.outcome = list( ~ bart(verbose = FALSE, ndpost = 200)),
                     model.treatment = list( ~ bart(verbose = FALSE, ndpost = 200)),
-                    model.iter = list(cov_x = ~ glm(formula = outcome1 ~treat+X1*X2 ,family = gaussian()),
-                                         M1 = ~ glm(formula = outcome1 ~treat+med1+X1*X2, family = gaussian())
+                    model.iter = list(cov_x = ~ glm(formula = Outcome1 ~Treat+X1*X2 ,family = gaussian()),
+                                         M1 = ~ glm(formula = Outcome1 ~Treat+Med1+X1*X2, family = gaussian())
                                      )
 )
 ## [34mNo missing values found. Final sample size: 1000.[39m
@@ -537,11 +541,11 @@ models.
 ``` r
 mfit<- pathsInfo(data = multiTreat,
                  Y = "Y",
-                 A = c("t1","t2"),
+                 A = c("T1","T2"),
                  cov_x = "X",
                  M.list = list(
-                   M1 = 'm1',
-                   M2 = 'm2'
+                   M1 = 'M1',
+                   M2 = 'M2'
                  ),
                  estimation = "EIF",
                  model.treatment =list(~ glm(formula = Y~ . + I(X^2),family = binomial())),
@@ -571,6 +575,4 @@ more models.
 | `stats` | `lm` | No additional arguments required. |
 | `stats` | `glm` | `family`: Specifies the error distribution and link function. |
 | `dbarts` | `bart` | No additional arguments required. |
-| `SuperLearner` | `SuperLearner` | \- `SL.library`: A list of learner algorithms available in `SuperLearner` (ensure the necessary packages are loaded); <br> - `family`: Defines the outcome type (e.g., binomial, gaussian); <br> - For clustered data, specify `id = 'ID'` (ensure “ID” is included in `cov_x`). |
-| `lme4` | `lmer` | to be added |
-| `lme4` | `glmer` | to be added |
+| `SuperLearner` | `SuperLearner` | \- `SL.library`: A list of learner algorithms available in `SuperLearner` (ensure the necessary packages are loaded); <br> - `family`: Defines the outcome type (e.g., binomial, gaussian). |
