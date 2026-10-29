@@ -39,5 +39,7 @@ Suggests:
     knitr,
     randomForest,
     rmarkdown,
+    testthat (>= 3.0.0),
     xgboost
+Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0

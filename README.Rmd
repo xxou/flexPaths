@@ -46,6 +46,14 @@ Primary advantages of the package include:
 
 Usage instructions and examples are provided below.
 
+`pathsInfo()` accepts each treatment column as numeric 0/1 or as a factor with
+exactly two non-missing levels. It maps the first factor level to 0 and the second
+to 1, respecting the order in `levels()` (including ordered factors). Set the
+factor levels before calling `pathsInfo()` to choose the reference level. Its
+returned `$data` contains numeric 0/1 treatment columns; use these codes for
+`active` in subsequent analyses. Rows containing missing values are dropped;
+the original input data frame is not modified.
+
 # 0. Installation:
 
 ```{r, eval=FALSE}

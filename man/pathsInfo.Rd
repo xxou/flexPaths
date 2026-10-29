@@ -18,13 +18,18 @@ pathsInfo(
 }
 \arguments{
 \item{A}{A character string or a vector of character strings representing the name(s) of one or more treatments.
-The treatments should be binary variables taking values of either 0 or 1.}
+Each treatment must be a numeric vector containing only 0 and 1 (apart from missing values),
+or a factor with exactly two non-missing levels, including an ordered factor.
+Factors are encoded using their existing level order: \code{levels(x)[1]} becomes 0
+and \code{levels(x)[2]} becomes 1. Set \code{levels} or use \code{relevel} before calling
+this function to choose the reference level. All treatment columns in the returned
+\code{data} are converted to numeric 0/1; subsequent \code{active} values use this encoding.}
 
 \item{Y}{A character string indicating the name of the outcome variable. Y should be numeric variable.}
 
 \item{cov_x}{A vector of character strings indicating the name(s) of covariates.}
 
-\item{data}{A wide-format data frame with one row per individual. Treatments and mediators measured at different times must be stored in separate columns. The data are checked for missing values and validated for variable requirements. Rows with missing values will be dropped, and a summary of dropped rows and final sample size will be provided.}
+\item{data}{A wide-format data frame with one row per individual. Treatments and mediators measured at different times must be stored in separate columns. Treatment types, levels, and non-missing values are checked before rows with missing values are dropped. A summary of dropped rows and final sample size will be provided. The input data frame is not modified.}
 
 \item{M.list}{A list of \eqn{K} mediators, where \eqn{K} is the number of mediators. Each mediator can be multivariate.
 Use the form \code{list(M1 = c("mediator1_1", "mediator1_2"), M2 = c("mediator2"), ... )}, with \code{M_i} to index the order of mediators.
@@ -55,7 +60,7 @@ Alternatively, you can list them in order using \code{list(c("mediator1_1", "med
 \value{
 An object of class \code{pathsInfo}, which is a list containing the following elements:
 \describe{
-\item{\code{data}}{The data frame used for the analysis.}
+\item{\code{data}}{The data frame used for the analysis, with missing rows removed and all treatment columns encoded as numeric 0/1. Other columns retain their original types and values for the retained rows.}
 \item{\code{A}}{A vector or list representing the treatment(s) in the causal analysis.}
 \item{\code{Y}}{A character representing the outcome variable.}
 \item{\code{cov_x}}{A vector of covariates to be adjusted for in the models.}

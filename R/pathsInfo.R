@@ -4,7 +4,12 @@
 #' It prepares the data, estimation methods, and models required for further effect calculations.
 #'
 #' @param A A character string or a vector of character strings representing the name(s) of one or more treatments.
-#' The treatments should be binary variables taking values of either 0 or 1.
+#' Each treatment must be a numeric vector containing only 0 and 1 (apart from missing values),
+#' or a factor with exactly two non-missing levels, including an ordered factor.
+#' Factors are encoded using their existing level order: \code{levels(x)[1]} becomes 0
+#' and \code{levels(x)[2]} becomes 1. Set \code{levels} or use \code{relevel} before calling
+#' this function to choose the reference level. All treatment columns in the returned
+#' \code{data} are converted to numeric 0/1; subsequent \code{active} values use this encoding.
 #' @param Y A character string indicating the name of the outcome variable. Y should be numeric variable.
 #' @param cov_x A vector of character strings indicating the name(s) of covariates.
 #' @param M.list A list of \eqn{K} mediators, where \eqn{K} is the number of mediators. Each mediator can be multivariate.
@@ -28,11 +33,11 @@
 #'   \item You can input a single formula or a list containing one formula, which will be applied to all iterative regression models.
 #'   \item Alternatively, input \eqn{K} models for \eqn{(A,X)}, \eqn{(M_1, A,X)}, ..., \eqn{(\overline{M}_{k-1}, A,X)}, which will be used as the predictors for iterative regression models.
 #' }
-#' @param data A wide-format data frame with one row per individual. Treatments and mediators measured at different times must be stored in separate columns. The data are checked for missing values and validated for variable requirements. Rows with missing values will be dropped, and a summary of dropped rows and final sample size will be provided.
+#' @param data A wide-format data frame with one row per individual. Treatments and mediators measured at different times must be stored in separate columns. Treatment types, levels, and non-missing values are checked before rows with missing values are dropped. A summary of dropped rows and final sample size will be provided. The input data frame is not modified.
 #'
 #' @return An object of class \code{pathsInfo}, which is a list containing the following elements:
 #' \describe{
-#'   \item{\code{data}}{The data frame used for the analysis.}
+#'   \item{\code{data}}{The data frame used for the analysis, with missing rows removed and all treatment columns encoded as numeric 0/1. Other columns retain their original types and values for the retained rows.}
 #'   \item{\code{A}}{A vector or list representing the treatment(s) in the causal analysis.}
 #'   \item{\code{Y}}{A character representing the outcome variable.}
 #'   \item{\code{cov_x}}{A vector of covariates to be adjusted for in the models.}
@@ -62,21 +67,37 @@ pathsInfo<-function(
     ){
 
   # 1. check inputs correct, missing input; correct input type -----------------
+  if (!is.data.frame(data)) {stop("'data' must be a data.frame.")}
+
+  if (!is.character(A) || length(A) == 0L) {stop("'A' must be a character string or a non-empty vector of character strings.")}
+  if (!all(A %in% names(data))) {stop("All elements of 'A' must exist in the data.")}
+
+  # Validate the original treatment columns, including rows with missing covariates.
+  # Keep declared factor levels so the encoding does not change after row removal.
+  for (a in A) {
+    treatment <- data[[a]]
+    if (is.factor(treatment) && is.null(dim(treatment))) {
+      if (nlevels(treatment) != 2L || anyNA(levels(treatment))) {
+        stop(sprintf("Treatment '%s' must be a factor with exactly two non-missing levels.", a))
+      }
+    } else if (is.numeric(treatment) && !is.complex(treatment) && is.null(dim(treatment))) {
+      if (any(!is.na(treatment) & !(treatment %in% c(0, 1)))) {
+        stop(sprintf("Numeric treatment '%s' must contain only 0 and 1 (apart from missing values).", a))
+      }
+    } else {
+      stop(sprintf("Treatment '%s' must be numeric 0/1 or a factor with exactly two non-missing levels.", a))
+    }
+  }
+
   na_rows <- which(rowSums(is.na(data)) > 0)
   # Report and drop rows with NA
   if (length(na_rows) > 0) {
-    cat("\033[34m", sprintf("Dropping %d rows due to missing values. Final sample size: %d.",
-                            length(na_rows), nrow(data) - length(na_rows)), "\033[39m", sep = "")
-    data <- data[-na_rows, ]
+    message(sprintf("Dropping %d rows due to missing values. Final sample size: %d.",
+                    length(na_rows), nrow(data) - length(na_rows)))
+    data <- data[-na_rows, , drop = FALSE]
   } else {
-    cat("\033[34m", sprintf("No missing values found. Final sample size: %d.", nrow(data)), "\033[39m", sep = "")
+    message(sprintf("No missing values found. Final sample size: %d.", nrow(data)))
   }
- cat("\n")
-
-  if (!is.data.frame(data)) {stop("'data' must be a data.frame.")}
-
-  if (!is.character(A)) {stop("'A' must be a character string or a vector of character strings.")}
-  if (!all(A %in% names(data))) {stop("All elements of 'A' must exist in the data.")}
 
   if (!is.character(Y) || length(Y) != 1) {stop("'Y' must be a single character string.")}
   if (!(Y %in% names(data))) { stop("'Y' must exist in the data.")}
@@ -93,6 +114,10 @@ pathsInfo<-function(
 
   if (!estimation %in% c("EIF", "IPW", "G")) {stop("'estimation' must be one of 'EIF', 'IPW', or 'G'.")}
 
+  for (a in A) {
+    treatment <- data[[a]]
+    data[[a]] <- if (is.factor(treatment)) as.numeric(treatment) - 1 else as.numeric(treatment)
+  }
 
 
   # 2. reorder M.list, model.list --------------------------------
@@ -169,13 +194,13 @@ pathsInfo<-function(
 
   if(estimation == "G"){
     if(!is.null(model.treatment)){
-      cat("model.treatment will not be used in the plug-in G computation estimation\n")}
+      message("model.treatment will not be used in the plug-in G computation estimation")}
     if(is.null(Omodel.lists)|is.null(Imodel.lists)){
       stop("Please input 1 or (k+1) model.outcome, k is the number of mediators \n Please input NULL or 1 or k model.iter")}}
 
   if(estimation == "IPW"){
     if(!is.null(model.outcome)){
-      cat("model.outcome will not be used in the IPW estimation\n")}
+      message("model.outcome will not be used in the IPW estimation")}
     if(is.null(Pmodel.lists)){
       stop("Please input 1 or (k+1) model.treatment, k is the number of mediators ")}}
 
@@ -204,11 +229,13 @@ pathsInfo<-function(
     Imodel.source = Imodel.source
   )
 
-  # Return a message confirming that the checks passed (optional)
-  cat("\033[34m", "\nInput checks passed successfully.", sep = "")
+  # Report successful validation.
+  message("Input checks passed successfully.")
 
   if(estimation != "EIF"){
-  cat("\033[31m", "\nReminder: \nDo not rely on naive standard errors and p-values when using G or IPW. \nPlease add the bootstrapping argument in effect functions then.\033[39m",  sep = "")
+    message("Reminder:\n",
+            "Do not rely on naive standard errors and p-values when using G or IPW.\n",
+            "Please add the bootstrapping argument in effect functions then.")
   }
 
 
