@@ -564,15 +564,18 @@ more models.
 
 ## 3.2 Summary for models and the required arguments
 
-- The usage of arguments follows their implementation in the respective
-  original packages.
-- When specifying arguments, ensure that both the argument name and
-  value are provided. For example, rather than using `glm(binomial())`,
-  explicitly state `glm(family = binomial())` with `family =`.
+Specify models in `pathsInfo()` using expressions such as
+`~ glm(family = binomial())` or `~ lm()`. flexPaths supplies the variables and
+training data automatically. Use the original function names without the `fl_`
+prefix, and name every supplied argument.
 
-| Package | Function | Required Arguments |
-|----|----|----|
-| `stats` | `lm` | No additional arguments required. |
-| `stats` | `glm` | `family`: Specifies the error distribution and link function. |
-| `dbarts` | `bart` | No additional arguments required. |
-| `SuperLearner` | `SuperLearner` | \- `SL.library`: A list of learner algorithms available in `SuperLearner` (ensure the necessary packages are loaded); <br> - `family`: Defines the outcome type (e.g., binomial, gaussian). |
+| Package | Function | Arguments to specify |
+|---------|----------|----------------------|
+| `stats` | `lm` | None required. |
+| `stats` | `glm` | An appropriate `family`, such as `binomial()` for binary treatments; default: `gaussian()`. |
+| `dbarts` | `bart` | None required. Tuning options such as `ntree` and `ndpost` are optional. |
+| `SuperLearner` | `SuperLearner` | `SL.library`, such as `c("SL.glm", "SL.mean")`, and an appropriate `family` (default: `gaussian()`). |
+
+Other model options follow the original fitting functions. For `lm` and `glm`,
+a named, two-sided `formula` can optionally specify interactions or transformations.
+See `?fl_glm`, `?fl_lm`, `?fl_bart`, or `?fl_SuperLearner` for the wrapper arguments.

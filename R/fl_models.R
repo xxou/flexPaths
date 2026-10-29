@@ -1,10 +1,35 @@
-
-
-## remember to write a note for any input in the model, please point the args name
-# of the orginial model for run
-
-
 #  SL ------------
+#' Built-in Model Wrappers
+#'
+#' Wrappers for linear models, generalized linear models, BART, and
+#' Super Learner. Usually called internally by flexPaths using the model
+#' specifications supplied to [pathsInfo()].
+#'
+#' @param data A wide-format data frame with one row per individual.
+#' @param X Predictor column names in `data`.
+#' @param Y Response column name in `data`.
+#' @param fl_call An unevaluated model call, for example
+#'   `quote(glm(family = binomial()))`. All arguments in the call must be named.
+#' @param object A fitted object returned by the corresponding wrapper.
+#' @param newdata A data frame of predictors for prediction.
+#'
+#' @details
+#' The wrappers supply training data, predictors, and the response automatically.
+#' For `lm` and `glm`, an additive formula is used unless a named, two-sided
+#' `formula` is supplied; its response is replaced by `Y`.
+#' For `bart`, `keeptrees = TRUE` is set for prediction.
+#' For `SuperLearner`, supply `SL.library` and an appropriate `family`;
+#' optional `id` is a column name included in `X`, and that column is excluded
+#' from the training predictors.
+#'
+#' @return A list with the corresponding `fl_*` class, containing `model`
+#'   (the fitted model) and `dataX` (the predictors selected by `X`).
+#'   `fl_SuperLearner()` also returns `coef` (the ensemble weights).
+#'   Prediction methods return predictions for `newdata`.
+#'
+#' @seealso [pathsInfo()], [stats::lm()], [stats::glm()], [dbarts::bart()],
+#'   [SuperLearner::SuperLearner()]
+#' @rdname fl_models
 #' @import stats
 #' @import SuperLearner
 #' @export
@@ -33,6 +58,7 @@ fl_SuperLearner <- function(data, X = c(""), Y = " ", fl_call) {
 }
 
 
+#' @rdname fl_models
 #' @export
 predict.fl_SuperLearner <- function(object, newdata) {
   # order of X!!!!!
@@ -48,6 +74,7 @@ predict.fl_SuperLearner <- function(object, newdata) {
 # just input whole data, it will directly get the predictors.name
 
 # fl_bart ------------
+#' @rdname fl_models
 #' @import stats  dbarts
 #' @export
 fl_bart <- function(data, X = c(""), Y = " ", fl_call) {
@@ -69,6 +96,7 @@ fl_bart <- function(data, X = c(""), Y = " ", fl_call) {
 
 
 
+#' @rdname fl_models
 #' @export
 predict.fl_bart <- function(object, newdata) {
   # Extract the fitted model object from the input
@@ -82,6 +110,7 @@ predict.fl_bart <- function(object, newdata) {
 
 
 # glm ------------
+#' @rdname fl_models
 #' @import stats
 #' @export
 #'
@@ -114,6 +143,7 @@ fl_glm <- function(data, X = c(""), Y = " ", fl_call) {
 
 
 # Define the prediction function for fl_glm
+#' @rdname fl_models
 #' @export
 predict.fl_glm <- function(object, newdata) {
   # Extract the fitted model object from the input
@@ -128,6 +158,7 @@ predict.fl_glm <- function(object, newdata) {
 
 
 # lm ------------
+#' @rdname fl_models
 #' @import stats
 #' @export
 #'
@@ -160,6 +191,7 @@ fl_lm <- function(data, X = c(""), Y = " ", fl_call) {
 
 
 # Define the prediction function for fl_lm
+#' @rdname fl_models
 #' @export
 predict.fl_lm <- function(object, newdata) {
   # Extract the fitted model object from the input
