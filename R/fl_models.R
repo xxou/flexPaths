@@ -12,6 +12,7 @@
 #'   `quote(glm(family = binomial()))`. All arguments in the call must be named.
 #' @param object A fitted object returned by the corresponding wrapper.
 #' @param newdata A data frame of predictors for prediction.
+#' @param ... Additional arguments accepted for S3 compatibility; currently unused.
 #'
 #' @details
 #' The wrappers supply training data, predictors, and the response automatically.
@@ -60,7 +61,7 @@ fl_SuperLearner <- function(data, X = c(""), Y = " ", fl_call) {
 
 #' @rdname fl_models
 #' @export
-predict.fl_SuperLearner <- function(object, newdata) {
+predict.fl_SuperLearner <- function(object, newdata, ...) {
   # order of X!!!!!
   # Extract the fitted model object from the input
   model <- object$model
@@ -98,7 +99,7 @@ fl_bart <- function(data, X = c(""), Y = " ", fl_call) {
 
 #' @rdname fl_models
 #' @export
-predict.fl_bart <- function(object, newdata) {
+predict.fl_bart <- function(object, newdata, ...) {
   # Extract the fitted model object from the input
   model <- object$model
 
@@ -145,7 +146,7 @@ fl_glm <- function(data, X = c(""), Y = " ", fl_call) {
 # Define the prediction function for fl_glm
 #' @rdname fl_models
 #' @export
-predict.fl_glm <- function(object, newdata) {
+predict.fl_glm <- function(object, newdata, ...) {
   # Extract the fitted model object from the input
   model <- object$model
 
@@ -193,7 +194,7 @@ fl_lm <- function(data, X = c(""), Y = " ", fl_call) {
 # Define the prediction function for fl_lm
 #' @rdname fl_models
 #' @export
-predict.fl_lm <- function(object, newdata) {
+predict.fl_lm <- function(object, newdata, ...) {
   # Extract the fitted model object from the input
   model <- object$model
 

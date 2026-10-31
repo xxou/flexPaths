@@ -10,7 +10,7 @@ reorder_list <- function(x_list) {
     M_names <- names_list[grepl("^M\\d+$", names_list)]
 
     # Sort 'M' elements
-    sorted_M_names <- sort(M_names)
+    sorted_M_names <- M_names[order(as.numeric(sub("^M", "", M_names)))]
 
     # Combine in the desired order
     reordered_names <- c(cov_x_name, sorted_M_names)
@@ -232,7 +232,8 @@ one_boot.flexEffect <- function(data, pathsInfo, call_all, index_p1, index_p0){
   sim_p1 <- boot_sim[index_p1,]
   sim_p0 <- boot_sim[index_p0,]
 
-  out<- data.frame(active = paste(sim_p1$active, "vs" , sim_p0$active),
+  out<- data.frame(comparison_id = seq_along(index_p1),
+                   active = paste(sim_p1$active, "vs" , sim_p0$active),
                    value1 = sim_p1$value,
                    value0 = sim_p0$value)
   return(out)

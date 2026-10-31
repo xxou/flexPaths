@@ -4,10 +4,12 @@
 #' Users can specify different levels of each treatment for each mediator (M1 to Mk) and directly define the outcome (Y) to represent the potential outcome for a single path or several combined paths.
 #' The function supports various estimation methods, including EIF (Efficient Influence Function), IPW (Inverse Probability Weighting), and G-computation.
 #'
-#' @param data A data frame containing all the variables required for the analysis.
-#' @param pathsInfo An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models.
-#' @param active A list of vectors specifying the active values for each mediator (M1 to Mk) and the direct value setting for the outcome (Y).
-#' Each vector in the list corresponds to the setting of one treatment for the mediators. The order of treatments in the list should match the order of mediators.
+#' @param pathsInfo An object of class \code{pathsInfo}, returned by \code{pathsInfo()},
+#' containing the analysis settings and model specifications. The analysis data
+#' are taken from \code{pathsInfo$data}.
+#' @param active A list of numeric vectors, with one vector per treatment in the order of \code{pathsInfo$A}. Integer vectors are also accepted.
+#' Each vector must have length \code{length(pathsInfo$M.list) + 1}, with entries for mediator stages M1 to Mk followed by the outcome Y.
+#' Values must be 0 or 1. Use \code{NA} for mediator stages that occur before the corresponding treatment; \code{NaN} is not allowed.
 #'
 #' @return An object of class \code{mflexPotential}, which includes the following components:
 #' \describe{
@@ -39,6 +41,23 @@ mflexPotential <-  function(
   ## cov_x and mediators
   N = nrow(data)
   Km <- length(M.list)
+
+  if(!is.list(active) || !is.null(dim(active))){
+    stop("'active' must be a list of numeric vectors.")
+  }
+  if(length(active) != length(A)){
+    stop("The length of 'active' must equal the number of treatments.")
+  }
+  for(i in seq_along(active)){
+    a <- active[[i]]
+    if(length(a) != Km + 1){
+      stop("Each vector in 'active' must have length equal to the length of 'M.list' + 1.")
+    }
+    if(!is.numeric(a) || is.complex(a) || !is.null(dim(a)) ||
+       !all(a %in% c(0, 1, NA))){
+      stop(sprintf("'active[[%d]]' must be a numeric vector containing only 0, 1 or NA.", i))
+    }
+  }
 
   # combine mediators
   # mediators for model

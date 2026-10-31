@@ -50,7 +50,7 @@
 
 #' }
 #'
-#' @import stats purrr dplyr
+#' @import stats purrr
 #'
 #' @export
 #'

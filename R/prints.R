@@ -1,6 +1,6 @@
 
 #' @export
-print.pathsInfo <- function(x){
+print.pathsInfo <- function(x, ...){
   cat("\n")
   cat("Paths Parameters")
   cat("\n\n")

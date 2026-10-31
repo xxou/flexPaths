@@ -7,12 +7,12 @@
 flexPotential(pathsInfo, active)
 }
 \arguments{
-\item{pathsInfo}{An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models and data.}
+\item{pathsInfo}{An object of class \code{pathsInfo}, returned by \code{pathsInfo()},
+containing the analysis settings and model specifications. The analysis data
+are taken from \code{pathsInfo$data}.}
 
-\item{active}{A vector specifying the active values for each mediator (M1 to Mk) and the direct value setting for the outcome (Y) in order.
+\item{active}{A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order. Integer vectors are also accepted.
 The last value in the vector corresponds to the treatment value for Y. The length of this vector should be equal to the number of mediators plus one (for the direct effect on Y).}
-
-\item{data}{A data frame containing all the variables required for the analysis.}
 }
 \value{
 An object of class \code{flexPotential}, which includes the following components:

@@ -7,12 +7,13 @@
 mflexPotential(pathsInfo, active)
 }
 \arguments{
-\item{pathsInfo}{An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models.}
+\item{pathsInfo}{An object of class \code{pathsInfo}, returned by \code{pathsInfo()},
+containing the analysis settings and model specifications. The analysis data
+are taken from \code{pathsInfo$data}.}
 
-\item{active}{A list of vectors specifying the active values for each mediator (M1 to Mk) and the direct value setting for the outcome (Y).
-Each vector in the list corresponds to the setting of one treatment for the mediators. The order of treatments in the list should match the order of mediators.}
-
-\item{data}{A data frame containing all the variables required for the analysis.}
+\item{active}{A list of numeric vectors, with one vector per treatment in the order of \code{pathsInfo$A}. Integer vectors are also accepted.
+Each vector must have length \code{length(pathsInfo$M.list) + 1}, with entries for mediator stages M1 to Mk followed by the outcome Y.
+Values must be 0 or 1. Use \code{NA} for mediator stages that occur before the corresponding treatment; \code{NaN} is not allowed.}
 }
 \value{
 An object of class \code{mflexPotential}, which includes the following components:

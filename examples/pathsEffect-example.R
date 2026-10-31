@@ -20,11 +20,6 @@ results_refer0
 results_seq <- pathsEffect(pathsInfo = EIF_fit, decomposition = "sequential", scale = "diff", CI_level = 0.95)
 results_seq
 
-# bootstrap and parallel computation
-results_boot <- pathsEffect(pathsInfo = EIF_fit, decomposition = "sequential",
-                            scale = "diff", CI_level = 0.95, nboot = 10, m.cores = NULL)
-
-results_parallel <- pathsEffect(pathsInfo = EIF_fit, decomposition = "sequential",
-                                scale = "diff", CI_level = 0.95, nboot = 10, m.cores = 3)
+# For a small bootstrap example, see help("flexEffect").
 
 

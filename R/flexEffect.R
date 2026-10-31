@@ -22,8 +22,9 @@
 #' }
 #'
 #'
-#' @import stats purrr dplyr
+#' @import stats purrr
 #' @import SuperLearner dbarts
+#' @importFrom dplyr %>% arrange select mutate group_by summarise full_join join_by relocate
 #' @importFrom parallel mclapply detectCores
 #'
 #' @export
@@ -122,6 +123,8 @@ flexEffect<-function(
   # check_SuperLearner return warning
   if(!is.null(nboot)){
 
+  results$comparison_id <- seq_len(nrow(results))
+
   # aviod replicate calculation to save time
   call_p1 <- map(p1, ~.x$call)
   call_p0 <- map(p0, ~.x$call)
@@ -157,19 +160,24 @@ flexEffect<-function(
   results.combine <- map_dfr(boot.list, ~ .x , .id = "source")
   output<- results.combine %>%
     mutate(
-    #  scale = scale,
-      Effect = case_when(scale == "diff"~ (value1-value0),
-                         scale == "risk"~ (value1/value0),
-                         scale == "oddsratio"~ (value1/(1-value1))/(value0/(1-value0)))
+      Effect = if(scale == "diff"){
+        value1-value0
+      }else if(scale == "risk"){
+        value1/value0
+      }else if(scale == "oddsratio"){
+        (value1/(1-value1))/(value0/(1-value0))
+      }
     ) %>%
-    group_by(active) %>%
+    group_by(comparison_id) %>%
     summarise(
       boot.SE = sd(Effect),
       boot.CI.lower = quantile(Effect, probs = (1-CI_level)/2),
       boot.CI.upper = quantile(Effect, probs = 1-(1-CI_level)/2)) %>%
-    full_join(select(results, active, Effect), by = join_by(active)) %>%
+    full_join(select(results, comparison_id, active, Effect), by = join_by(comparison_id)) %>%
+    arrange(active) %>%
+    select(-comparison_id) %>%
     mutate(nboot = nboot) %>%
-    relocate(Effect, .after = active) %>% as.data.frame()
+    relocate(active, Effect) %>% as.data.frame()
 
   if(scale =="diff"){output$boot.P.value = round(2*(1-pnorm(abs(output$Effect)/output$boot.SE)),4)}
 

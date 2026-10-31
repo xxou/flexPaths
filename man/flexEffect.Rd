@@ -52,7 +52,8 @@ The function also supports bootstrapping for estimating confidence intervals and
 ###########################
 data("singTreat")
 # input information for PSE
-EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
+EIF_fit <- pathsInfo(data = singTreat[1:200, ], A = "Treat", Y = "Outcome1",
+                     cov_x = c("X1", "X2"),
                      M.list = list(M1 = "Med1", M2 = c('Med2_1', 'Med2_2'), M3 = 'Med3'),
                      estimation = "EIF",
                      model.outcome = ~ glm(family = gaussian()),
@@ -65,9 +66,11 @@ potential_outcome1 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 1, 1))
 potential_outcome2 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 0, 1))
 potential_outcome3 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 0, 0))
 
-# one comparison
+# one comparison; 10 bootstrap samples are used only to illustrate the syntax
+set.seed(123)
 flex_results1 <- flexEffect(p1 = potential_outcome1,
-                            p0 = potential_outcome0, scale = "diff", CI_level = 0.95,nboot = 100, m.cores = 3)
+                            p0 = potential_outcome0, scale = "diff",
+                            CI_level = 0.95, nboot = 10, m.cores = NULL)
 flex_results1
 
 # multiple comparisons
@@ -75,7 +78,7 @@ flex_results1
 # PSE: potential_outcome2 - potential_outcome3
 flex_results <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
                            p0 = list(potential_outcome0, potential_outcome3), scale = "diff",
-                           CI_level = 0.95,nboot = 100, m.cores = 4)
+                           CI_level = 0.95)
 flex_results
 
 ###########################
@@ -108,5 +111,5 @@ mp2<-mflexPotential(active = list(a1=c(0,0,0,0,1,0,0),
                                   a2=c(0,0,0,1,1,0,0),
                                   a3=c(NA,NA,NA,1,0,0,0)),mfit)
 
-flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95, nboot =100 , m.cores = 6)
+flexEffect(p1 = mp1, p0 = mp2, scale = "diff", CI_level = 0.95)
 }

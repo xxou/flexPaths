@@ -244,7 +244,7 @@ refer0_effect <- function(
 #   sequential decomposition
 ##################################
 
-#' @import stats purrr dplyr
+#' @import stats purrr
 #' @import SuperLearner dbarts
 sequential_effect <-  function(
     data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,

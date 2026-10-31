@@ -4,9 +4,10 @@
 #' Users can specify different levels of the treatment for each mediator (M1, M2, ..., Mk) and directly define the outcome (Y) to represent the potential outcome for a specific path or a combination of paths.
 #' The function supports various estimation methods, including EIF (Efficient Influence Function), IPW (Inverse Probability Weighting), and G-computation.
 #'
-#' @param data A data frame containing all the variables required for the analysis.
-#' @param pathsInfo An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models and data.
-#' @param active A vector specifying the active values for each mediator (M1 to Mk) and the direct value setting for the outcome (Y) in order.
+#' @param pathsInfo An object of class \code{pathsInfo}, returned by \code{pathsInfo()},
+#' containing the analysis settings and model specifications. The analysis data
+#' are taken from \code{pathsInfo$data}.
+#' @param active A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order. Integer vectors are also accepted.
 #' The last value in the vector corresponds to the treatment value for Y. The length of this vector should be equal to the number of mediators plus one (for the direct effect on Y).
 #'
 #' @return An object of class \code{flexPotential}, which includes the following components:
@@ -44,6 +45,10 @@ flexPotential <-  function(
   if((Km + 1)!=length(active)){
     stop("Error: The length of 'active' must be equal to the length of 'M.list' + 1.
          Please ensure both inputs are of the same length.")
+  }
+  if(!is.numeric(active) || is.complex(active) || !is.null(dim(active)) ||
+     anyNA(active) || !all(active %in% c(0, 1))){
+    stop("'active' must be a numeric vector containing only 0 and 1, without missing values.")
   }
 
   # combine the same value of path

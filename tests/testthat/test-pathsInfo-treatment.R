@@ -13,12 +13,12 @@ treatment_data <- function(multiple = FALSE) {
 }
 
 treatment_info <- function(data, A = "A", estimation = "G") {
-  invisible(capture.output(info <- pathsInfo(
+  info <- suppressMessages(pathsInfo(
     A = A, Y = "Y", cov_x = "X", data = data,
     M.list = list(M1 = "M1", M2 = "M2"), estimation = estimation,
     model.treatment = if (estimation != "G") ~glm(family = binomial()),
     model.outcome = if (estimation != "IPW") ~lm()
-  )))
+  ))
   info
 }
 

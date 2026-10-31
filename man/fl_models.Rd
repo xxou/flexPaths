@@ -13,19 +13,19 @@
 \usage{
 fl_SuperLearner(data, X = c(""), Y = " ", fl_call)
 
-\method{predict}{fl_SuperLearner}(object, newdata)
+\method{predict}{fl_SuperLearner}(object, newdata, ...)
 
 fl_bart(data, X = c(""), Y = " ", fl_call)
 
-\method{predict}{fl_bart}(object, newdata)
+\method{predict}{fl_bart}(object, newdata, ...)
 
 fl_glm(data, X = c(""), Y = " ", fl_call)
 
-\method{predict}{fl_glm}(object, newdata)
+\method{predict}{fl_glm}(object, newdata, ...)
 
 fl_lm(data, X = c(""), Y = " ", fl_call)
 
-\method{predict}{fl_lm}(object, newdata)
+\method{predict}{fl_lm}(object, newdata, ...)
 }
 \arguments{
 \item{data}{A wide-format data frame with one row per individual.}
@@ -40,6 +40,8 @@ fl_lm(data, X = c(""), Y = " ", fl_call)
 \item{object}{A fitted object returned by the corresponding wrapper.}
 
 \item{newdata}{A data frame of predictors for prediction.}
+
+\item{...}{Additional arguments accepted for S3 compatibility; currently unused.}
 }
 \value{
 A list with the corresponding \verb{fl_*} class, containing \code{model}
