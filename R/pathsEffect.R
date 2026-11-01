@@ -53,7 +53,12 @@ pathsEffect<-function(
     CI_level = 0.95 , nboot = NULL, m.cores = NULL){
   # evironment
   Call <- match.call()
+  # Variables populated by list2env().
+  data <- type <- A <- Y <- cov_x <- M.list <- estimation <- NULL
+  Pmodel.lists <- Omodel.lists <- Imodel.lists <- Imodel.source <- NULL
   list2env(pathsInfo, envir = environment())
+  # Column names used in dplyr expressions.
+  Path <- Effect <- NULL
 
   if(type != "single treatment"){
     stop("This function is only used for single treatment")

@@ -8,15 +8,14 @@ This is the first submission of flexPaths to CRAN.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 4 notes
+0 errors | 0 warnings | 3 notes
 
-Checked with `R CMD check --as-cran` on 2026-11-01. All 497 test assertions,
+Checked with `R CMD check --as-cran` on 2026-11-01. All 533 test assertions,
 examples and the PDF manual check passed.
 
-After that check, `pathsInfo()` was updated to require at least one covariate.
-All 533 local test assertions passed; a full check of this update is pending.
+The check includes the covariate input requirement and static code fixes.
+Checking R code for possible problems is now OK.
 
 * New submission: this is the first submission of flexPaths to CRAN.
-* Three existing notes remain pending: static code checks, Rd example line
-  widths, and HTML validation skipped because the local HTML Tidy version is
-  too old.
+* Two existing notes remain pending: Rd example line widths and HTML validation
+  skipped because the local HTML Tidy version is too old.

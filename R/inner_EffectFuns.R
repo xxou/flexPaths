@@ -18,6 +18,8 @@ refer0_effect <- function(
     Imodel.source = Imodel.source
 ){
   cl <- match.call()
+  # Column names used in dplyr expressions.
+  Effect <- SE <- NULL
 
   #### 1. data preparation ---------
   # A is a binary;
@@ -254,6 +256,8 @@ sequential_effect <-  function(
 ){
 
   cl <- match.call()
+  # Column names used in dplyr expressions.
+  Effect <- SE <- NULL
   #### 1. data preparation ---------
   # A is a binary;
   I = data[[A]]

@@ -33,6 +33,9 @@ mflexPotential <-  function(
    pathsInfo,active
 ){
   cl <- match.call()
+  # Variables populated by list2env().
+  data <- A <- Y <- cov_x <- M.list <- estimation <- NULL
+  Pmodel.lists <- Omodel.lists <- Imodel.lists <- Imodel.source <- NULL
   list2env(pathsInfo, envir = environment())
 
   # **********************************
@@ -95,7 +98,7 @@ mflexPotential <-  function(
   mu.calls <- c(rep(iter.calls, K-1), out.calls)
 
   # Innermost function
-  mu.all <- matrix(NA, nc = K+1, nr = N) # EE..E()|A,X)|..), ...., E(Y|mk,A,x), Y
+  mu.all <- matrix(NA, ncol = K+1, nrow = N) # EE..E()|A,X)|..), ...., E(Y|mk,A,x), Y
   mu.all[ , K+1] <- data[ , Y]
 
 
@@ -158,7 +161,7 @@ mflexPotential <-  function(
   # 4. potential outcome data --------
   # **********************************
   if(estimation == "EIF"){
-  phi.all <- matrix(NA, nc = K+1, nr = N) # calculation from muK to mu1
+  phi.all <- matrix(NA, ncol = K+1, nrow = N) # calculation from muK to mu1
   phi.all[ ,1] <- mu.all[ ,1]
 
   for (i in K:1) {

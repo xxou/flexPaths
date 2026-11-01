@@ -31,6 +31,9 @@ flexPotential <-  function(
     pathsInfo,active  # M1, M2, M3,...,Direc
 ){
   cl <- match.call()
+  # Variables populated by list2env().
+  data <- A <- Y <- cov_x <- M.list <- estimation <- NULL
+  Pmodel.lists <- Omodel.lists <- Imodel.lists <- Imodel.source <- NULL
   list2env(pathsInfo, envir = environment())
 
   #### 1. data preparation ---------
@@ -102,7 +105,7 @@ flexPotential <-  function(
 
 
   # Innermost function
-  mu.all <- matrix(NA,nc=K+1,nr=nrow(data)) # EE..E()|A,X)|..), ...., E(Y|mk,A,x), Y
+  mu.all <- matrix(NA,ncol=K+1,nrow=nrow(data)) # EE..E()|A,X)|..), ...., E(Y|mk,A,x), Y
   mu.all[,K+1] <- data[,Y]
 
   # iterative outcome model
@@ -119,7 +122,7 @@ flexPotential <-  function(
   #### 4. calculate phi() and Pn( ) ------
   if(estimation == "EIF"){
   # phi() is a value for each row of EIF formula
-  phi.all <- matrix(NA,nc=K+1,nr=nrow(data)) # calculation from muK to mu1
+  phi.all <- matrix(NA,ncol=K+1,nrow=nrow(data)) # calculation from muK to mu1
   phi.all[,1] <- mu.all[,1]
 
 

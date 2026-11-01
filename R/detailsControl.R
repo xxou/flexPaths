@@ -198,6 +198,7 @@ prod_assign_modellist <- function(model_list,a_vars, a_values){
 #' @importFrom dplyr mutate
 one_boot.pathsEffect <- function(object){
   # get the full data
+  data <- NULL
   list2env(object, envir = environment())
 
   # replaced sample for boot

@@ -39,6 +39,8 @@ flexEffect<-function(
 
   # environment
   Call <- match.call()
+  # Column names used in dplyr expressions.
+  active <- value1 <- value0 <- comparison_id <- Effect <- NULL
 
   # 1. check the input p1 and p0 -----
   ## (1) to check one input -------
