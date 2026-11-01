@@ -1,6 +1,7 @@
 # Source a user model and restore the previous bindings after each test.
-local_custom_model <- function(env = globalenv(), .local_envir = parent.frame()) {
-  models <- c("fl_testlm", "predict.fl_testlm")
+local_custom_model <- function(env = globalenv(), .local_envir = parent.frame(),
+                              file = test_path("fixtures", "custom-model.R"),
+                              models = c("fl_testlm", "predict.fl_testlm")) {
   present <- vapply(models, exists, logical(1), envir = env, inherits = FALSE)
   old <- mget(models[present], envir = env, inherits = FALSE)
   withr::defer({
@@ -9,5 +10,5 @@ local_custom_model <- function(env = globalenv(), .local_envir = parent.frame())
         if (exists(name, envir = env, inherits = FALSE)) rm(list = name, envir = env)
     }
   }, envir = .local_envir)
-  source(test_path("fixtures", "custom-model.R"), local = env)
+  source(file, local = env)
 }

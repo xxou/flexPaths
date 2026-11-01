@@ -70,11 +70,11 @@ refer0_effect <- function(
                        })
 
   EY_A0_Mk_X.list <-purrr::map2(out.modelfits,cum_mediators, ~ {
-    pred=predict(.x, A0_data[,c(A,.y)])
+    pred=predict(.x, A0_data[,c(A,.y), drop = FALSE])
     return(pred)
   })
   # E[Y|A=a,X]:
-  EY_A1_X <- predict(out.modelfits[[1]], A1_data[,c(A,cum_mediators[[1]])])
+  EY_A1_X <- predict(out.modelfits[[1]], A1_data[,c(A,cum_mediators[[1]]), drop = FALSE])
   # E[Y|A=a',X]:
   EY_A0_X <- EY_A0_Mk_X.list[[1]]
 
@@ -93,7 +93,7 @@ refer0_effect <- function(
                            model_fun <- match.fun(fname)
                            model<-model_fun(data, X = c(A,M),Y = "mu", fl_call=icalls)
 
-                           pred <- predict(model,  A1_data[,c(A,M)])
+                           pred <- predict(model,  A1_data[,c(A,M), drop = FALSE])
                            return(pred)
                          })
 
@@ -105,12 +105,12 @@ refer0_effect <- function(
                            model<-model_fun(data, X = c(A,cum_mediators[[1]]),Y = "mu", fl_call=icalls)
                            # print(model)
 
-                           pred <- predict(model, A0_data[,c(A,cum_mediators[[1]])])
+                           pred <- predict(model, A0_data[,c(A,cum_mediators[[1]]), drop = FALSE])
                            return(pred)
                          })
 
   # fit model for direct A->Y; Y(a,Mk(a'))
-  EY_A1_MK_X <- predict(out.modelfits[[K]], A1_data[,c(A,cum_mediators[[K]])])
+  EY_A1_MK_X <- predict(out.modelfits[[K]], A1_data[,c(A,cum_mediators[[K]]), drop = FALSE])
 
   E_EY_A1_MK_X_given_A0X <- unlist( # E(E(Y|M1,...,Mk, a,X)|a',X)
     purrr::map(list(EY_A1_MK_X), ~ {
@@ -119,7 +119,7 @@ refer0_effect <- function(
       model_fun <- match.fun(fname)
       model<-model_fun(data, X = c(A,cum_mediators[[1]]),Y = "mu", fl_call=icalls)
       # print(model)
-      pred <- predict(model,  A0_data[,c(A,cum_mediators[[1]])])
+      pred <- predict(model,  A0_data[,c(A,cum_mediators[[1]]), drop = FALSE])
       return(pred)
     }))
 
@@ -307,14 +307,14 @@ sequential_effect <-  function(
 
 
   EY_A1_Mk_X.list <-purrr::map2(out.modelfits,cum_mediators, ~ {
-    pred=predict(.x, A1_data[,c(A,.y)])
+    pred=predict(.x, A1_data[,c(A,.y), drop = FALSE])
     return(pred)
   })
 
   # E[Y|A=a,X]:
   EY_A1_X <- EY_A1_Mk_X.list[[1]]
   # E[Y|A=a',X]:
-  EY_A0_X <- predict(out.modelfits[[1]], A0_data[,c(A,cum_mediators[[1]])])
+  EY_A0_X <- predict(out.modelfits[[1]], A0_data[,c(A,cum_mediators[[1]]), drop = FALSE])
 
   ## integrate_m
   # K-1 iter outcome models
@@ -332,7 +332,7 @@ sequential_effect <-  function(
                        model<-model_fun(data, X = c(A,cum_mediators[[1]]),Y = "mu", fl_call=icalls)
                       # print(model)
 
-                       pred <- predict(model,  A0_data[,c(A,cum_mediators[[1]])])
+                       pred <- predict(model,  A0_data[,c(A,cum_mediators[[1]]), drop = FALSE])
                        return(pred)}
   )
 

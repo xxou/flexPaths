@@ -26,7 +26,7 @@
 #'
 #' @export
 #'
-#' @example examples/mflexPotential-example.R
+#' @example inst/examples/mflexPotential-example.R
 #'
 #'
 mflexPotential <-  function(
@@ -111,7 +111,7 @@ mflexPotential <-  function(
     modelfit <- model_fun(data, X = c(a.list[[i]], cum_mediators[[i]]), Y = "mu", fl_call = mu.calls[[i]])
 
     # cat("num:", i, "\n"); print(a.list[[i]]); print(active_s.list[[i]]); print(modelfit$model)
-    mu.all[ , i] <- predict(modelfit, Ai_data[ , c(a.list[[i]], cum_mediators[[i]])])
+    mu.all[ , i] <- predict(modelfit, Ai_data[ , c(a.list[[i]], cum_mediators[[i]]), drop = FALSE])
   }
 
   }

@@ -45,7 +45,7 @@
 #'
 #' @export
 #'
-#' @example examples/pathsEffect-example.R
+#' @example inst/examples/pathsEffect-example.R
 #'
 #'
 pathsEffect<-function(

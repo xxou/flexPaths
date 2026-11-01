@@ -29,7 +29,7 @@
 #'
 #' @export
 #'
-#' @example examples/flexEffect-example.R
+#' @example inst/examples/flexEffect-example.R
 #'
 flexEffect<-function(
     p1 ,

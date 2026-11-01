@@ -46,7 +46,7 @@ paper](https://arxiv.org/abs/2610.34349):
 
 This is a schematic illustration of the flexPaths workflow:
 
-<img src="pic/flow.jpeg" width="1000" />
+<img src="inst/images/flow.jpeg" width="1000" />
 
 Primary advantages of the package include:
 
@@ -63,7 +63,7 @@ Primary advantages of the package include:
 - **Flexible models**: The package supports model fitting using
   `glm/lm`, `bart` in package `dbarts`, and `SuperLearner` in package
   `SuperLearner`. Users can also integrate
-  new models for estimation by modifying the `fl_model_template.R`.
+  new models using the template in `inst/templates/fl_model_template.R`.
 
 - **Flexible estimators**: This package includes three
   estimators—Inverse Probability Weighting (IPW), plug-in G-computation,
@@ -96,7 +96,7 @@ Here, we illustrate the case with two mediators $M_1$ and $M_2$ (the
 mediator can be high dimensional). Let $A$ denote the binary treatment
 (0 or 1), $Y$ denote the outcome, and $X$ denote the covariates.
 
-<img src="pic/DAG_oneT.png" width="400" />
+<img src="inst/images/DAG_oneT.png" width="400" />
 
 Denote the counterfactual outcome
 $\phi(a_1, a_2, a) = Y(a,M_1(a_1),M_2(a_2,M_1(a_1)))$ that would be
@@ -109,7 +109,7 @@ where $(a_1, a_2, a) \in \{0,1\}^3$.
 In the case of two mediators, we have three identified pathways. Using
 `pathsEffect`, we can obtain the effect via each mediator.
 
-<img src="pic/oneT_identified_pathway.jpg" width="1067" />
+<img src="inst/images/oneT_identified_pathway.jpg" width="1067" />
 
 **Decomposition**:
 
@@ -340,7 +340,7 @@ mediators (the mediator can be high dimensional). Let $A_1$ and $A_2$
 denote binary treatments (0 or 1), $Y$ denote the outcome, and $X$
 denote the covariates.
 
-<img src="pic/DAG_multiT.png" width="400" />
+<img src="inst/images/DAG_multiT.png" width="400" />
 
 The sequence of treatments and mediators follows the order:
 $A \rightarrow M_1 \rightarrow A_2 \rightarrow M_2 \rightarrow Y$.
@@ -362,7 +362,7 @@ treatment 2 $A_2=0$).
 This can be represented in matrix form, where rows represent treatments
 and columns represent mediators:
 
-<img src="pic/multi_matrix.png" width="300" />
+<img src="inst/images/multi_matrix.png" width="300" />
 
 **Models for Estimation**: Given the complexity of models involving
 multiple treatments, this package applies a consistent modeling
@@ -565,8 +565,25 @@ mfit<- pathsInfo(data = multiTreat,
 ## Input checks passed successfully.
 ```
 
-**Extend model** : User can modify `fl_model_template.R` to integrate
-more models.
+**Extend model**: The installed template provides a working linear-model example.
+Copy it to your analysis directory, adapt the fitting and prediction code, and
+rename `fl_template`, `predict.fl_template`, and the class `"fl_template"`
+together, for example to `fl_my_model`, `predict.fl_my_model`, and `"fl_my_model"`.
+Keep the function arguments shown in the template. Predictions should return
+one conditional mean per row, or the probability of 1 for a binary response.
+
+```r
+file.copy(system.file("templates", "fl_model_template.R",
+                      package = "flexPaths", mustWork = TRUE), "my_model.R")
+file.edit("my_model.R")
+# After adapting and renaming the functions:
+source("my_model.R", local = globalenv())
+```
+
+Then use `model.outcome = ~my_model()` in `pathsInfo()`, or use it for
+`model.treatment` if the model returns probabilities for the binary treatment.
+The template is supplied as a file; its functions are loaded when you source
+your edited copy.
 
 <br>
 

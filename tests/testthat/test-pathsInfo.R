@@ -27,6 +27,22 @@ test_that("pathsInfo retains variables and accepts formulas or model lists", {
   }
 })
 
+test_that("missing or empty covariates warn and return NULL", {
+  data <- test_data()[, c("A", "A2", "M1", "M2", "Y")]
+  for (A in list("A", c("A", "A2"))) {
+    for (estimation in c("G", "IPW", "EIF")) {
+      expect_warning(info <- pathsInfo(A = A, Y = "Y", data = data,
+        estimation = estimation), "Please provide at least one covariate")
+      expect_null(info)
+      for (cov_x in list(NULL, character(0))) {
+        expect_warning(info <- pathsInfo(A = A, Y = "Y", cov_x = cov_x, data = data,
+          estimation = estimation), "Please provide at least one covariate")
+        expect_null(info)
+      }
+    }
+  }
+})
+
 test_that("per-stage and explicit iterative models are retained", {
   data <- test_data()
   fit <- suppressMessages(pathsInfo("A", "Y", "X", data, list(M1 = "M1", M2 = "M2"),

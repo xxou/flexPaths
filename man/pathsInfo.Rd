@@ -27,7 +27,7 @@ this function to choose the reference level. All treatment columns in the return
 
 \item{Y}{A character string indicating the name of the outcome variable. Y should be numeric variable.}
 
-\item{cov_x}{A vector of character strings indicating the name(s) of covariates.}
+\item{cov_x}{A vector of character strings indicating the name(s) of covariates. At least one covariate is required.}
 
 \item{data}{A wide-format data frame with one row per individual. Treatments and mediators measured at different times must be stored in separate columns. Treatment types, levels, and non-missing values are checked before rows with missing values are dropped. A summary of dropped rows and final sample size will be provided. The input data frame is not modified.}
 
@@ -43,7 +43,10 @@ Alternatively, you can list them in order using \code{list(c("mediator1_1", "med
 \itemize{
 \item Provide a single formula or a list containing one formula. This formula will be applied to all propensity models.
 \item Alternatively, provide a list of formulas with names, e.g., \code{list(cov_x = ~glm(family = binomial()), M1 = ~bart(), ..., MK = ~glm(family = binomial()))}. If no names are provided, the formulas will correspond to \eqn{P(A|X)}, \eqn{P(A|M_1, X)}, ..., \eqn{P(A|M_1, M_2, ..., M_K, X)} in order.
-\item Each formula can come from functions like \code{glm}, \code{bart}, or \code{Superlearner}. The arguments are the same as in their original functions, except that you do not need to specify the variables already provided in \code{data}. If you wish to use models other than \code{glm}, \code{bart}, or \code{Superlearner}, you can use \code{fl_model_template} to create a custom model function.
+\item Each formula can come from functions like \code{glm}, \code{bart}, or \code{Superlearner}. The arguments are the same as in their original functions, except that you do not need to specify the variables already provided in \code{data}.
+To create a custom model, copy the file located by
+\code{system.file("templates", "fl_model_template.R", package = "flexPaths")},
+adapt the fitting and prediction functions, and source it into the global environment.
 }}
 
 \item{model.outcome}{If you select "IPW" for estimation, this parameter is not needed. Otherwise, provide the model for outcome regression
@@ -58,7 +61,8 @@ Alternatively, you can list them in order using \code{list(c("mediator1_1", "med
 }}
 }
 \value{
-An object of class \code{pathsInfo}, which is a list containing the following elements:
+If \code{cov_x} is missing or empty, a warning is issued and \code{NULL} is returned.
+Otherwise, an object of class \code{pathsInfo}, which is a list containing the following elements:
 \describe{
 \item{\code{data}}{The data frame used for the analysis, with missing rows removed and all treatment columns encoded as numeric 0/1. Other columns retain their original types and values for the retained rows.}
 \item{\code{A}}{A vector or list representing the treatment(s) in the causal analysis.}

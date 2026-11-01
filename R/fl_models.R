@@ -22,6 +22,8 @@
 #' For `SuperLearner`, supply `SL.library` and an appropriate `family`;
 #' optional `id` is a column name included in `X`, and that column is excluded
 #' from the training predictors.
+#' Its prediction method selects and orders `newdata` columns by the training
+#' variable names. Extra columns are ignored; missing predictors cause an error.
 #'
 #' @return A list with the corresponding `fl_*` class, containing `model`
 #'   (the fitted model) and `dataX` (the predictors selected by `X`).
@@ -41,7 +43,7 @@ fl_SuperLearner <- function(data, X = c(""), Y = " ", fl_call) {
 
   # cluster data
   if(!is.null(fl_call$id)){
-    X_train = dataX[, names(dataX) != fl_call$id]
+    X_train = dataX[, names(dataX) != fl_call$id, drop = FALSE]
     X_id = dataX[, fl_call$id]
     fl_call$id = quote(X_id)
   }else{X_train = dataX}
@@ -62,9 +64,16 @@ fl_SuperLearner <- function(data, X = c(""), Y = " ", fl_call) {
 #' @rdname fl_models
 #' @export
 predict.fl_SuperLearner <- function(object, newdata, ...) {
-  # order of X!!!!!
   # Extract the fitted model object from the input
   model <- object$model
+  # Select predictors in their training order
+  if(!missing(newdata)){
+    missing_X <- setdiff(model$varNames, colnames(newdata))
+    if(length(missing_X) > 0){
+      stop(paste("Missing predictors in 'newdata':", paste(missing_X, collapse = ", ")))
+    }
+    newdata <- newdata[, model$varNames, drop = FALSE]
+  }
   # Predict using the fitted model
   pred <- predict(model, newdata = newdata, onlySL = T)$pred
 

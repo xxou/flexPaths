@@ -62,6 +62,8 @@ For \code{bart}, \code{keeptrees = TRUE} is set for prediction.
 For \code{SuperLearner}, supply \code{SL.library} and an appropriate \code{family};
 optional \code{id} is a column name included in \code{X}, and that column is excluded
 from the training predictors.
+Its prediction method selects and orders \code{newdata} columns by the training
+variable names. Extra columns are ignored; missing predictors cause an error.
 }
 \seealso{
 \code{\link[=pathsInfo]{pathsInfo()}}, \code{\link[stats:lm]{stats::lm()}}, \code{\link[stats:glm]{stats::glm()}}, \code{\link[dbarts:bart]{dbarts::bart()}},

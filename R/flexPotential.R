@@ -25,7 +25,7 @@
 #'
 #' @export
 #'
-#' @example examples/flexPotential-example.R
+#' @example inst/examples/flexPotential-example.R
 #'
 flexPotential <-  function(
     pathsInfo,active  # M1, M2, M3,...,Direc
@@ -113,7 +113,7 @@ flexPotential <-  function(
     modelfit <- model_fun(data, X = c(A,cum_mediators[[i]]),Y = "mu", fl_call=mu.calls[[i]])
 
     Ai_data <- if(active_s[i]==1){ A1_data }else{ A0_data }
-    mu.all[,i] <- predict(modelfit, Ai_data[,c(A,cum_mediators[[i]])])
+    mu.all[,i] <- predict(modelfit, Ai_data[,c(A,cum_mediators[[i]]), drop = FALSE])
   }
 }
   #### 4. calculate phi() and Pn( ) ------
