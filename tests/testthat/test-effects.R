@@ -1,7 +1,7 @@
 test_that("effect differences, SEs and intervals agree with individual scores", {
   fit <- test_info()
-  p0 <- flexPotential(fit, c(0, 0, 0))
-  p1 <- flexPotential(fit, c(1, 0, 1))
+  p0 <- flexMean(fit, c(0, 0, 0))
+  p1 <- flexMean(fit, c(1, 0, 1))
   out <- flexEffect(p1, p0, CI_level = 0.90)
   ref <- reference_effect(p1$potential_data, p0$potential_data, CI_level = 0.90)
   expect_s3_class(out, "flexEffect")
@@ -11,8 +11,8 @@ test_that("effect differences, SEs and intervals agree with individual scores", 
 
 test_that("ratios use potential means and odds on the probability scale", {
   fit <- test_info(Y = "B", estimation = "G", model.outcome = ~ glm(family = binomial()))
-  p0 <- flexPotential(fit, c(0, 0, 0))
-  p1 <- flexPotential(fit, c(1, 0, 1))
+  p0 <- flexMean(fit, c(0, 0, 0))
+  p1 <- flexMean(fit, c(1, 0, 1))
   expect_true(all(c(p0$results$value, p1$results$value) > 0.1 &
     c(p0$results$value, p1$results$value) < 0.9))
   for (scale in c("risk", "oddsratio")) {
@@ -23,14 +23,14 @@ test_that("ratios use potential means and odds on the probability scale", {
 
 test_that("list comparisons retain labels, values and intervals after reordering", {
   fit <- test_info()
-  p0 <- flexPotential(fit, c(0, 0, 0))
-  p1 <- flexPotential(fit, c(1, 0, 1))
-  p2 <- flexPotential(fit, c(0, 1, 0))
+  p0 <- flexMean(fit, c(0, 0, 0))
+  p1 <- flexMean(fit, c(1, 0, 1))
+  p2 <- flexMean(fit, c(0, 1, 0))
   out <- flexEffect(list(p1, p2, p1), p0)$results
   expect_equal(nrow(out), 3)
   for (p in list(p1, p2)) {
     ref <- flexEffect(p, p0)$results
-    rows <- out[out$active == ref$active, ]
+    rows <- out[out$assign == ref$assign, ]
     for (name in c("Effect", "SE", "CI.lower", "CI.upper"))
       expect_equal(rows[[name]], rep(ref[[name]], nrow(rows)), tolerance = 1e-8)
   }

@@ -9,9 +9,9 @@ A data frame with 1000 rows and 9 variables:
 \describe{
 \item{Treat}{Binary treatment, stored as integer 0 or 1.}
 \item{X1, X2}{Continuous baseline covariates.}
-\item{Med1}{Continuous mediator at the first stage.}
-\item{Med2_1, Med2_2}{Continuous mediators jointly forming the second stage.}
-\item{Med3}{Continuous mediator at the third stage.}
+\item{Med1}{Continuous mediator.}
+\item{Med2_1, Med2_2}{The second mediator has two continuous components.}
+\item{Med3}{Continuous mediator.}
 \item{Outcome1}{Continuous outcome.}
 \item{Outcome2}{Binary outcome, stored as integer 0 or 1.}
 }
@@ -23,20 +23,18 @@ Simulated by Xiaxian Ou for flexPaths.
 data(singTreat)
 }
 \description{
-Data simulated by Xiaxian Ou for the single-treatment examples in flexPaths.
+Data simulated for the single-treatment examples in flexPaths.
 Each row represents one simulated individual, with baseline covariates,
 three ordered mediator stages, and continuous and binary outcomes.
 }
 \details{
-The data use wide format and contain no missing values. In the examples,
-the mediator stages are specified as
-\code{list(M1 = "Med1", M2 = c("Med2_1", "Med2_2"), M3 = "Med3")}.
+The data use wide format and contain no missing values.
 }
 \examples{
 data("singTreat")
 head(singTreat)
 }
 \seealso{
-\code{\link[=pathsInfo]{pathsInfo()}}, \code{\link[=pathsEffect]{pathsEffect()}}, \code{\link[=flexPotential]{flexPotential()}}
+\code{\link[=pathsInfo]{pathsInfo()}}, \code{\link[=pathsEffect]{pathsEffect()}}, \code{\link[=flexMean]{flexMean()}}
 }
 \keyword{datasets}

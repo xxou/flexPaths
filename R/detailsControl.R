@@ -60,17 +60,17 @@ replace_family <- function(call) {
 
 # function to get index in flex path
 # index for mediators to be used
-create_index <- function(active) {
+create_index <- function(assign) {
   # Define the corresponding position vector p
-  p <- seq_along(active)
+  p <- seq_along(assign)
   # Initialize the index vector
-  index <- rep(NA, length(active))
+  index <- rep(NA, length(assign))
   # Set the last value first
-  index[length(active)] <- 0
+  index[length(assign)] <- 0
 
-  # Loop through the active vector backwards
-  for (i in (length(active) - 1):1) {
-    if (active[i] == active[i + 1]) { index[i] <- index[i + 1]
+  # Loop through the assign vector backwards
+  for (i in (length(assign) - 1):1) {
+    if (assign[i] == assign[i + 1]) { index[i] <- index[i + 1]
     } else { index[i] <- p[i]}
   }
   return(index)
@@ -78,9 +78,9 @@ create_index <- function(active) {
 
 
 # multiple
-mcreate_index <- function(active_matrix) {
+mcreate_index <- function(assign_matrix) {
   # Get the number of columns in the matrix
-  n_cols <- dim(active_matrix)[2]
+  n_cols <- dim(assign_matrix)[2]
 
   # Initialize the index vector
   index <- rep(NA, n_cols)
@@ -89,10 +89,10 @@ mcreate_index <- function(active_matrix) {
   index[n_cols] <- 0
 
   # Loop through the columns from right to left
-  active_matrix[is.na(active_matrix)] <- -1
+  assign_matrix[is.na(assign_matrix)] <- -1
   for (i in (n_cols - 1):1) {
     # Compare the entire column vector with the next column vector
-    if (all(active_matrix[, i] == active_matrix[, i + 1])) {
+    if (all(assign_matrix[, i] == assign_matrix[, i + 1])) {
       index[i] <- index[i + 1]  # Keep the index same as the right one
     } else {
       index[i] <- i  # Set index to the column number
@@ -103,18 +103,18 @@ mcreate_index <- function(active_matrix) {
 }
 
 
-# conbine active value
-simplify_active <- function(active_matrix) {
-  active_matrix[is.na(active_matrix)] <- -1
+# conbine assign value
+simplify_assign <- function(assign_matrix) {
+  assign_matrix[is.na(assign_matrix)] <- -1
   # Initialize the simplified matrix with the first column
-  simplified_m <- active_matrix[, 1, drop = FALSE]
+  simplified_m <- assign_matrix[, 1, drop = FALSE]
 
   # Loop through columns 2 to n
-  for (i in 2:ncol(active_matrix)) {
+  for (i in 2:ncol(assign_matrix)) {
     # Check if the current column is different from the last column in the simplified matrix
-    if (!all(active_matrix[, i] == simplified_m[, ncol(simplified_m)], na.rm = TRUE)) {
+    if (!all(assign_matrix[, i] == simplified_m[, ncol(simplified_m)], na.rm = TRUE)) {
       # If different, add the current column to the simplified matrix
-      simplified_m <- cbind(simplified_m, active_matrix[, i])
+      simplified_m <- cbind(simplified_m, assign_matrix[, i])
     }
   }
   simplified_m[simplified_m == -1] <- NA
@@ -157,7 +157,7 @@ cumulate_vars <- function(input, first_null = FALSE) {
 
 # model_list<- pro.modelfits[[4]] the model to be predicted
 # a_vars <- a.list[[3]] its value
-# a_values <- active_s.list[[3]]
+# a_values <- assign_s.list[[3]]
 #' @import stats purrr
 #'
 prod_assign_modellist <- function(model_list, a_vars, a_values) {
@@ -201,10 +201,10 @@ check_nboot <- function(nboot) {
   }
 }
 
-one_boot.potential <- function(pathsInfo, active, model_fun) {
+one_boot.potential <- function(pathsInfo, assign, model_fun) {
   index <- sample(seq_len(nrow(pathsInfo$data)), replace = TRUE)
   pathsInfo$data <- pathsInfo$data[index, , drop = FALSE]
-  boot_sim <- model_fun(pathsInfo, active, nboot = NULL)
+  boot_sim <- model_fun(pathsInfo, assign, nboot = NULL)
   return(boot_sim$results$value)
 }
 
@@ -247,14 +247,14 @@ one_boot.flexEffect <- function(data, pathsInfo, call_all, index_p1, index_p0) {
 
   boot_sim = map_dfr(object, function(x) {
     sim = eval(x)
-    return(sim$results[, c('active', 'value')])
+    return(sim$results[, c('assign', 'value')])
   })
 
   sim_p1 <- boot_sim[index_p1, ]
   sim_p0 <- boot_sim[index_p0, ]
 
   out <- data.frame(comparison_id = seq_along(index_p1),
-    active = paste(sim_p1$active, "vs", sim_p0$active),
+    assign = paste(sim_p1$assign, "vs", sim_p0$assign),
     value1 = sim_p1$value,
     value0 = sim_p0$value)
   return(out)

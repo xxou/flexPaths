@@ -14,7 +14,9 @@ pathsEffect(
 )
 }
 \arguments{
-\item{pathsInfo}{An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models and data.}
+\item{pathsInfo}{An object of class \code{pathsInfo} containing the analysis settings
+and model specifications provided by the \code{pathsInfo} function.
+The analysis data are taken from \code{pathsInfo$data}.}
 
 \item{decomposition}{A character string specifying the method of decomposition to use for effect calculation. Options are "refer0" (aligned with CPSE) and "sequential" (aligned with NPSE). The default is "refer0".}
 
@@ -51,9 +53,12 @@ are included only for \code{scale = "diff"}.}
 }
 }
 \description{
-This function estimates causal path-specific effects (PSE) for a single treatment,
-focusing on specific pathways through which the treatment influences the outcome.
-The estimation is based on the fitted models and data provided by the \code{pathsInfo} function.
+Estimates causal path-specific effects (PSEs) for a single binary treatment
+with K (>= 1) causally ordered mediators. The function estimates the effect
+along each mediator-specific pathway, A -> M_k -> ... -> Y, for k = 1, ..., K,
+as well as the direct effect along A -> Y.
+The estimation is based on analysis settings and model specifications
+provided by the \code{pathsInfo} function.
 }
 \details{
 \strong{Decomposition Methods}:
@@ -94,22 +99,21 @@ EIF_fit <- pathsInfo(
 
 # EIF differences include SE, confidence intervals and p-values.
 # 0 reference decomposition
+# Compare each single-stage assignment of 1 with assign = c(0, 0, 0, 0).
 results_refer0 <- pathsEffect(
   pathsInfo = EIF_fit,
   decomposition = "refer0",
-  scale = "diff",
-  CI_level = 0.95
+  scale = "diff", CI_level = 0.95
 )
-results_refer0
 
 # sequential decomposition
+# Compare adjacent assignments: 1111, 0111, 0011, 0001, then 0000,
+# where the four positions represent (M1, M2, M3, Y).
 results_seq <- pathsEffect(
   pathsInfo = EIF_fit,
   decomposition = "sequential",
-  scale = "diff",
-  CI_level = 0.95
+  scale = "diff", CI_level = 0.95
 )
-results_seq
 
 # G/IPW and risk/oddsratio results contain only point estimates without nboot.
 # Use nboot for bootstrap SE and intervals with any estimation method.

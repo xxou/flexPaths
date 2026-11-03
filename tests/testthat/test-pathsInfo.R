@@ -21,8 +21,8 @@ test_that("pathsInfo retains variables and accepts formulas or model lists", {
       expect_identical(fit$A, A)
       expect_identical(fit$M.list, M)
       expect_true(all(is.finite(if (length(A) == 1)
-        flexPotential(fit, c(0, 1))$potential_data else
-        mflexPotential(fit, list(c(0, 1), c(NA, 1)))$potential_data)))
+        flexMean(fit, c(0, 1))$potential_data else
+        mflexMean(fit, list(c(0, 1), c(NA, 1)))$potential_data)))
     }
   }
 })
@@ -53,8 +53,8 @@ test_that("per-stage and explicit iterative models are retained", {
   expect_named(fit$Omodel.lists, c("cov_x", "M1", "M2"))
   expect_named(fit$Imodel.lists, c("M1", "M2"))
   expect_identical(fit$Imodel.source, "user input")
-  expect_equal(flexPotential(fit, c(1, 0, 1))$potential_data,
-    flexPotential(test_info(data), c(1, 0, 1))$potential_data, tolerance = 1e-8)
+  expect_equal(flexMean(fit, c(1, 0, 1))$potential_data,
+    flexMean(test_info(data), c(1, 0, 1))$potential_data, tolerance = 1e-8)
   fit <- suppressMessages(pathsInfo(c("A", "A2"), "Y", "X", data,
     list("M1", "M2"), model.treatment = ~ glm(), model.outcome = ~ lm(), model.iter = ~ lm()))
   expect_length(fit$Imodel.lists, 1)
@@ -76,7 +76,7 @@ test_that("invalid variables, estimation and model counts are rejected", {
   expect_error(suppressMessages(pathsInfo("A", "Y", "X", data, list("M1", "M2"),
     estimation = "IPW", model.treatment = list(~ glm(), ~ glm()))), "model.treatment")
   fit <- test_info(data)
-  expect_error(flexPotential(fit, c(0, 1)), "length of 'active'", fixed = TRUE)
+  expect_error(flexMean(fit, c(0, 1)), "length of 'assign'", fixed = TRUE)
 })
 
 test_that("mediators and per-stage models retain their numeric time order", {
@@ -105,36 +105,36 @@ test_that("mediators and per-stage models retain their numeric time order", {
   expect_identical(test_info(data, M.list = unnamed)$M.list, unnamed)
 })
 
-test_that("single-treatment active values must be numeric 0/1", {
+test_that("single-treatment assign values must be numeric 0/1", {
   fit <- test_info()
   for (value in c(2, -1, 0.5, NA_real_, NaN, Inf))
-    expect_error(flexPotential(fit, c(0, value, 1)), "only 0 and 1")
+    expect_error(flexMean(fit, c(0, value, 1)), "only 0 and 1")
   for (a in list(c("0", "1", "1"), factor(c(0, 1, 1)), c(FALSE, TRUE, TRUE),
     as.complex(c(0, 1, 1)), matrix(c(0, 1, 1), nrow = 1), list(0, 1, 1)))
-    expect_error(flexPotential(fit, a), "numeric vector")
+    expect_error(flexMean(fit, a), "numeric vector")
   for (a in list(numeric(), c(0, 1), c(0, 1, 0, 1)))
-    expect_error(flexPotential(fit, a), "length of 'active'", fixed = TRUE)
-  expect_equal(flexPotential(fit, c(0L, 1L, 1L))$potential_data,
-    flexPotential(fit, c(0, 1, 1))$potential_data, tolerance = 1e-8)
+    expect_error(flexMean(fit, a), "length of 'assign'", fixed = TRUE)
+  expect_equal(flexMean(fit, c(0L, 1L, 1L))$potential_data,
+    flexMean(fit, c(0, 1, 1))$potential_data, tolerance = 1e-8)
 })
 
-test_that("multiple-treatment active inputs have valid values and dimensions", {
+test_that("multiple-treatment assign inputs have valid values and dimensions", {
   fit <- test_info(A = c("A", "A2"))
   a1 <- c(0, 1, 1); a2 <- c(NA, 0, 1)
   for (a in list(a1, rbind(a1, a2), data.frame(a1, a2)))
-    expect_error(mflexPotential(fit, a), "must be a list")
+    expect_error(mflexMean(fit, a), "must be a list")
   for (a in list(list(), list(a1), list(a1, a2, a2)))
-    expect_error(mflexPotential(fit, a), "number of treatments")
+    expect_error(mflexMean(fit, a), "number of treatments")
   for (a in list(list(c(0, 1), c(NA, 1)), list(a1, c(NA, 1)),
     list(c(0, 1, 1, 1), a2), list(numeric(), a2)))
-    expect_error(mflexPotential(fit, a), "length of 'M.list' + 1", fixed = TRUE)
+    expect_error(mflexMean(fit, a), "length of 'M.list' + 1", fixed = TRUE)
   for (value in c(2, -1, 0.5, NaN, Inf))
-    expect_error(mflexPotential(fit, list(a1, c(NA, value, 1))), "only 0, 1 or NA")
+    expect_error(mflexMean(fit, list(a1, c(NA, value, 1))), "only 0, 1 or NA")
   for (a in list(c(NA, "0", "1"), factor(a2), c(NA, FALSE, TRUE),
     as.complex(a2), matrix(a2, nrow = 1), list(NA, 0, 1)))
-    expect_error(mflexPotential(fit, list(a1, a)), "numeric vector")
-  out <- mflexPotential(fit, list(c(0L, 1L, 1L), c(NA_integer_, 0L, 1L)))
-  expect_true(is.na(out$active[2, 1]))
-  expect_equal(out$potential_data, mflexPotential(fit, list(a1, a2))$potential_data,
+    expect_error(mflexMean(fit, list(a1, a)), "numeric vector")
+  out <- mflexMean(fit, list(c(0L, 1L, 1L), c(NA_integer_, 0L, 1L)))
+  expect_true(is.na(out$assign[2, 1]))
+  expect_equal(out$potential_data, mflexMean(fit, list(a1, a2))$potential_data,
     tolerance = 1e-8)
 })

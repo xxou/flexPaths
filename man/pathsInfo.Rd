@@ -23,7 +23,7 @@ or a factor with exactly two non-missing levels, including an ordered factor.
 Factors are encoded using their existing level order: \code{levels(x)[1]} becomes 0
 and \code{levels(x)[2]} becomes 1. Set \code{levels} or use \code{relevel} before calling
 this function to choose the reference level. All treatment columns in the returned
-\code{data} are converted to numeric 0/1; subsequent \code{active} values use this encoding.}
+\code{data} are converted to numeric 0/1; subsequent \code{assign} values use this encoding.}
 
 \item{Y}{A character string indicating the name of the outcome variable. Y should be numeric variable.}
 
@@ -80,7 +80,8 @@ Otherwise, an object of class \code{pathsInfo}, which is a list containing the f
 }
 \description{
 This function sets up the necessary components for conducting a causal path-specific analysis.
-It prepares the data, estimation methods, and models required for further effect calculations.
+It prepares the data, analysis settings, and model specifications required
+for further mean and effect calculations.
 }
 \examples{
 # ***************************************
@@ -89,6 +90,7 @@ It prepares the data, estimation methods, and models required for further effect
 data("singTreat")
 
 # EIF estimation
+# A single model specification is reused across the relevant stages.
 EIF_fit <- pathsInfo(
   data = singTreat,
   A = "Treat",
@@ -103,6 +105,8 @@ EIF_fit <- pathsInfo(
   model.treatment = ~bart(verbose = FALSE, ndpost = 200)
 )
 
+# Named entries select different treatment models for each conditioning set.
+# cov_x uses baseline covariates; M2 also includes stages M1 and M2.
 EIF_fit <- pathsInfo(
   data = singTreat,
   A = "Treat",
@@ -125,6 +129,7 @@ EIF_fit <- pathsInfo(
   )
 )
 
+# Named formulas allow different predictor terms at each stage.
 EIF_fit <- pathsInfo(
   data = singTreat,
   A = "Treat",

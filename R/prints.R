@@ -42,7 +42,7 @@ print.pathsEffect <- function(x, ...) {
 
 
 #' @export
-print.flexPotential <- function(x, ...) {
+print.flexMean <- function(x, ...) {
   cat("\n")
   # Print function call
   cat("Call: ")
@@ -67,7 +67,7 @@ print.flexPotential <- function(x, ...) {
 
 
 #' @export
-print.mflexPotential <- function(x, ...) {
+print.mflexMean <- function(x, ...) {
   cat("\n")
   # Print function call
   cat("Call: ")
@@ -82,7 +82,7 @@ print.mflexPotential <- function(x, ...) {
 
 
   cat("mutiple treatment matrix: \n")
-  print(x$active)
+  print(x$assign)
   cat("\n\n")
 
 

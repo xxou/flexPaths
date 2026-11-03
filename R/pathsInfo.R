@@ -1,7 +1,8 @@
 #' Causal Path-Specific Analysis Setup
 #'
 #' This function sets up the necessary components for conducting a causal path-specific analysis.
-#' It prepares the data, estimation methods, and models required for further effect calculations.
+#' It prepares the data, analysis settings, and model specifications required
+#' for further mean and effect calculations.
 #'
 #' @param A A character string or a vector of character strings representing the name(s) of one or more treatments.
 #' Each treatment must be a numeric vector containing only 0 and 1 (apart from missing values),
@@ -9,7 +10,7 @@
 #' Factors are encoded using their existing level order: \code{levels(x)[1]} becomes 0
 #' and \code{levels(x)[2]} becomes 1. Set \code{levels} or use \code{relevel} before calling
 #' this function to choose the reference level. All treatment columns in the returned
-#' \code{data} are converted to numeric 0/1; subsequent \code{active} values use this encoding.
+#' \code{data} are converted to numeric 0/1; subsequent \code{assign} values use this encoding.
 #' @param Y A character string indicating the name of the outcome variable. Y should be numeric variable.
 #' @param cov_x A vector of character strings indicating the name(s) of covariates. At least one covariate is required.
 #' @param M.list A list of \eqn{K} mediators, where \eqn{K} is the number of mediators. Each mediator can be multivariate.

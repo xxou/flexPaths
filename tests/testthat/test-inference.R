@@ -17,17 +17,17 @@ test_that("direct effect inference is limited to EIF differences", {
     for (A in list("A", c("A", "A2"))) {
       fit <- test_info(data, A = A, estimation = estimation)
       if (length(A) == 1) {
-        p0 <- flexPotential(fit, c(0, 0, 0))
-        p1 <- flexPotential(fit, c(1, 1, 1))
+        p0 <- flexMean(fit, c(0, 0, 0))
+        p1 <- flexMean(fit, c(1, 1, 1))
       } else {
-        p0 <- mflexPotential(fit, list(c(0, 0, 0), c(NA, 0, 0)))
-        p1 <- mflexPotential(fit, list(c(1, 1, 1), c(NA, 1, 1)))
+        p0 <- mflexMean(fit, list(c(0, 0, 0), c(NA, 0, 0)))
+        p1 <- mflexMean(fit, list(c(1, 1, 1), c(NA, 1, 1)))
       }
       for (scale in c("diff", "risk", "oddsratio")) {
         inference <- if (estimation == "EIF" && scale == "diff")
           c("SE", "CI.lower", "CI.upper", "P.value")
         out <- flexEffect(p1, p0, scale = scale)
-        expect_named(out$results, c("active", "Effect", inference))
+        expect_named(out$results, c("assign", "Effect", inference))
         ref <- reference_effect(p1$potential_data, p0$potential_data, scale,
           estimation = estimation)
         expect_equal(unlist(out$results[names(ref)], use.names = FALSE),
@@ -44,8 +44,8 @@ test_that("direct effect inference is limited to EIF differences", {
 test_that("G total effects omit the degenerate naive SE and retain bootstrap inference", {
   data <- test_data()
   fit <- test_info(data, estimation = "G")
-  p0 <- flexPotential(fit, c(0, 0, 0))
-  p1 <- flexPotential(fit, c(1, 1, 1))
+  p0 <- flexMean(fit, c(0, 0, 0))
+  p1 <- flexMean(fit, c(1, 1, 1))
   set.seed(704)
   out <- flexEffect(p1, p0, nboot = 10)
   set.seed(704)
@@ -53,7 +53,7 @@ test_that("G total effects omit the degenerate naive SE and retain bootstrap inf
     boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
     unname(coef(lm(Y ~ A + X, data = boot))["A"])
   })
-  expect_named(out$results, c("active", "Effect"))
+  expect_named(out$results, c("assign", "Effect"))
   expect_equal(out$results$Effect, unname(coef(lm(Y ~ A + X, data))["A"]))
   expect_gt(out$boot_results$boot.SE, 0)
   expect_equal(out$boot_results$boot.SE, sd(ref), tolerance = 1e-8)

@@ -1,7 +1,7 @@
 # Independent calculations for two mediators, using only base R regressions.
 # These deliberately do not use flexPaths model or estimation helpers.
-reference_single <- function(data, active, estimation) {
-  a1 <- active[1]; a2 <- active[2]; ay <- active[3]
+reference_single <- function(data, assign, estimation) {
+  a1 <- assign[1]; a2 <- assign[2]; ay <- assign[3]
   q2 <- predict(lm(Y ~ A + X + M1 + M2, data), transform(data, A = ay))
   q1 <- predict(lm(q2 ~ A + X + M1, data), transform(data, A = a2))
   q0 <- predict(lm(q1 ~ A + X, data), transform(data, A = a1))
@@ -49,10 +49,10 @@ reference_effect <- function(p1, p0, scale = "diff", CI_level = 0.95, estimation
 
 # The two documented path decompositions, ordered as M1, M2, direct, total.
 reference_paths <- function(data, estimation, decomposition, scale = "diff") {
-  active <- if (decomposition == "refer0")
+  assign <- if (decomposition == "refer0")
     list(c(1, 0, 0), c(0, 1, 0), c(0, 0, 1), c(1, 1, 1), c(0, 0, 0)) else
     list(c(1, 1, 1), c(0, 1, 1), c(0, 0, 1), c(0, 0, 0))
-  p <- lapply(active, function(a) reference_single(data, a, estimation))
+  p <- lapply(assign, function(a) reference_single(data, a, estimation))
   if (decomposition == "refer0") {
     p1 <- p[1:4]; p0 <- rep(p[5], 4)
   } else {

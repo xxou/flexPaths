@@ -4,14 +4,14 @@ test_that("flexEffect bootstrap agrees with an independent row-resampling loop",
   data$Y <- 0.3 + 0.01 * data$Y
   for (estimation in c("G", "IPW", "EIF")) {
     fit <- test_info(data, estimation = estimation)
-    p0 <- flexPotential(fit, c(0, 0, 0))
-    p1 <- flexPotential(fit, c(1, 0, 1))
-    p2 <- flexPotential(fit, c(0, 1, 0))
+    p0 <- flexMean(fit, c(0, 0, 0))
+    p1 <- flexMean(fit, c(1, 0, 1))
+    p2 <- flexMean(fit, c(0, 1, 0))
     for (scale in c("diff", "risk", "oddsratio")) {
       set.seed(21)
       fit_boot <- flexEffect(list(p1, p2), p0, scale = scale, nboot = 10)
       if (estimation != "EIF" || scale != "diff")
-        expect_named(fit_boot$results, c("active", "Effect"))
+        expect_named(fit_boot$results, c("assign", "Effect"))
       out <- fit_boot$boot_results
       expect_identical("boot.P.value" %in% names(out), scale == "diff")
       set.seed(21)
@@ -25,7 +25,7 @@ test_that("flexEffect bootstrap agrees with an independent row-resampling loop",
       })
       labels <- c("101 vs 000", "010 vs 000")
       for (i in 1:2) {
-        row <- out[out$active == labels[i], ]
+        row <- out[out$assign == labels[i], ]
         expect_equal(row$boot.SE, sd(ref[i, ]), tolerance = 1e-8)
         expect_equal(c(row$boot.CI.lower, row$boot.CI.upper),
           unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
@@ -65,13 +65,13 @@ test_that("multiple-treatment bootstrap agrees with independent refits", {
   data$Y <- 0.3 + 0.01 * data$Y
   for (estimation in c("G", "IPW", "EIF")) {
     fit <- test_info(data, A = c("A", "A2"), estimation = estimation)
-    p0 <- mflexPotential(fit, list(c(0, 0, 0), c(NA, 0, 0)))
-    p1 <- mflexPotential(fit, list(c(1, 1, 1), c(NA, 1, 1)))
+    p0 <- mflexMean(fit, list(c(0, 0, 0), c(NA, 0, 0)))
+    p1 <- mflexMean(fit, list(c(1, 1, 1), c(NA, 1, 1)))
     for (scale in c("diff", "risk", "oddsratio")) {
       set.seed(26)
       out <- flexEffect(p1, p0, scale = scale, nboot = 10)
       if (estimation != "EIF" || scale != "diff")
-        expect_named(out$results, c("active", "Effect"))
+        expect_named(out$results, c("assign", "Effect"))
       set.seed(26)
       ref <- replicate(10, {
         boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
@@ -92,16 +92,16 @@ test_that("repeated comparisons do not change bootstrap uncertainty", {
   data <- test_data()
   data$Y <- 0.3 + 0.01 * data$Y
   fit <- test_info(data)
-  p0 <- flexPotential(fit, c(0, 0, 0))
-  p1 <- flexPotential(fit, c(1, 0, 1))
-  p2 <- flexPotential(fit, c(0, 1, 0))
+  p0 <- flexMean(fit, c(0, 0, 0))
+  p1 <- flexMean(fit, c(1, 0, 1))
+  p2 <- flexMean(fit, c(0, 1, 0))
   for (scale in c("diff", "risk", "oddsratio")) {
     for (pairs in list(list(p1, p1), list(p1, p2, p1))) {
       set.seed(23)
       ref <- flexEffect(unique(pairs), p0, scale = scale, nboot = 10)$boot_results
       set.seed(23)
       out <- flexEffect(pairs, p0, scale = scale, nboot = 10)$boot_results
-      expected <- ref[match(out$active, ref$active), ]
+      expected <- ref[match(out$assign, ref$assign), ]
       rownames(expected) <- NULL
       expect_equal(nrow(out), length(pairs))
       expect_equal(out, expected, tolerance = 1e-8)
@@ -115,10 +115,10 @@ test_that("a user model also works in the bootstrap refits", {
   local_custom_model()
   custom <- test_info(model.outcome = ~ testlm())
   builtin <- test_info()
-  p0 <- flexPotential(custom, c(0, 0, 0))
-  p1 <- flexPotential(custom, c(1, 0, 1))
-  q0 <- flexPotential(builtin, c(0, 0, 0))
-  q1 <- flexPotential(builtin, c(1, 0, 1))
+  p0 <- flexMean(custom, c(0, 0, 0))
+  p1 <- flexMean(custom, c(1, 0, 1))
+  q0 <- flexMean(builtin, c(0, 0, 0))
+  q1 <- flexMean(builtin, c(1, 0, 1))
   set.seed(24)
   custom_boot <- flexEffect(p1, p0, nboot = 10)$boot_results
   set.seed(24)

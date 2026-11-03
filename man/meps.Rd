@@ -53,7 +53,7 @@ Its documentation identifies the original source as the datasets accompanying
 data(meps)
 }
 \description{
-A person-level sample from the 2004 Medical Expenditure Panel Survey (MEPS),
+A sample from the 2004 Medical Expenditure Panel Survey (MEPS),
 containing demographic information, health measures, insurance coverage,
 healthcare spending, and service use.
 }
@@ -61,18 +61,9 @@ healthcare spending, and service use.
 This is the unchanged \code{meps} data object distributed in version 0.1.0
 of the \pkg{twopartm} package, including its column types and attributes.
 It has one row per person and no missing values.
-
-The columns \code{female}, \code{race_bl}, \code{race_oth}, \code{eth_hisp},
-\code{ed_hs}, \code{ed_hsplus}, \code{ed_col}, \code{ed_colplus},
-\code{reg_south}, \code{reg_west}, \code{anylim}, \code{ins_mcare},
-\code{ins_mcaid}, and \code{ins_unins} are factors with levels \code{"0"}
-and \code{"1"}. The columns \code{reg_midw} and \code{ins_dent} retain
-the upstream \code{haven_labelled} numeric class. The column \code{hieuidx}
-is character; the remaining columns are numeric.
 }
 \examples{
 data("meps")
-head(meps[, c("age", "female", "exp_tot")])
 }
 \references{
 Partha Deb, Edward C. Norton, and Willard G. Manning (2017).

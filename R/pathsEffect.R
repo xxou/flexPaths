@@ -1,8 +1,11 @@
 #' Causal Path-Specific Effect Estimation for Single Treatment
 #'
-#' This function estimates causal path-specific effects (PSE) for a single treatment,
-#' focusing on specific pathways through which the treatment influences the outcome.
-#' The estimation is based on the fitted models and data provided by the \code{pathsInfo} function.
+#' Estimates causal path-specific effects (PSEs) for a single binary treatment
+#' with K (>= 1) causally ordered mediators. The function estimates the effect
+#' along each mediator-specific pathway, A -> M_k -> ... -> Y, for k = 1, ..., K,
+#' as well as the direct effect along A -> Y.
+#' The estimation is based on analysis settings and model specifications
+#' provided by the \code{pathsInfo} function.
 #'
 #' **Decomposition Methods**:
 #' Path-specific effects can be decomposed in various ways to reveal how a treatment's effect is mediated through different pathways.
@@ -17,7 +20,9 @@
 #'    - For example, NPSEs can be interpreted as the average change in the outcome Y if a marginalized group had the same mediator values as a privileged group.
 #'    - Unlike CPSEs, NPSEs cannot be simply summed to represent the total effect in the presence of interactions between the treatment and mediators.
 #'
-#' @param pathsInfo An object of class \code{pathsInfo}, which is the output from the \code{pathsInfo} function, containing the necessary fitted models and data.
+#' @param pathsInfo An object of class \code{pathsInfo} containing the analysis settings
+#' and model specifications provided by the \code{pathsInfo} function.
+#' The analysis data are taken from \code{pathsInfo$data}.
 #' @param decomposition A character string specifying the method of decomposition to use for effect calculation. Options are "refer0" (aligned with CPSE) and "sequential" (aligned with NPSE). The default is "refer0".
 #' @param scale A character string specifying the scale of the effect. Options are
 #' \code{"diff"}, \code{"risk"}, and \code{"oddsratio"}. Direct standard errors,

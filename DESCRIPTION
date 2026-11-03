@@ -18,7 +18,6 @@ Description: Estimates identifiable path-specific means and effects in
     longitudinal settings are described in Ou, He, and Nabi (2026)
     <doi:10.48550/arXiv.2610.34349>.
 License: GPL-3
-Copyright: 2026 Xiaxian Ou
 URL: https://github.com/xxou/flexPaths
 BugReports: https://github.com/xxou/flexPaths/issues
 Encoding: UTF-8

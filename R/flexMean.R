@@ -1,27 +1,31 @@
-#' Causal Path-Specific Potential Outcome Calculation for Single Treatment
+#' Path-Specific Mean Estimation for a Single Binary Treatment
 #'
-#' This function calculates causal path-specific potential outcomes for a single binary treatment.
-#' Users can specify different levels of the treatment for each mediator (M1, M2, ..., Mk) and directly define the outcome (Y) to represent the potential outcome for a specific path or a combination of paths.
-#' The function supports various estimation methods, including EIF (Efficient Influence Function), IPW (Inverse Probability Weighting), and G-computation.
+#' Estimates a path-specific counterfactual mean for a single binary treatment
+#' and causally ordered mediators. The \code{assign} vector specifies treatment
+#' values on the edges into each mediator stage and the outcome, encoding the
+#' pathways of interest. Under the identification assumptions, the target mean
+#' is identified by the edge g-formula. Available estimators are inverse
+#' probability weighting (IPW), sequential regression-based g-computation (G),
+#' and efficient influence function-based estimation (EIF).
 #'
-#' @param pathsInfo An object of class \code{pathsInfo}, returned by \code{pathsInfo()},
-#' containing the analysis settings and model specifications. The analysis data
-#' are taken from \code{pathsInfo$data}.
-#' @param active A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order. Integer vectors are also accepted.
+#' @param pathsInfo An object of class \code{pathsInfo} containing the analysis settings
+#' and model specifications provided by the \code{pathsInfo} function.
+#' The analysis data are taken from \code{pathsInfo$data}.
+#' @param assign A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order. Integer vectors are also accepted.
 #' The last value in the vector corresponds to the treatment value for Y. The length of this vector should be equal to the number of mediators plus one (for the direct effect on Y).
 #' @param nboot An optional integer of at least 2 specifying the number of bootstrap
 #' samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.
 #'
-#' @return An object of class \code{flexPotential}, which includes the following components:
+#' @return An object of class \code{flexMean}, which includes the following components:
 #' \describe{
-#'   \item{\code{call}}{The matched call to the \code{flexPotential} function.}
+#'   \item{\code{call}}{The matched call to the \code{flexMean} function.}
 #'   \item{\code{pathsInfo}}{The original \code{pathsInfo} object used for the analysis.}
-#'   \item{\code{active}}{A vector representing the active values used for each mediator and the direct outcome.}
+#'   \item{\code{assign}}{A vector representing the assigned treatment values used for each mediator and the direct outcome.}
 #'   \item{\code{results}}{A data frame containing the calculated potential mean (value).
 #'   The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
 #'   \item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
 #'   \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
-#'   the active values, the original potential mean (value), its bootstrap standard
+#'   the treatment assignments, the original potential mean (value), its bootstrap standard
 #'   error (boot.SE), and the number of bootstrap samples (nboot).}
 #' }
 #'
@@ -34,10 +38,10 @@
 #'
 #' @export
 #'
-#' @example inst/examples/flexPotential-example.R
+#' @example inst/examples/flexMean-example.R
 #'
-flexPotential <- function(
-  pathsInfo, active, nboot = NULL  # M1, M2, M3,...,Direc
+flexMean <- function(
+  pathsInfo, assign, nboot = NULL  # M1, M2, M3,...,Direc
 ) {
   cl <- match.call()
   check_nboot(nboot)
@@ -55,20 +59,20 @@ flexPotential <- function(
 
   ### cov_x and mediators
   Km <- length(M.list)    # have Km mediators
-  if ((Km + 1) != length(active)) {
-    stop("Error: The length of 'active' must be equal to the length of 'M.list' + 1.
+  if ((Km + 1) != length(assign)) {
+    stop("Error: The length of 'assign' must be equal to the length of 'M.list' + 1.
          Please ensure both inputs are of the same length.")
   }
-  if (!is.numeric(active) || is.complex(active) || !is.null(dim(active)) ||
-    anyNA(active) || !all(active %in% c(0, 1))) {
-    stop("'active' must be a numeric vector containing only 0 and 1, without missing values.")
+  if (!is.numeric(assign) || is.complex(assign) || !is.null(dim(assign)) ||
+    anyNA(assign) || !all(assign %in% c(0, 1))) {
+    stop("'assign' must be a numeric vector containing only 0 and 1, without missing values.")
   }
 
   # combine the same value of path
-  M.index <- create_index(active)[-(Km + 1)]
+  M.index <- create_index(assign)[-(Km + 1)]
 
   M.list_s <- combine_item(M.list, M.index)
-  active_s <- rle(active)$values
+  assign_s <- rle(assign)$values
   cum_mediators <- Reduce(c, c(list(cov_x), M.list_s), accumulate = TRUE)
 
   K = length(cum_mediators) # K-1 combined mediators and cov
@@ -125,7 +129,7 @@ flexPotential <- function(
       model_fun <- match.fun(fit_names[[i]])
       modelfit <- model_fun(data, X = c(A, cum_mediators[[i]]), Y = "mu", fl_call = mu.calls[[i]])
 
-      Ai_data <- if (active_s[i] == 1) { A1_data } else { A0_data }
+      Ai_data <- if (assign_s[i] == 1) { A1_data } else { A0_data }
       mu.all[, i] <- predict(modelfit, Ai_data[, c(A, cum_mediators[[i]]), drop = FALSE])
     }
   }
@@ -137,7 +141,7 @@ flexPotential <- function(
 
 
     for (i in K:1) {
-      if (active_s[i] == 1) {
+      if (assign_s[i] == 1) {
         gA_X <- gA1_Mk_X.list[[1]]
         ratio_index = -1
       } else {
@@ -149,7 +153,7 @@ flexPotential <- function(
       product <- 1 # Initialize the product
     # Iterate through previous indices j < i
       for (j in seq_len(i - 1)) {
-        if (active_s[i] != active_s[j]) {
+        if (assign_s[i] != assign_s[j]) {
           product <- product *
             ((gA1_Mk_X.list[[j + 1]] / gA0_Mk_X.list[[j + 1]]) * (gA0_Mk_X.list[[j]] / gA1_Mk_X.list[[j]])) ^ (ratio_index)
         }
@@ -157,7 +161,7 @@ flexPotential <- function(
 
 
     # sub EIF function for each row
-      phi.all[, i + 1] = (I == active_s[i]) / gA_X * product * (mu.all[, i + 1] - mu.all[, i])
+      phi.all[, i + 1] = (I == assign_s[i]) / gA_X * product * (mu.all[, i + 1] - mu.all[, i])
     }
     potential_data = rowSums(phi.all)
   }
@@ -168,22 +172,22 @@ flexPotential <- function(
   }
 
   if (estimation == "IPW") {
-    if (active_s[K] == 1) { gA_X <- gA1_Mk_X.list[[1]]; ratio_index = -1
+    if (assign_s[K] == 1) { gA_X <- gA1_Mk_X.list[[1]]; ratio_index = -1
     } else { gA_X <- gA0_Mk_X.list[[1]]; ratio_index = 1 }
 
     # Bayes density ratio
     product <- 1 # Initialize the product
     # Iterate through previous indices j < i
     for (j in seq_len(K - 1)) {
-      if (active_s[K] != active_s[j]) {
+      if (assign_s[K] != assign_s[j]) {
         product <- product *
           ((gA1_Mk_X.list[[j + 1]] / gA0_Mk_X.list[[j + 1]]) * (gA0_Mk_X.list[[j]] / gA1_Mk_X.list[[j]])) ^ (ratio_index)
       }
     }
-    potential_data = (I == active_s[K]) / gA_X * product * data[, Y]
+    potential_data = (I == assign_s[K]) / gA_X * product * data[, Y]
   }
 
-  results = data.frame(active = paste0(as.character(active), collapse = ""),
+  results = data.frame(assign = paste0(as.character(assign), collapse = ""),
     value = mean(potential_data, na.rm = T)
   )
   if (estimation == "EIF") {
@@ -192,15 +196,15 @@ flexPotential <- function(
 
   output <- list(call = cl,
     pathsInfo = pathsInfo,
-    active = active,
+    assign = assign,
     results = results,
     potential_data = potential_data)
   if (!is.null(nboot)) {
     boot.values <- map_dbl(seq_len(nboot),
-      ~ one_boot.potential(pathsInfo, active, flexPotential))
-    output$boot_results <- data.frame(active = results$active, value = results$value,
+      ~ one_boot.potential(pathsInfo, assign, flexMean))
+    output$boot_results <- data.frame(assign = results$assign, value = results$value,
       boot.SE = sd(boot.values), nboot = nboot)
   }
-  class(output) <- 'flexPotential'
+  class(output) <- 'flexMean'
   return(output)
 }

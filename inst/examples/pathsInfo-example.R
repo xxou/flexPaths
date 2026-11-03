@@ -4,6 +4,7 @@
 data("singTreat")
 
 # EIF estimation
+# A single model specification is reused across the relevant stages.
 EIF_fit <- pathsInfo(
   data = singTreat,
   A = "Treat",
@@ -18,6 +19,8 @@ EIF_fit <- pathsInfo(
   model.treatment = ~bart(verbose = FALSE, ndpost = 200)
 )
 
+# Named entries select different treatment models for each conditioning set.
+# cov_x uses baseline covariates; M2 also includes stages M1 and M2.
 EIF_fit <- pathsInfo(
   data = singTreat,
   A = "Treat",
@@ -40,6 +43,7 @@ EIF_fit <- pathsInfo(
   )
 )
 
+# Named formulas allow different predictor terms at each stage.
 EIF_fit <- pathsInfo(
   data = singTreat,
   A = "Treat",

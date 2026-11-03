@@ -51,7 +51,7 @@ exactly two non-missing levels. It maps the first factor level to 0 and the seco
 to 1, respecting the order in `levels()` (including ordered factors). Set the
 factor levels before calling `pathsInfo()` to choose the reference level. Its
 returned `$data` contains numeric 0/1 treatment columns; use these codes for
-`active` in subsequent analyses. Rows containing missing values are dropped;
+`assign` in subsequent analyses. Rows containing missing values are dropped;
 the original input data frame is not modified.
 
 Direct standard errors are returned only for EIF potential means. For effects,
@@ -60,7 +60,7 @@ with EIF estimation and `scale = "diff"`; other results contain point estimates
 without these columns. Set `nboot` in `flexEffect()` or `pathsEffect()` for
 bootstrap standard errors and confidence intervals with any estimation method
 or scale. Bootstrap p-values are available only for `scale = "diff"`.
-Set `nboot` in `flexPotential()` or `mflexPotential()` for bootstrap mean standard
+Set `nboot` in `flexMean()` or `mflexMean()` for bootstrap mean standard
 errors. Their `$boot_results` contain the original mean and `boot.SE`, calculated
 by resampling individuals and refitting the models in each bootstrap sample.
 
@@ -149,17 +149,17 @@ results_seq
 
 ## 1.2 `flexEffect`: PSE for flexible pathway(s)
 
-The `flexEffect` function can get effect for any identified pathway or combined pathways by comparing two potential outcome from the function `flexPotential`.
+The `flexEffect` function can get effect for any identified pathway or combined pathways by comparing two potential outcome from the function `flexMean`.
 
-The `flexPotential` will calculate the **potential outcome** for user-specified counterfactual values.The argument active = $c(a_1, a_2, a)$ specifies the counterfatual value of $A$ for $M_1$, $M_2$, and $Y$ orderly.
+The `flexMean` will calculate the **potential outcome** for user-specified counterfactual values.The argument assign = $c(a_1, a_2, a)$ specifies the counterfatual value of $A$ for $M_1$, $M_2$, and $Y$ orderly.
 
 By comparing $\mathbb{E} (\phi(1,0,1))$ and $\mathbb{E} (\phi(0,0,0))$, we get the combined effect through $A \rightarrow M_1 \rightarrow Y$ and $A \rightarrow Y$
 
 ```{r}
-potential_outcome0 <- flexPotential(pathsInfo = EIF_fit, active = c(0, 0, 0))
-potential_outcome1 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 1))
-potential_outcome2 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 1, 0))
-potential_outcome3 <- flexPotential(pathsInfo = EIF_fit, active = c(1, 0, 0))
+potential_outcome0 <- flexMean(pathsInfo = EIF_fit, assign = c(0, 0, 0))
+potential_outcome1 <- flexMean(pathsInfo = EIF_fit, assign = c(1, 0, 1))
+potential_outcome2 <- flexMean(pathsInfo = EIF_fit, assign = c(1, 1, 0))
+potential_outcome3 <- flexMean(pathsInfo = EIF_fit, assign = c(1, 0, 0))
 
 
 flex_results <- flexEffect(p1 = potential_outcome1,
@@ -211,9 +211,9 @@ This can be represented in matrix form, where rows represent treatments and colu
 
 ## 2.1 `flexEffect`: PSE for flexible pathway(s)
 
-`flexEffect` is the same function as in the single treatment case. It can get effect for any identified pathway or combined pathways by comparing two potential outcome from the function `mflexPotential`.
+`flexEffect` is the same function as in the single treatment case. It can get effect for any identified pathway or combined pathways by comparing two potential outcome from the function `mflexMean`.
 
-The `mflexPotential` will calculate the **potential outcome** for user-specified counterfactual values in the scenario of multiple treatments. Inputs of counterfactual values are specified using a list. (The `mflexPotential` function can also be applied to single treatment scenarios; however, it may require more processing time compared to `flexPotential`.)
+The `mflexMean` will calculate the **potential outcome** for user-specified counterfactual values in the scenario of multiple treatments. Inputs of counterfactual values are specified using a list. (The `mflexMean` function can also be applied to single treatment scenarios; however, it may require more processing time compared to `flexMean`.)
 
 ```{r}
 data("multiTreat")
@@ -233,10 +233,10 @@ mfit<- pathsInfo(data = multiTreat,
                  
 )
 
-mp1<-mflexPotential(active = list(a1=c(0,0,1),
+mp1<-mflexMean(assign = list(a1=c(0,0,1),
                                   a2=c(NA,0,1)),
                     mfit)
-mp2<-mflexPotential(active = list(a1=c(0,0,0),
+mp2<-mflexMean(assign = list(a1=c(0,0,0),
                                   a2=c(NA,0,0)),
                     mfit)
 
