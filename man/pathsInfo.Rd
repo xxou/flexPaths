@@ -40,26 +40,48 @@ Alternatively, you can list them in order using \code{list(c("mediator1_1", "med
 Direct standard errors are provided only for EIF potential means and EIF effects
 on the difference scale. Use bootstrapping for uncertainty estimation otherwise.}
 
-\item{model.treatment}{If you select "G" for estimation, this parameter is not needed. Otherwise, provide a formula or list of formulas for modeling the propensity score
-(for \eqn{K} mediators, you need \eqn{K+1} models for \eqn{P(A|X)}, \eqn{P(A|M_1, X)}, ..., \eqn{P(A|M_K, X)}).
+\item{model.treatment}{Not used for "G" estimation. A model specification for
+the conditional treatment probabilities \eqn{P(A \mid \ldots)} required by
+the estimator. Supply one formula or a list containing one formula to apply
+the same fitting specification to all required treatment regressions.
+This applies to both single and repeated treatments.
 \itemize{
-\item Provide a single formula or a list containing one formula. This formula will be applied to all propensity models.
-\item Alternatively, provide a list of formulas with names, e.g., \code{list(cov_x = ~glm(family = binomial()), M1 = ~bart(), ..., MK = ~glm(family = binomial()))}. If no names are provided, the formulas will correspond to \eqn{P(A|X)}, \eqn{P(A|M_1, X)}, ..., \eqn{P(A|M_1, M_2, ..., M_K, X)} in order.
-\item Each formula can come from functions like \code{glm}, \code{bart}, or \code{Superlearner}. The arguments are the same as in their original functions, except that you do not need to specify the variables already provided in \code{data}.
-To create a custom model, copy the file located by
-\code{system.file("templates", "fl_model_template.R", package = "flexPaths")},
-adapt the fitting and prediction functions, and source it into the global environment.
+\item For a single treatment only, a list of \eqn{K+1} formulas may instead
+specify \eqn{P(A \mid X)}, \eqn{P(A \mid M_1, X)}, ...,
+\eqn{P(A \mid M_1, \ldots, M_K, X)}, in that order. The list may be named
+\code{cov_x}, \code{M1}, ..., \code{MK}. For repeated treatments, use one
+common formula. A common specification is recommended; see Details.
+\item Formulas may use \code{glm}, \code{bart}, or \code{SuperLearner}.
+Supply the fitting arguments; the package supplies the response and predictors.
+To create a custom model, copy the template located by:
+\preformatted{
+  system.file("templates", "fl_model_template.R",
+              package = "flexPaths")
+  }
+Adapt the fitting and prediction functions, and source it into the global environment.
 }}
 
-\item{model.outcome}{If you select "IPW" for estimation, this parameter is not needed. Otherwise, provide the model for outcome regression
-(e.g., \eqn{E(Y|A,X)}, \eqn{E(Y|M_1, A,X)}, ..., \eqn{E(Y|M_1, M_2, ..., M_K, A, X)}). This parameter follows the same logic as \code{model.treatment}.}
+\item{model.outcome}{Not used for "IPW" estimation. Supply one formula or a
+list containing one formula for outcome regression. For repeated treatments,
+this common fitting specification is used with the required predictor sets.
+For a single treatment only, a list of \eqn{K+1} formulas may instead specify
+\eqn{E(Y \mid A, X)}, \eqn{E(Y \mid A, M_1, X)}, ...,
+\eqn{E(Y \mid A, M_1, \ldots, M_K, X)}, in that order, with the same naming
+convention as \code{model.treatment}.}
 
-\item{model.iter}{If you select "IPW" for estimation, this parameter is not needed. This parameter is used for modeling the iterative outcome regression
-(e.g., \eqn{E(Y|M_1, X)}, ..., \eqn{E(Y|M_1, M_2, ..., M_K, X)}) with predictors \eqn{(A,X)}, \eqn{(M_1, A,X)}, ..., \eqn{(\overline{M}_{k-1}, A,X)}, and for higher layers of iterative modeling.
+\item{model.iter}{Not used for "IPW" estimation. Specifies the sequential
+regressions, which regress fitted values from the next stage on the current
+treatment and covariate history.
 \itemize{
-\item If you do not provide input, the iterative model will use the \code{model.outcome} fitting corresponding predictors, with the Gaussian family applied to all.
-\item You can input a single formula or a list containing one formula, which will be applied to all iterative regression models.
-\item Alternatively, input \eqn{K} models for \eqn{(A,X)}, \eqn{(M_1, A,X)}, ..., \eqn{(\overline{M}_{k-1}, A,X)}, which will be used as the predictors for iterative regression models.
+\item If \code{NULL}, the corresponding \code{model.outcome} specifications
+are reused with the Gaussian family.
+\item Supply one formula or a list containing one formula for all sequential
+regressions. For repeated treatments, use this common specification.
+We recommend this common specification to reduce errors in specifying
+and ordering separate regression models.
+\item For a single treatment only, a list of \eqn{K} formulas may instead
+specify regressions with predictors \eqn{(A, X)}, \eqn{(A, M_1, X)}, ...,
+\eqn{(A, M_1, \ldots, M_{K-1}, X)}, in that order.
 }}
 }
 \value{
@@ -82,6 +104,13 @@ Otherwise, an object of class \code{pathsInfo}, which is a list containing the f
 This function sets up the necessary components for conducting a causal path-specific analysis.
 It prepares the data, analysis settings, and model specifications required
 for further mean and effect calculations.
+}
+\details{
+We recommend a common \code{SuperLearner} specification within each
+of \code{model.treatment} and \code{model.outcome}, with an appropriate
+\code{family} and a library of candidate learners, to improve prediction and
+reduce reliance on a single parametric model. Using one specification for
+each argument is simpler than specifying every regression separately.
 }
 \examples{
 # ***************************************

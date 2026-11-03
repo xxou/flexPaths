@@ -125,13 +125,13 @@ mfit <- pathsInfo(data = multiTreat,
 # Each vector specifies the treatment values for (M1, M2, M3, M4, M5, M6, Y).
 # NA indicates mediator stages that occur before the corresponding treatment.
 mp1 <- mflexMean(assign = list(a1 = c(0,  1,  0,  0, 1, 0, 0),
-                                    a2 = c(1,  0,  1,  1, 1, 0, 0),
-                                    a3 = c(NA, NA, NA, 1, 0, 0, 0)),
-                      mfit)
+                               a2 = c(1,  0,  1,  1, 1, 0, 0),
+                               a3 = c(NA, NA, NA, 1, 0, 0, 0)),
+                 mfit)
 mp2 <- mflexMean(assign = list(a1 = c(0,  0,  0,  0, 1, 0, 0),
-                                    a2 = c(0,  0,  0,  1, 1, 0, 0),
-                                    a3 = c(NA, NA, NA, 1, 0, 0, 0)),
-                      mfit)
+                               a2 = c(0,  0,  0,  1, 1, 0, 0),
+                               a3 = c(NA, NA, NA, 1, 0, 0, 0)),
+                 mfit)
 
 flexEffect(p1 = mp1, p0 = mp2,
            scale = "diff", CI_level = 0.95)

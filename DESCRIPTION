@@ -14,28 +14,18 @@ Description: Estimates identifiable path-specific means and effects in
     a single binary treatment or repeated binary treatments. The package
     provides inverse probability weighting, plug-in g-computation, and
     influence-function-based estimators, with flexible modeling options for
-    treatment assignment mechanisms and outcome regressions. Methods for
-    longitudinal settings are described in Ou, He, and Nabi (2026)
-    <doi:10.48550/arXiv.2610.34349>.
+    treatment assignment mechanisms and outcome regressions. The implementation
+    uses a regression-based representation: sequential outcome regressions
+    replace integrations, and Bayes' rule expresses mediator-density ratios
+    through treatment-history probabilities, avoiding direct mediator-density
+    estimation. Methods for longitudinal settings are described in Ou, He,
+    and Nabi (2026) <doi:10.48550/arXiv.2610.34349>.
 License: GPL-3
 URL: https://github.com/xxou/flexPaths
 BugReports: https://github.com/xxou/flexPaths/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Imports:
-    dbarts,
-    dplyr (>= 1.1.0),
-    parallel,
-    purrr,
-    stats,
-    SuperLearner
-Suggests:
-    gam,
-    knitr,
-    randomForest,
-    rmarkdown,
-    testthat (>= 3.0.0),
-    withr,
-    xgboost
+Imports: dbarts, dplyr (>= 1.1.0), parallel, purrr, stats, SuperLearner
+Suggests: gam, knitr, randomForest, rmarkdown, testthat (>= 3.0.0), withr, xgboost
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0

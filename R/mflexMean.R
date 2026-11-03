@@ -1,19 +1,20 @@
 #' Path-Specific Mean Estimation for Repeated Binary Treatments
 #'
 #' Estimates a path-specific counterfactual mean in longitudinal studies with
-#' repeated binary treatments and causally ordered mediators. The \code{assign}
-#' list specifies the treatment history assigned to each mediator stage and the
+#' repeated binary treatments.
+#' The \code{assign} list specifies the treatment history assigned to each mediator stage and the
 #' outcome, respecting their temporal ordering. Under the identification
 #' assumptions, the target mean is identified by the edge g-formula. Available
-#' estimators are inverse probability weighting (IPW), sequential regression-based
-#' g-computation (G), and efficient influence function-based estimation (EIF).
+#' estimators are inverse probability weighting (IPW), plug-in g-computation (G), and efficient influence function-based estimation (EIF).
 #'
 #' @param pathsInfo An object of class \code{pathsInfo} containing the analysis settings
 #' and model specifications provided by the \code{pathsInfo} function.
-#' The analysis data are taken from \code{pathsInfo$data}.
-#' @param assign A list of numeric vectors, with one vector per treatment in the order of \code{pathsInfo$A}. Integer vectors are also accepted.
-#' Each vector must have length \code{length(pathsInfo$M.list) + 1}, with entries for mediator stages M1 to Mk followed by the outcome Y.
-#' Values must be 0 or 1. Use \code{NA} for mediator stages that occur before the corresponding treatment; \code{NaN} is not allowed.
+#' @param assign A list of numeric vectors, one for each treatment in the
+#'   order specified by \code{pathsInfo$A}. Each vector must have length
+#'   equal to the number of mediators plus one, specifying treatment
+#'   assignments for mediator stages M1 to Mk and the outcome Y.
+#'   Values must be 0 or 1, with \code{NA} indicating mediator stages
+#'   that precede the corresponding treatment. \code{NaN} is not allowed.
 #' @param nboot An optional integer of at least 2 specifying the number of bootstrap
 #' samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.
 #'
@@ -24,7 +25,8 @@
 #'   \item{\code{assign}}{A matrix representing the assigned treatment values used for each mediator and the direct outcome.}
 #'   \item{\code{results}}{A data frame containing the calculated potential mean (value).
 #'   The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
-#'   \item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
+#'   \item{\code{potential_data}}{A numeric vector of observation-level
+#'   contributions to the mean estimator.}
 #'   \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
 #'   the treatment assignments, the original potential mean (value), its bootstrap standard
 #'   error (boot.SE), and the number of bootstrap samples (nboot).}
@@ -32,7 +34,6 @@
 #'
 #' @details Bootstrapping resamples individuals with replacement and refits all
 #' required models in each sample. It is available for EIF, G, and IPW estimation.
-#' The bootstrap standard error is the sample standard deviation of the bootstrap means.
 #'
 #' @import stats purrr
 #' @import SuperLearner dbarts

@@ -8,12 +8,14 @@ mflexMean(pathsInfo, assign, nboot = NULL)
 }
 \arguments{
 \item{pathsInfo}{An object of class \code{pathsInfo} containing the analysis settings
-and model specifications provided by the \code{pathsInfo} function.
-The analysis data are taken from \code{pathsInfo$data}.}
+and model specifications provided by the \code{pathsInfo} function.}
 
-\item{assign}{A list of numeric vectors, with one vector per treatment in the order of \code{pathsInfo$A}. Integer vectors are also accepted.
-Each vector must have length \code{length(pathsInfo$M.list) + 1}, with entries for mediator stages M1 to Mk followed by the outcome Y.
-Values must be 0 or 1. Use \code{NA} for mediator stages that occur before the corresponding treatment; \code{NaN} is not allowed.}
+\item{assign}{A list of numeric vectors, one for each treatment in the
+order specified by \code{pathsInfo$A}. Each vector must have length
+equal to the number of mediators plus one, specifying treatment
+assignments for mediator stages M1 to Mk and the outcome Y.
+Values must be 0 or 1, with \code{NA} indicating mediator stages
+that precede the corresponding treatment. \code{NaN} is not allowed.}
 
 \item{nboot}{An optional integer of at least 2 specifying the number of bootstrap
 samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.}
@@ -26,7 +28,8 @@ An object of class \code{mflexMean}, which includes the following components:
 \item{\code{assign}}{A matrix representing the assigned treatment values used for each mediator and the direct outcome.}
 \item{\code{results}}{A data frame containing the calculated potential mean (value).
 The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
-\item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
+\item{\code{potential_data}}{A numeric vector of observation-level
+contributions to the mean estimator.}
 \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
 the treatment assignments, the original potential mean (value), its bootstrap standard
 error (boot.SE), and the number of bootstrap samples (nboot).}
@@ -34,21 +37,19 @@ error (boot.SE), and the number of bootstrap samples (nboot).}
 }
 \description{
 Estimates a path-specific counterfactual mean in longitudinal studies with
-repeated binary treatments and causally ordered mediators. The \code{assign}
-list specifies the treatment history assigned to each mediator stage and the
+repeated binary treatments.
+The \code{assign} list specifies the treatment history assigned to each mediator stage and the
 outcome, respecting their temporal ordering. Under the identification
 assumptions, the target mean is identified by the edge g-formula. Available
-estimators are inverse probability weighting (IPW), sequential regression-based
-g-computation (G), and efficient influence function-based estimation (EIF).
+estimators are inverse probability weighting (IPW), plug-in g-computation (G), and efficient influence function-based estimation (EIF).
 }
 \details{
 Bootstrapping resamples individuals with replacement and refits all
 required models in each sample. It is available for EIF, G, and IPW estimation.
-The bootstrap standard error is the sample standard deviation of the bootstrap means.
 }
 \examples{
 # ******************************************************************************
-#    Potential outcome for flexible pathway in multiple treatments
+#    Path-specific mean for a flexible pathway in multiple treatments
 # ******************************************************************************
 data("multiTreat")
 
@@ -58,24 +59,21 @@ mfit <- pathsInfo(data = multiTreat,
                                 M4 = "M4", M5 = "M5", M6 = "M6"),
                   estimation = "EIF",
                   model.treatment = list(~glm(family = binomial())),
-                  model.outcome = list(
-                    ~SuperLearner(SL.library = "SL.mean", family = gaussian())
-                  ),
-                  model.iter = list(~glm(family = gaussian()))
+                  model.outcome = list(~glm(family = gaussian()))
 )
-# EIF potential means include SE.
+
 # assign contains one vector for each treatment: T1, T2 and T3, in that order.
 # Each vector gives treatment values for (M1, M2, M3, M4, M5, M6, Y).
 # NA marks stages before that treatment; here T3 starts after M3.
 mp1 <- mflexMean(assign = list(a1 = c(0, 1, 0, 0, 1, 0, 0),
-                                   a2 = c(1, 0, 1, 1, 1, 0, 0),
-                                   a3 = c(NA, NA, NA, 1, 0, 0, 0)),
-                      mfit)
+                               a2 = c(1, 0, 1, 1, 1, 0, 0),
+                               a3 = c(NA, NA, NA, 1, 0, 0, 0)),
+                 mfit)
 # mp2 changes T1's assignment for M2 and T2's assignments for M1 and M3.
 mp2 <- mflexMean(assign = list(a1 = c(0, 0, 0, 0, 1, 0, 0),
-                                   a2 = c(0, 0, 0, 1, 1, 0, 0),
-                                   a3 = c(NA, NA, NA, 1, 0, 0, 0)),
-                      mfit)
+                               a2 = c(0, 0, 0, 1, 1, 0, 0),
+                               a3 = c(NA, NA, NA, 1, 0, 0, 0)),
+                 mfit)
 # G/IPW omit direct SE; use nboot for bootstrap SE with any method.
 # A small IPW example; 10 bootstrap samples are for illustration only.
 IPW_fit <- pathsInfo(
@@ -84,5 +82,6 @@ IPW_fit <- pathsInfo(
   model.treatment = ~glm(family = binomial()))
 set.seed(123)
 # Each vector is ordered as (M1, M2, Y); both treatments are set to 1 throughout.
+# Only consider the data structure: T1, T2, M1, M2, Y
 mflexMean(IPW_fit, list(c(1, 1, 1), c(1, 1, 1)), nboot = 10)
 }

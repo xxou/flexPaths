@@ -8,11 +8,9 @@ flexMean(pathsInfo, assign, nboot = NULL)
 }
 \arguments{
 \item{pathsInfo}{An object of class \code{pathsInfo} containing the analysis settings
-and model specifications provided by the \code{pathsInfo} function.
-The analysis data are taken from \code{pathsInfo$data}.}
+and model specifications provided by the \code{pathsInfo} function.}
 
-\item{assign}{A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order. Integer vectors are also accepted.
-The last value in the vector corresponds to the treatment value for Y. The length of this vector should be equal to the number of mediators plus one (for the direct effect on Y).}
+\item{assign}{A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order.}
 
 \item{nboot}{An optional integer of at least 2 specifying the number of bootstrap
 samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.}
@@ -25,44 +23,45 @@ An object of class \code{flexMean}, which includes the following components:
 \item{\code{assign}}{A vector representing the assigned treatment values used for each mediator and the direct outcome.}
 \item{\code{results}}{A data frame containing the calculated potential mean (value).
 The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
-\item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
+\item{\code{potential_data}}{A numeric vector of observation-level
+contributions to the mean estimator.}
 \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
 the treatment assignments, the original potential mean (value), its bootstrap standard
 error (boot.SE), and the number of bootstrap samples (nboot).}
 }
 }
 \description{
-Estimates a path-specific counterfactual mean for a single binary treatment
-and causally ordered mediators. The \code{assign} vector specifies treatment
+Estimates a path-specific counterfactual mean for a single binary treatment.
+The \code{assign} vector specifies treatment
 values on the edges into each mediator stage and the outcome, encoding the
 pathways of interest. Under the identification assumptions, the target mean
 is identified by the edge g-formula. Available estimators are inverse
-probability weighting (IPW), sequential regression-based g-computation (G),
-and efficient influence function-based estimation (EIF).
+probability weighting (IPW), plug-in g-computation (G), and efficient influence function-based estimation (EIF).
 }
 \details{
 Bootstrapping resamples individuals with replacement and refits all
 required models in each sample. It is available for EIF, G, and IPW estimation.
-The bootstrap standard error is the sample standard deviation of the bootstrap means.
 }
 \examples{
 # ******************************************************************************
-#    Potential outcome for flexible pathway in one single treatment
+#    Path-specific mean for a flexible pathway in one single treatment
 # ******************************************************************************
 
 data("singTreat")
 
 # input information for PSE
-EIF_fit <- pathsInfo(data = singTreat, A = "Treat", Y = "Outcome1", cov_x = c("X1", "X2"),
-                    M.list = list(M1 = "Med1", M2 = c("Med2_1", "Med2_2"),
-                                  M3 = "Med3"),
-                    estimation = "EIF",
-                    model.outcome = ~glm(family = gaussian()),
-                    model.treatment = ~glm(family = binomial())
+EIF_fit <- pathsInfo(data = singTreat, A = "Treat",
+                     Y = "Outcome1", cov_x = c("X1", "X2"),
+                     M.list = list(M1 = "Med1",
+                                   M2 = c("Med2_1", "Med2_2"),
+                                   M3 = "Med3"),
+                     estimation = "EIF",
+                     model.outcome = ~glm(family = gaussian()),
+                     model.treatment = ~glm(family = binomial())
 )
 
 
-# EIF potential means include SE.
+
 # assign gives treatment values for (M1, M2, M3, Y), not mediator values.
 # M2 is one stage containing both Med2_1 and Med2_2.
 # c(0, 0, 0, 0) uses treatment 0 throughout.
@@ -74,9 +73,12 @@ potential_outcome3 <- flexMean(pathsInfo = EIF_fit, assign = c(1, 0, 0, 0))
 
 # G and IPW potential means omit SE.
 G_fit <- pathsInfo(
-  data = singTreat[1:200, ], A = "Treat", Y = "Outcome1",
-  cov_x = c("X1", "X2"), M.list = list(M1 = "Med1"),
-  estimation = "G", model.outcome = ~lm()
+  data = singTreat[1:200, ],
+  A = "Treat", Y = "Outcome1",
+  cov_x = c("X1", "X2"),
+  M.list = list(M1 = "Med1"),
+  estimation = "G",
+  model.outcome = ~lm()
 )
 # With one mediator stage, c(1, 0) uses treatment 1 for M1 and 0 for Y.
 flexMean(G_fit, c(1, 0))

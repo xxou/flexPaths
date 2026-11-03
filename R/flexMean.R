@@ -1,18 +1,15 @@
 #' Path-Specific Mean Estimation for a Single Binary Treatment
 #'
-#' Estimates a path-specific counterfactual mean for a single binary treatment
-#' and causally ordered mediators. The \code{assign} vector specifies treatment
+#' Estimates a path-specific counterfactual mean for a single binary treatment.
+#' The \code{assign} vector specifies treatment
 #' values on the edges into each mediator stage and the outcome, encoding the
 #' pathways of interest. Under the identification assumptions, the target mean
 #' is identified by the edge g-formula. Available estimators are inverse
-#' probability weighting (IPW), sequential regression-based g-computation (G),
-#' and efficient influence function-based estimation (EIF).
+#' probability weighting (IPW), plug-in g-computation (G), and efficient influence function-based estimation (EIF).
 #'
 #' @param pathsInfo An object of class \code{pathsInfo} containing the analysis settings
 #' and model specifications provided by the \code{pathsInfo} function.
-#' The analysis data are taken from \code{pathsInfo$data}.
-#' @param assign A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order. Integer vectors are also accepted.
-#' The last value in the vector corresponds to the treatment value for Y. The length of this vector should be equal to the number of mediators plus one (for the direct effect on Y).
+#' @param assign A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order.
 #' @param nboot An optional integer of at least 2 specifying the number of bootstrap
 #' samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.
 #'
@@ -23,7 +20,8 @@
 #'   \item{\code{assign}}{A vector representing the assigned treatment values used for each mediator and the direct outcome.}
 #'   \item{\code{results}}{A data frame containing the calculated potential mean (value).
 #'   The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
-#'   \item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
+#'   \item{\code{potential_data}}{A numeric vector of observation-level
+#'   contributions to the mean estimator.}
 #'   \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
 #'   the treatment assignments, the original potential mean (value), its bootstrap standard
 #'   error (boot.SE), and the number of bootstrap samples (nboot).}
@@ -31,7 +29,6 @@
 #'
 #' @details Bootstrapping resamples individuals with replacement and refits all
 #' required models in each sample. It is available for EIF, G, and IPW estimation.
-#' The bootstrap standard error is the sample standard deviation of the bootstrap means.
 #'
 #' @import stats purrr
 #' @import SuperLearner dbarts

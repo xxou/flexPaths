@@ -15,10 +15,12 @@ pathsEffect(
 }
 \arguments{
 \item{pathsInfo}{An object of class \code{pathsInfo} containing the analysis settings
-and model specifications provided by the \code{pathsInfo} function.
-The analysis data are taken from \code{pathsInfo$data}.}
+and model specifications provided by the \code{pathsInfo} function.}
 
-\item{decomposition}{A character string specifying the method of decomposition to use for effect calculation. Options are "refer0" (aligned with CPSE) and "sequential" (aligned with NPSE). The default is "refer0".}
+\item{decomposition}{A character string specifying the decomposition method:
+\code{"refer0"} for natural path-specific effects (NPSEs), or
+\code{"sequential"} for cumulative path-specific effects (CPSEs).
+The default is \code{"refer0"}.}
 
 \item{scale}{A character string specifying the scale of the effect. Options are
 \code{"diff"}, \code{"risk"}, and \code{"oddsratio"}. Direct standard errors,
@@ -42,7 +44,9 @@ An object of class \code{pathsEffect}, containing the following components:
 \item{\code{scale}}{The scale used for the effect estimation, such as "diff", "risk", or "oddsratio".}
 \item{\code{CI_level}}{The confidence level used for the confidence intervals.}
 \item{\code{data}}{The original data set that was used for the analysis.}
-\item{\code{potential_data}}{The potential outcome data generated during the analysis.}
+\item{\code{potential_data}}{A data frame of observation-level contributions
+to the mean estimators, with one column for each treatment assignment used
+in the effect contrasts.}
 \item{\code{results}}{A data frame containing the estimated effects for each path.
 SE, CI.lower, CI.upper, and P.value are included only for EIF estimation
 with \code{scale = "diff"}; otherwise, these columns are omitted.}
@@ -61,22 +65,20 @@ The estimation is based on analysis settings and model specifications
 provided by the \code{pathsInfo} function.
 }
 \details{
-\strong{Decomposition Methods}:
-Path-specific effects can be decomposed in various ways to reveal how a treatment's effect is mediated through different pathways.
-This function supports two primary methods of decomposition:
-\enumerate{
-\item \strong{Cumulative Path-Specific Effects (CPSE)}:
+\strong{Decomposition methods:} Both options compare means defined by
+different treatment assignments, as specified by \code{assign} in \code{flexMean}.
+The entries correspond to the mediator stages followed by the outcome.
 \itemize{
-\item This method captures the effect of a treatment by sequentially activating all pathways that involve a particular mediator while blocking others.
-\item These CPSEs can be summed to yield the total effect of the treatment, allowing the decomposition of the total effect into path-specific components. This method is particularly useful for calculating the proportion of mediation.
+\item \code{"refer0"} gives natural path-specific effects (NPSEs).
+Each pathway-specific assignment is compared with the same all-zero
+reference. These effects need not sum to the total effect.
+\item \code{"sequential"} gives cumulative path-specific effects (CPSEs).
+Adjacent assignments are compared as treatment values are changed from
+1 to 0, one mediator stage at a time, followed by the outcome.
+On the difference scale, these effects sum to the total effect.
 }
-\item \strong{Natural Path-Specific Effects (NPSE)}:
-\itemize{
-\item NPSEs focus on the specific pathways of interest by treating the treatment variable as set to an 'active' value (A = 1) in some pathways while keeping it at a 'baseline' value (A = 0) in others. This approach helps in isolating the main effect of each mediator.
-\item For example, NPSEs can be interpreted as the average change in the outcome Y if a marginalized group had the same mediator values as a privileged group.
-\item Unlike CPSEs, NPSEs cannot be simply summed to represent the total effect in the presence of interactions between the treatment and mediators.
-}
-}
+The examples below show the assignment contrasts for three mediator stages
+and illustrate how to express them using \code{flexMean} and \code{flexEffect}.
 }
 \examples{
 # ******************************************************************************
@@ -91,32 +93,38 @@ EIF_fit <- pathsInfo(
   A = "Treat",
   Y = "Outcome1",
   cov_x = c("X1", "X2"),
-  M.list = list(M1 = "Med1", M2 = c("Med2_1", "Med2_2"), M3 = "Med3"),
+  M.list = list(M1 = "Med1",
+                M2 = c("Med2_1", "Med2_2"),
+                M3 = "Med3"),
   estimation = "EIF",
   model.outcome = ~glm(family = gaussian()),
   model.treatment = ~glm(family = binomial())
 )
 
-# EIF differences include SE, confidence intervals and p-values.
-# 0 reference decomposition
-# Compare each single-stage assignment of 1 with assign = c(0, 0, 0, 0).
+
+# 0 reference decomposition: natural path-specific effects
+# In flexMean(), assign follows (M1, M2, M3, Y); 1000 means c(1, 0, 0, 0).
+# On the difference scale, the mean contrasts are:
+#   M1: 1000 - 0000; M2: 0100 - 0000; M3: 0010 - 0000; direct: 0001 - 0000.
+# For example, the M1 target contrast can be expressed as:
+# flexEffect(p1 = flexMean(EIF_fit, assign = c(1, 0, 0, 0)),
+#            p0 = flexMean(EIF_fit, assign = c(0, 0, 0, 0)), scale = "diff")
 results_refer0 <- pathsEffect(
   pathsInfo = EIF_fit,
   decomposition = "refer0",
   scale = "diff", CI_level = 0.95
 )
 
-# sequential decomposition
-# Compare adjacent assignments: 1111, 0111, 0011, 0001, then 0000,
-# where the four positions represent (M1, M2, M3, Y).
+# sequential decomposition: cumulative path-specific effects
+#   M1: 1111 - 0111; M2: 0111 - 0011; M3: 0011 - 0001; direct: 0001 - 0000.
+# These contrasts sum to the total effect, 1111 - 0000.
+# Here the M1 comparison keeps the remaining entries at 1, rather than 0:
+# flexEffect(p1 = flexMean(EIF_fit, assign = c(1, 1, 1, 1)),
+#            p0 = flexMean(EIF_fit, assign = c(0, 1, 1, 1)), scale = "diff")
 results_seq <- pathsEffect(
   pathsInfo = EIF_fit,
   decomposition = "sequential",
   scale = "diff", CI_level = 0.95
 )
 
-# G/IPW and risk/oddsratio results contain only point estimates without nboot.
-# Use nboot for bootstrap SE and intervals with any estimation method.
-# Bootstrap p-values are returned only on the difference scale.
-# For a small bootstrap example, see help("flexEffect").
 }
