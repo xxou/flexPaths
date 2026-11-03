@@ -20,7 +20,11 @@ test_that("fixed two-treatment regimes agree with independent sequential formula
       ref <- reference_multi(data, a1, a2, estimation)
       expect_equal(as.numeric(out$potential_data), ref, tolerance = 1e-8)
       expect_equal(out$results$value, mean(ref), tolerance = 1e-8)
-      expect_equal(out$results$SE, sd(ref) / sqrt(nrow(data)), tolerance = 1e-8)
+      if (estimation == "EIF") {
+        expect_equal(out$results$SE, sd(ref) / sqrt(nrow(data)), tolerance = 1e-8)
+      } else {
+        expect_named(out$results, c("active", "value"))
+      }
     }
   }
 })

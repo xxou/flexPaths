@@ -1,25 +1,21 @@
 Package: flexPaths
+Type: Package
 Title: Causal Path-Specific Effect Estimation in Flexible Settings
 Version: 0.1.0
 Authors@R: c(
     person("Xiaxian", "Ou", email = "xiaxian.ou@emory.edu",
-           role = c("aut", "cre", "cph"),
+           role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2905-8287")),
-    person("Xinwei", "He", role = "aut",
-           comment = "Contributed to the theoretical methodology"),
-    person("Razieh", "Nabi", role = "aut",
-           comment = "Contributed to the theoretical methodology")
+    person("Xinwei", "He", role = "aut"),
+    person("Razieh", "Nabi", role = "aut")
     )
-Description: Estimates causal path-specific means and effects with a single
-    binary treatment or repeated binary treatments and multiple ordered
-    mediators using wide-format data with one row per individual. Provides
-    inverse probability weighting, plug-in g-computation,
-    and influence-function-based estimators, with flexible models for
-    treatment and outcome regressions. Supports linear and generalized linear
-    models, Bayesian additive regression trees, and
-    ensemble learning through 'SuperLearner'. Users can implement custom model
-    fitting and prediction functions using the provided template. Methods for
-    longitudinal settings are described in Ou, He and Nabi (2026)
+Description: Estimates identifiable path-specific means and effects in
+    longitudinal studies with multiple causally ordered mediators and either
+    a single binary treatment or repeated binary treatments. The package
+    provides inverse probability weighting, plug-in g-computation, and
+    influence-function-based estimators, with flexible modeling options for
+    treatment assignment mechanisms and outcome regressions. Methods for
+    longitudinal settings are described in Ou, He, and Nabi (2026)
     <doi:10.48550/arXiv.2610.34349>.
 License: GPL-3
 Copyright: 2026 Xiaxian Ou

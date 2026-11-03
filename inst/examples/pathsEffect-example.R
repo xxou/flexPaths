@@ -16,6 +16,7 @@ EIF_fit <- pathsInfo(
   model.treatment = ~glm(family = binomial())
 )
 
+# EIF differences include SE, confidence intervals and p-values.
 # 0 reference decomposition
 results_refer0 <- pathsEffect(
   pathsInfo = EIF_fit,
@@ -34,4 +35,7 @@ results_seq <- pathsEffect(
 )
 results_seq
 
+# G/IPW and risk/oddsratio results contain only point estimates without nboot.
+# Use nboot for bootstrap SE and intervals with any estimation method.
+# Bootstrap p-values are returned only on the difference scale.
 # For a small bootstrap example, see help("flexEffect").

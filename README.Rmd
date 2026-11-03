@@ -54,6 +54,16 @@ returned `$data` contains numeric 0/1 treatment columns; use these codes for
 `active` in subsequent analyses. Rows containing missing values are dropped;
 the original input data frame is not modified.
 
+Direct standard errors are returned only for EIF potential means. For effects,
+direct standard errors, confidence intervals and p-values are returned only
+with EIF estimation and `scale = "diff"`; other results contain point estimates
+without these columns. Set `nboot` in `flexEffect()` or `pathsEffect()` for
+bootstrap standard errors and confidence intervals with any estimation method
+or scale. Bootstrap p-values are available only for `scale = "diff"`.
+Set `nboot` in `flexPotential()` or `mflexPotential()` for bootstrap mean standard
+errors. Their `$boot_results` contain the original mean and `boot.SE`, calculated
+by resampling individuals and refitting the models in each bootstrap sample.
+
 # 0. Installation:
 
 ```{r, eval=FALSE}

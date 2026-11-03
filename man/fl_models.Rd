@@ -34,8 +34,10 @@ fl_lm(data, X = c(""), Y = " ", fl_call)
 
 \item{Y}{Response column name in \code{data}.}
 
-\item{fl_call}{An unevaluated model call, for example
-\code{quote(glm(family = binomial()))}. All arguments in the call must be named.}
+\item{fl_call}{An unevaluated model call specifying the additional
+arguments for the underlying fitting function, excluding \code{data}, \code{X},
+and \code{Y}, which are supplied automatically by the wrapper. For example,
+\code{quote(glm(family = binomial()))}.}
 
 \item{object}{A fitted object returned by the corresponding wrapper.}
 
@@ -46,24 +48,12 @@ fl_lm(data, X = c(""), Y = " ", fl_call)
 \value{
 A list with the corresponding \verb{fl_*} class, containing \code{model}
 (the fitted model) and \code{dataX} (the predictors selected by \code{X}).
-\code{fl_SuperLearner()} also returns \code{coef} (the ensemble weights).
 Prediction methods return predictions for \code{newdata}.
 }
 \description{
 Wrappers for linear models, generalized linear models, BART, and
 Super Learner. Usually called internally by flexPaths using the model
 specifications supplied to \code{\link[=pathsInfo]{pathsInfo()}}.
-}
-\details{
-The wrappers supply training data, predictors, and the response automatically.
-For \code{lm} and \code{glm}, an additive formula is used unless a named, two-sided
-\code{formula} is supplied; its response is replaced by \code{Y}.
-For \code{bart}, \code{keeptrees = TRUE} is set for prediction.
-For \code{SuperLearner}, supply \code{SL.library} and an appropriate \code{family};
-optional \code{id} is a column name included in \code{X}, and that column is excluded
-from the training predictors.
-Its prediction method selects and orders \code{newdata} columns by the training
-variable names. Extra columns are ignored; missing predictors cause an error.
 }
 \seealso{
 \code{\link[=pathsInfo]{pathsInfo()}}, \code{\link[stats:lm]{stats::lm()}}, \code{\link[stats:glm]{stats::glm()}}, \code{\link[dbarts:bart]{dbarts::bart()}},

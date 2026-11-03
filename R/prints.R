@@ -53,10 +53,15 @@ print.flexPotential <- function(x, ...) {
 
   cat("Causal Paths Analysis: \n")
   cat("mean counterfactual outcome for flexible path \n")
-  cat("estimation:", x$estimation,"\n\n")
+  cat("estimation:", x$pathsInfo$estimation,"\n\n")
 
 
-  print(x$results, ...)
+  if(is.null(x$boot_results)){
+    print(x$results, ...)
+  }else{
+    cat("boot strap results: \n\n")
+    print(x$boot_results, ...)
+  }
 }
 
 
@@ -73,7 +78,7 @@ print.mflexPotential <- function(x, ...) {
 
   cat("Causal Paths Analysis: \n")
   cat("mean counterfactual outcome for flexible path \n")
-  cat("estimation:", x$estimation,"\n\n")
+  cat("estimation:", x$pathsInfo$estimation,"\n\n")
 
 
     cat("mutiple treatment matrix: \n")
@@ -82,7 +87,12 @@ print.mflexPotential <- function(x, ...) {
 
 
 
-  print(x$results, ...)
+  if(is.null(x$boot_results)){
+    print(x$results, ...)
+  }else{
+    cat("boot strap results: \n\n")
+    print(x$boot_results, ...)
+  }
 }
 
 

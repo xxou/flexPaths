@@ -206,12 +206,16 @@ refer0_effect <- function(
   if(scale == "diff"){
     out <- data.frame(Path = c(paste0("A->M", 1:(K-1), "->...->Y"), "A->Y", "total effect: A->...->Y")) %>%
       mutate(
-        Effect = map_dbl(1:(K+1), ~ mean(Y_via_i[, .x] - Y_via_i[,(K+2)], na.rm = TRUE)),
+        Effect = map_dbl(1:(K+1), ~ mean(Y_via_i[, .x] - Y_via_i[,(K+2)], na.rm = TRUE))
+      )
+    if(estimation == "EIF"){
+      out <- out %>% mutate(
         SE = map_dbl(1:(K+1), ~ sqrt(var(Y_via_i[, .x] - Y_via_i[,(K+2)], na.rm = TRUE) / nrow(data))),
         CI.lower = Effect + qnorm((1-CI_level)/2)*SE,
         CI.upper = Effect - qnorm((1-CI_level)/2)*SE,
         P.value = round(2 * (1 - pnorm(abs(Effect / SE))), 4)
       )
+    }
   }
 
   if(scale == "risk"){
@@ -382,21 +386,24 @@ sequential_effect <-  function(
   names(potential_outcome)[2:K] <- paste0("Y_M", 1:(K - 1)) # head(potential_outcome)
 
   if(scale == "diff"){
-  out <- data.frame(Path = rep(NA,K+1),Effect = rep(NA,K+1), SE= rep(NA,K+1))
+  out <- data.frame(Path = rep(NA,K+1),Effect = rep(NA,K+1))
+  if(estimation == "EIF"){out$SE = rep(NA,K+1)}
   for (i in 1:K ) {
     effect = potential_outcome[,i]-potential_outcome[,i+1]
     out$Effect[i] = mean(effect,na.rm=T)
-    out$SE[i] = sqrt(var(effect,na.rm=T)/nrow(data))
+    if(estimation == "EIF"){out$SE[i] = sqrt(var(effect,na.rm=T)/nrow(data))}
   }
   out$Effect[K+1] = mean(Y_A1 - Y_A0,na.rm=T)
+  out$Path = c(paste0("A->M", seq_len(K-1), "->...->Y"), "A->Y", "total effect: A->...->Y")
+  if(estimation == "EIF"){
   out$SE[K+1] = sqrt(var(Y_A1 - Y_A0,na.rm=T)/nrow(data))
 
   out<-out %>% mutate(
-    Path = c(paste0("A->M", seq_len(K-1), "->...->Y"), "A->Y", "total effect: A->...->Y"),
     CI.lower = Effect + qnorm((1-CI_level)/2)*SE,
     CI.upper = Effect - qnorm((1-CI_level)/2)*SE,
     P.value = round(2 * (1 - pnorm(abs(Effect / SE))), 4)
   )
+  }
   }
 
   # E(Y(a))/E(Y(a'))

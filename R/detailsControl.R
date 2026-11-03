@@ -192,6 +192,22 @@ prod_assign_modellist <- function(model_list,a_vars, a_values){
 
 
 # boot strap
+check_nboot <- function(nboot){
+  if(!is.null(nboot)){
+    if(length(nboot) != 1 || !is.numeric(nboot) || is.complex(nboot) ||
+       !is.finite(nboot) || nboot < 2 || nboot != floor(nboot)){
+      stop("'nboot' must be NULL or an integer of at least 2.")
+    }
+  }
+}
+
+one_boot.potential <- function(pathsInfo, active, model_fun){
+  index <- sample(seq_len(nrow(pathsInfo$data)), replace = TRUE)
+  pathsInfo$data <- pathsInfo$data[index, , drop = FALSE]
+  boot_sim <- model_fun(pathsInfo, active, nboot = NULL)
+  return(boot_sim$results$value)
+}
+
 # object<-out
 #' @import stats purrr
 #' @import SuperLearner dbarts
@@ -223,7 +239,11 @@ one_boot.flexEffect <- function(data, pathsInfo, call_all, index_p1, index_p0){
   pathsInfo$data <- boot_data
 
   # call for boot_data
-  object<-map(call_all, ~ {.x$pathsInfo <- substitute(pathsInfo); return(.x)})
+  object<-map(call_all, ~ {
+    .x$pathsInfo <- substitute(pathsInfo)
+    .x$nboot <- NULL
+    return(.x)
+  })
 
   boot_sim = map_dfr(object, function(x){
     sim = eval(x)

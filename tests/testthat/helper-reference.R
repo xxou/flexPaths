@@ -36,10 +36,11 @@ reference_multi <- function(data, a1, a2, estimation) {
   as.numeric(q0 + w1 * (q1 - q0) + w2 * (data$Y - q1))
 }
 
-reference_effect <- function(p1, p0, scale = "diff", CI_level = 0.95) {
+reference_effect <- function(p1, p0, scale = "diff", CI_level = 0.95, estimation = "EIF") {
   m1 <- mean(p1); m0 <- mean(p0)
   if (scale == "risk") return(c(Effect = m1 / m0))
   if (scale == "oddsratio") return(c(Effect = (m1 / (1 - m1)) / (m0 / (1 - m0))))
+  if (estimation != "EIF") return(c(Effect = m1 - m0))
   SE <- sd(p1 - p0) / sqrt(length(p1))
   c(Effect = m1 - m0, SE = SE,
     CI.lower = m1 - m0 + qnorm((1 - CI_level) / 2) * SE,
@@ -57,6 +58,6 @@ reference_paths <- function(data, estimation, decomposition, scale = "diff") {
   } else {
     p1 <- p[c(1, 2, 3, 1)]; p0 <- p[c(2, 3, 4, 4)]
   }
-  t(vapply(seq_len(4), function(i) reference_effect(p1[[i]], p0[[i]], scale),
-           if (scale == "diff") numeric(4) else numeric(1)))
+  do.call(rbind, lapply(seq_len(4), function(i)
+    reference_effect(p1[[i]], p0[[i]], scale, estimation = estimation)))
 }

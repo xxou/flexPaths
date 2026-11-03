@@ -36,7 +36,9 @@ Use the form \code{list(M1 = c("mediator1_1", "mediator1_2"), M2 = c("mediator2"
 Alternatively, you can list them in order using \code{list(c("mediator1_1", "mediator1_2"), c("mediator2"), ... )}.}
 
 \item{estimation}{A character string indicating the type of estimation to be used. Choose from "EIF" (Efficient Influence Function),
-"IPW" (Inverse Probability Weighting), or "G" (G-computation).}
+"IPW" (Inverse Probability Weighting), or "G" (G-computation).
+Direct standard errors are provided only for EIF potential means and EIF effects
+on the difference scale. Use bootstrapping for uncertainty estimation otherwise.}
 
 \item{model.treatment}{If you select "G" for estimation, this parameter is not needed. Otherwise, provide a formula or list of formulas for modeling the propensity score
 (for \eqn{K} mediators, you need \eqn{K+1} models for \eqn{P(A|X)}, \eqn{P(A|M_1, X)}, ..., \eqn{P(A|M_K, X)}).

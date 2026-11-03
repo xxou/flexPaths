@@ -8,26 +8,16 @@
 #' @param data A wide-format data frame with one row per individual.
 #' @param X Predictor column names in `data`.
 #' @param Y Response column name in `data`.
-#' @param fl_call An unevaluated model call, for example
-#'   `quote(glm(family = binomial()))`. All arguments in the call must be named.
+#' @param fl_call An unevaluated model call specifying the additional
+#'   arguments for the underlying fitting function, excluding `data`, `X`,
+#'   and `Y`, which are supplied automatically by the wrapper. For example,
+#'   `quote(glm(family = binomial()))`.
 #' @param object A fitted object returned by the corresponding wrapper.
 #' @param newdata A data frame of predictors for prediction.
 #' @param ... Additional arguments accepted for S3 compatibility; currently unused.
 #'
-#' @details
-#' The wrappers supply training data, predictors, and the response automatically.
-#' For `lm` and `glm`, an additive formula is used unless a named, two-sided
-#' `formula` is supplied; its response is replaced by `Y`.
-#' For `bart`, `keeptrees = TRUE` is set for prediction.
-#' For `SuperLearner`, supply `SL.library` and an appropriate `family`;
-#' optional `id` is a column name included in `X`, and that column is excluded
-#' from the training predictors.
-#' Its prediction method selects and orders `newdata` columns by the training
-#' variable names. Extra columns are ignored; missing predictors cause an error.
-#'
 #' @return A list with the corresponding `fl_*` class, containing `model`
 #'   (the fitted model) and `dataX` (the predictors selected by `X`).
-#'   `fl_SuperLearner()` also returns `coef` (the ensemble weights).
 #'   Prediction methods return predictions for `newdata`.
 #'
 #' @seealso [pathsInfo()], [stats::lm()], [stats::glm()], [dbarts::bart()],

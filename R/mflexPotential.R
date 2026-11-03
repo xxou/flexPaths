@@ -10,16 +10,25 @@
 #' @param active A list of numeric vectors, with one vector per treatment in the order of \code{pathsInfo$A}. Integer vectors are also accepted.
 #' Each vector must have length \code{length(pathsInfo$M.list) + 1}, with entries for mediator stages M1 to Mk followed by the outcome Y.
 #' Values must be 0 or 1. Use \code{NA} for mediator stages that occur before the corresponding treatment; \code{NaN} is not allowed.
+#' @param nboot An optional integer of at least 2 specifying the number of bootstrap
+#' samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.
 #'
 #' @return An object of class \code{mflexPotential}, which includes the following components:
 #' \describe{
 #'   \item{\code{call}}{The matched call to the \code{mflexPotential} function.}
 #'   \item{\code{pathsInfo}}{The original \code{pathsInfo} object used for the analysis.}
 #'   \item{\code{active}}{A matrix representing the active values used for each mediator and the direct outcome.}
-#'   \item{\code{results}}{A data frame containing the average potential outcome (value) and its standard error (SE).}
+#'   \item{\code{results}}{A data frame containing the calculated potential mean (value).
+#'   The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
 #'   \item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
+#'   \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
+#'   the active values, the original potential mean (value), its bootstrap standard
+#'   error (boot.SE), and the number of bootstrap samples (nboot).}
 #' }
 #'
+#' @details Bootstrapping resamples individuals with replacement and refits all
+#' required models in each sample. It is available for EIF, G, and IPW estimation.
+#' The bootstrap standard error is the sample standard deviation of the bootstrap means.
 #'
 #' @import stats purrr
 #' @import SuperLearner dbarts
@@ -30,9 +39,10 @@
 #'
 #'
 mflexPotential <-  function(
-   pathsInfo,active
+   pathsInfo,active, nboot = NULL
 ){
   cl <- match.call()
+  check_nboot(nboot)
   # Variables populated by list2env().
   data <- A <- Y <- cov_x <- M.list <- estimation <- NULL
   Pmodel.lists <- Omodel.lists <- Imodel.lists <- Imodel.source <- NULL
@@ -249,15 +259,23 @@ mflexPotential <-  function(
   # **********************************
   out = data.frame(active = paste0(map_chr(active, ~ paste0(na.omit(.x), collapse = "")),
                                    collapse = ";"),
-                   value = mean(potential_data,na.rm=T),
-                   SE = sqrt(var(potential_data,na.rm=T)/nrow(data))
+                   value = mean(potential_data,na.rm=T)
                    )
+  if(estimation == "EIF"){
+    out$SE = sqrt(var(potential_data,na.rm=T)/nrow(data))
+  }
 
   output <- list(call = cl,
                  pathsInfo = pathsInfo,
                  active = active_m,
                  results = out,
                  potential_data = potential_data)
+  if(!is.null(nboot)){
+    boot.values <- map_dbl(seq_len(nboot),
+                          ~one_boot.potential(pathsInfo, active, mflexPotential))
+    output$boot_results <- data.frame(active = out$active, value = out$value,
+                                     boot.SE = sd(boot.values), nboot = nboot)
+  }
   class(output) <- 'mflexPotential'
   return(output)
 

@@ -2,29 +2,35 @@ test_that("flexEffect bootstrap agrees with an independent row-resampling loop",
   withr::local_seed(21)
   data <- test_data()
   data$Y <- 0.3 + 0.01 * data$Y
-  fit <- test_info(data)
-  p0 <- flexPotential(fit, c(0, 0, 0))
-  p1 <- flexPotential(fit, c(1, 0, 1))
-  p2 <- flexPotential(fit, c(0, 1, 0))
-  for (scale in c("diff", "risk", "oddsratio")) {
-    set.seed(21)
-    out <- flexEffect(list(p1, p2), p0, scale = scale, nboot = 10)$boot_results
-    set.seed(21)
-    ref <- replicate(10, {
-      boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
-      q0 <- reference_single(boot, c(0, 0, 0), "EIF")
-      vapply(list(c(1, 0, 1), c(0, 1, 0)), function(a) {
-        q1 <- reference_single(boot, a, "EIF")
-        unname(reference_effect(q1, q0, scale)["Effect"])
-      }, numeric(1))
-    })
-    labels <- c("101 vs 000", "010 vs 000")
-    for (i in 1:2) {
-      row <- out[out$active == labels[i], ]
-      expect_equal(row$boot.SE, sd(ref[i, ]), tolerance = 1e-8)
-      expect_equal(c(row$boot.CI.lower, row$boot.CI.upper),
-                   unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
-      expect_equal(row$nboot, 10)
+  for (estimation in c("G", "IPW", "EIF")) {
+    fit <- test_info(data, estimation = estimation)
+    p0 <- flexPotential(fit, c(0, 0, 0))
+    p1 <- flexPotential(fit, c(1, 0, 1))
+    p2 <- flexPotential(fit, c(0, 1, 0))
+    for (scale in c("diff", "risk", "oddsratio")) {
+      set.seed(21)
+      fit_boot <- flexEffect(list(p1, p2), p0, scale = scale, nboot = 10)
+      if (estimation != "EIF" || scale != "diff")
+        expect_named(fit_boot$results, c("active", "Effect"))
+      out <- fit_boot$boot_results
+      expect_identical("boot.P.value" %in% names(out), scale == "diff")
+      set.seed(21)
+      ref <- replicate(10, {
+        boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+        q0 <- reference_single(boot, c(0, 0, 0), estimation)
+        vapply(list(c(1, 0, 1), c(0, 1, 0)), function(a) {
+          q1 <- reference_single(boot, a, estimation)
+          unname(reference_effect(q1, q0, scale, estimation = estimation)["Effect"])
+        }, numeric(1))
+      })
+      labels <- c("101 vs 000", "010 vs 000")
+      for (i in 1:2) {
+        row <- out[out$active == labels[i], ]
+        expect_equal(row$boot.SE, sd(ref[i, ]), tolerance = 1e-8)
+        expect_equal(c(row$boot.CI.lower, row$boot.CI.upper),
+                     unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
+        expect_equal(row$nboot, 10)
+      }
     }
   }
 })
@@ -32,21 +38,51 @@ test_that("flexEffect bootstrap agrees with an independent row-resampling loop",
 test_that("pathsEffect bootstrap agrees with independent path resampling", {
   withr::local_seed(22)
   data <- test_data()
-  fit <- test_info(data)
-  for (decomposition in c("refer0", "sequential")) {
-    set.seed(22)
-    out <- pathsEffect(fit, decomposition = decomposition, nboot = 10)
-    set.seed(22)
-    ref <- replicate(10, {
-      boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
-      reference_paths(boot, "EIF", decomposition)[, "Effect"]
-    })
-    for (i in 1:4) {
-      row <- out$boot_results[out$boot_results$Path == out$results$Path[i], ]
-      expect_equal(row$Effect, out$results$Effect[i], tolerance = 1e-8)
-      expect_equal(row$boot.SE, sd(ref[i, ]), tolerance = 1e-8)
-      expect_equal(c(row$boot.CI.lower, row$boot.CI.upper),
-                   unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
+  for (estimation in c("G", "IPW", "EIF")) {
+    fit <- test_info(data, estimation = estimation)
+    for (decomposition in c("refer0", "sequential")) {
+      set.seed(22)
+      out <- pathsEffect(fit, decomposition = decomposition, nboot = 10)
+      if (estimation != "EIF") expect_named(out$results, c("Path", "Effect"))
+      set.seed(22)
+      ref <- replicate(10, {
+        boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+        reference_paths(boot, estimation, decomposition)[, "Effect"]
+      })
+      for (i in 1:4) {
+        row <- out$boot_results[out$boot_results$Path == out$results$Path[i], ]
+        expect_equal(row$Effect, out$results$Effect[i], tolerance = 1e-8)
+        expect_equal(row$boot.SE, sd(ref[i, ]), tolerance = 1e-8)
+        expect_equal(c(row$boot.CI.lower, row$boot.CI.upper),
+                     unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
+      }
+    }
+  }
+})
+
+test_that("multiple-treatment bootstrap agrees with independent refits", {
+  data <- test_data()
+  data$Y <- 0.3 + 0.01 * data$Y
+  for (estimation in c("G", "IPW", "EIF")) {
+    fit <- test_info(data, A = c("A", "A2"), estimation = estimation)
+    p0 <- mflexPotential(fit, list(c(0, 0, 0), c(NA, 0, 0)))
+    p1 <- mflexPotential(fit, list(c(1, 1, 1), c(NA, 1, 1)))
+    for (scale in c("diff", "risk", "oddsratio")) {
+      set.seed(26)
+      out <- flexEffect(p1, p0, scale = scale, nboot = 10)
+      if (estimation != "EIF" || scale != "diff")
+        expect_named(out$results, c("active", "Effect"))
+      set.seed(26)
+      ref <- replicate(10, {
+        boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+        q0 <- reference_multi(boot, 0, 0, estimation)
+        q1 <- reference_multi(boot, 1, 1, estimation)
+        unname(reference_effect(q1, q0, scale, estimation = estimation)["Effect"])
+      })
+      expect_equal(out$boot_results$boot.SE, sd(ref), tolerance = 1e-8)
+      expect_equal(c(out$boot_results$boot.CI.lower, out$boot_results$boot.CI.upper),
+                   unname(quantile(ref, c(0.025, 0.975))), tolerance = 1e-8)
+      expect_identical("boot.P.value" %in% names(out$boot_results), scale == "diff")
     }
   }
 })

@@ -9,16 +9,25 @@
 #' are taken from \code{pathsInfo$data}.
 #' @param active A numeric vector containing only 0 and 1, without missing values, specifying the treatment values for each mediator stage (M1 to Mk) and the outcome (Y) in order. Integer vectors are also accepted.
 #' The last value in the vector corresponds to the treatment value for Y. The length of this vector should be equal to the number of mediators plus one (for the direct effect on Y).
+#' @param nboot An optional integer of at least 2 specifying the number of bootstrap
+#' samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.
 #'
 #' @return An object of class \code{flexPotential}, which includes the following components:
 #' \describe{
 #'   \item{\code{call}}{The matched call to the \code{flexPotential} function.}
 #'   \item{\code{pathsInfo}}{The original \code{pathsInfo} object used for the analysis.}
 #'   \item{\code{active}}{A vector representing the active values used for each mediator and the direct outcome.}
-#'   \item{\code{results}}{A data frame containing the calculated potential outcome (value) and its standard error (SE).}
+#'   \item{\code{results}}{A data frame containing the calculated potential mean (value).
+#'   The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
 #'   \item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
+#'   \item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
+#'   the active values, the original potential mean (value), its bootstrap standard
+#'   error (boot.SE), and the number of bootstrap samples (nboot).}
 #' }
 #'
+#' @details Bootstrapping resamples individuals with replacement and refits all
+#' required models in each sample. It is available for EIF, G, and IPW estimation.
+#' The bootstrap standard error is the sample standard deviation of the bootstrap means.
 #'
 #' @import stats purrr
 #' @import SuperLearner dbarts
@@ -28,9 +37,10 @@
 #' @example inst/examples/flexPotential-example.R
 #'
 flexPotential <-  function(
-    pathsInfo,active  # M1, M2, M3,...,Direc
+    pathsInfo,active, nboot = NULL  # M1, M2, M3,...,Direc
 ){
   cl <- match.call()
+  check_nboot(nboot)
   # Variables populated by list2env().
   data <- A <- Y <- cov_x <- M.list <- estimation <- NULL
   Pmodel.lists <- Omodel.lists <- Imodel.lists <- Imodel.source <- NULL
@@ -174,15 +184,23 @@ flexPotential <-  function(
   }
 
   results = data.frame(active = paste0(as.character(active), collapse = ""),
-                   value = mean(potential_data,na.rm=T),
-                   SE = sqrt(var(potential_data,na.rm=T)/nrow(data))
+                   value = mean(potential_data,na.rm=T)
   )
+  if(estimation == "EIF"){
+    results$SE = sqrt(var(potential_data,na.rm=T)/nrow(data))
+  }
 
   output <- list(call = cl,
                  pathsInfo =pathsInfo,
                  active = active,
                  results = results,
                  potential_data = potential_data)
+  if(!is.null(nboot)){
+    boot.values <- map_dbl(seq_len(nboot),
+                          ~one_boot.potential(pathsInfo, active, flexPotential))
+    output$boot_results <- data.frame(active = results$active, value = results$value,
+                                     boot.SE = sd(boot.values), nboot = nboot)
+  }
   class(output) <- 'flexPotential'
   return(output)
 }

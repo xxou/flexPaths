@@ -28,6 +28,7 @@ flex_results1 <- flexEffect(p1 = potential_outcome1,
                             CI_level = 0.95, nboot = 10, m.cores = NULL)
 flex_results1
 
+# EIF differences include SE, confidence intervals and p-values.
 # multiple comparisons
 # PSE: potential_outcome1 - potential_outcome0
 # PSE: potential_outcome2 - potential_outcome3
@@ -35,6 +36,21 @@ flex_results <- flexEffect(p1 = list(potential_outcome1, potential_outcome2),
                            p0 = list(potential_outcome0, potential_outcome3), scale = "diff",
                            CI_level = 0.95)
 flex_results
+
+# G and IPW effects return point estimates without direct SE or intervals.
+G_fit <- pathsInfo(
+  data = singTreat[1:200, ], A = "Treat", Y = "Outcome1",
+  cov_x = c("X1", "X2"), M.list = list(M1 = "Med1"),
+  estimation = "G", model.outcome = ~lm()
+)
+g0 <- flexPotential(G_fit, c(0, 0))
+g1 <- flexPotential(G_fit, c(1, 1))
+flexEffect(g1, g0)
+# Use nboot for bootstrap SE and intervals; 10 is for illustration only.
+set.seed(123)
+flexEffect(g1, g0, nboot = 10)
+# On risk and oddsratio scales, use nboot even with EIF estimation.
+# Bootstrap p-values are returned only on the difference scale.
 
 ###########################
 # multiple treatments

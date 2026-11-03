@@ -50,6 +50,8 @@ test_that("both decompositions agree with independently calculated path contrast
       ref <- reference_paths(data, estimation, decomposition)
       expect_s3_class(out, "pathsEffect")
       expect_identical(out$results$Path, labels)
+      expect_named(out$results, c("Path", colnames(ref),
+        if (estimation == "EIF") "P.value"))
       expect_equal(unname(as.matrix(out$results[, colnames(ref)])), unname(ref), tolerance = 1e-8)
       if (decomposition == "sequential")
         expect_equal(sum(out$results$Effect[1:3]), out$results$Effect[4], tolerance = 1e-8)

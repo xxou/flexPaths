@@ -4,7 +4,7 @@
 \alias{mflexPotential}
 \title{Causal Path-Specific Potential Outcome Calculation for Multiple Treatments}
 \usage{
-mflexPotential(pathsInfo, active)
+mflexPotential(pathsInfo, active, nboot = NULL)
 }
 \arguments{
 \item{pathsInfo}{An object of class \code{pathsInfo}, returned by \code{pathsInfo()},
@@ -14,6 +14,9 @@ are taken from \code{pathsInfo$data}.}
 \item{active}{A list of numeric vectors, with one vector per treatment in the order of \code{pathsInfo$A}. Integer vectors are also accepted.
 Each vector must have length \code{length(pathsInfo$M.list) + 1}, with entries for mediator stages M1 to Mk followed by the outcome Y.
 Values must be 0 or 1. Use \code{NA} for mediator stages that occur before the corresponding treatment; \code{NaN} is not allowed.}
+
+\item{nboot}{An optional integer of at least 2 specifying the number of bootstrap
+samples used to estimate the standard error. If \code{NULL}, no bootstrapping is performed.}
 }
 \value{
 An object of class \code{mflexPotential}, which includes the following components:
@@ -21,14 +24,23 @@ An object of class \code{mflexPotential}, which includes the following component
 \item{\code{call}}{The matched call to the \code{mflexPotential} function.}
 \item{\code{pathsInfo}}{The original \code{pathsInfo} object used for the analysis.}
 \item{\code{active}}{A matrix representing the active values used for each mediator and the direct outcome.}
-\item{\code{results}}{A data frame containing the average potential outcome (value) and its standard error (SE).}
+\item{\code{results}}{A data frame containing the calculated potential mean (value).
+The standard error (SE) is included only for EIF estimation; G and IPW omit this column.}
 \item{\code{potential_data}}{A vector containing the calculated potential outcomes for each observation in the dataset.}
+\item{\code{boot_results}}{If bootstrapping is performed, a data frame containing
+the active values, the original potential mean (value), its bootstrap standard
+error (boot.SE), and the number of bootstrap samples (nboot).}
 }
 }
 \description{
 This function calculates causal path-specific potential outcomes for multiple treatments.
 Users can specify different levels of each treatment for each mediator (M1 to Mk) and directly define the outcome (Y) to represent the potential outcome for a single path or several combined paths.
 The function supports various estimation methods, including EIF (Efficient Influence Function), IPW (Inverse Probability Weighting), and G-computation.
+}
+\details{
+Bootstrapping resamples individuals with replacement and refits all
+required models in each sample. It is available for EIF, G, and IPW estimation.
+The bootstrap standard error is the sample standard deviation of the bootstrap means.
 }
 \examples{
 # ******************************************************************************
@@ -55,10 +67,22 @@ mfit<- pathsInfo(data = multiTreat,
                  model.iter  = list(~glm(family = gaussian()))
 )
 
+# EIF potential means include SE.
 mp1<-mflexPotential(active = list(a1=c(0,1,0,0,1,0,0),
                                   a2=c(1,0,1,1,1,0,0),
                                   a3=c(NA,NA,NA,1,0,0,0)),mfit)
+mp1$results
 mp2<-mflexPotential(active = list(a1=c(0,0,0,0,1,0,0),
                                   a2=c(0,0,0,1,1,0,0),
                                   a3=c(NA,NA,NA,1,0,0,0)),mfit)
+# With estimation = "G" or "IPW", the results omit SE.
+# Use nboot for bootstrap SE with any estimation method.
+# A small IPW example; 10 bootstrap samples are for illustration only.
+IPW_fit <- pathsInfo(
+  data = multiTreat[1:200, ], A = c("T1", "T2"), Y = "Y", cov_x = "X",
+  M.list = list(M1 = "M1", M2 = "M2"), estimation = "IPW",
+  model.treatment = ~glm(family = binomial())
+)
+set.seed(123)
+mflexPotential(IPW_fit, list(c(1, 1, 1), c(1, 1, 1)), nboot = 10)
 }
