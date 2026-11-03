@@ -16,7 +16,7 @@ test_that("potential mean bootstrap agrees with independent refits", {
       ref <- replicate(10, {
         boot <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
         mean(if (length(A) == 1) reference_single(boot, c(1, 0, 1), estimation)
-             else reference_multi(boot, 1, 0, estimation))
+        else reference_multi(boot, 1, 0, estimation))
       })
       expect_equal(out$results, plain$results)
       expect_equal(out$potential_data, plain$potential_data)
@@ -36,7 +36,7 @@ test_that("potential mean bootstrap agrees with independent refits", {
 test_that("invalid mean bootstrap counts are rejected", {
   for (model_fun in list(flexPotential, mflexPotential)) {
     for (nboot in list(0, 1, -1, 2.5, NA_real_, NaN, Inf, "10", TRUE,
-                       c(2, 3), numeric(), 2 + 1i))
+      c(2, 3), numeric(), 2 + 1i))
       expect_error(model_fun(test_info(), c(1, 0, 1), nboot = nboot), "'nboot'")
   }
 })
@@ -68,7 +68,7 @@ test_that("mean bootstrap does not nest inside effect bootstrap", {
 test_that("a custom model works in potential mean bootstrap", {
   withr::local_seed(33)
   local_custom_model()
-  custom <- test_info(model.outcome = ~testlm())
+  custom <- test_info(model.outcome = ~ testlm())
   builtin <- test_info()
   set.seed(33)
   out <- flexPotential(custom, c(1, 0, 1), nboot = 10)

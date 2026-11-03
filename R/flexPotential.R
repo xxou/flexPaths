@@ -36,9 +36,9 @@
 #'
 #' @example inst/examples/flexPotential-example.R
 #'
-flexPotential <-  function(
-    pathsInfo,active, nboot = NULL  # M1, M2, M3,...,Direc
-){
+flexPotential <- function(
+  pathsInfo, active, nboot = NULL  # M1, M2, M3,...,Direc
+) {
   cl <- match.call()
   check_nboot(nboot)
   # Variables populated by list2env().
@@ -55,12 +55,12 @@ flexPotential <-  function(
 
   ### cov_x and mediators
   Km <- length(M.list)    # have Km mediators
-  if((Km + 1)!=length(active)){
+  if ((Km + 1) != length(active)) {
     stop("Error: The length of 'active' must be equal to the length of 'M.list' + 1.
          Please ensure both inputs are of the same length.")
   }
-  if(!is.numeric(active) || is.complex(active) || !is.null(dim(active)) ||
-     anyNA(active) || !all(active %in% c(0, 1))){
+  if (!is.numeric(active) || is.complex(active) || !is.null(dim(active)) ||
+    anyNA(active) || !all(active %in% c(0, 1))) {
     stop("'active' must be a numeric vector containing only 0 and 1, without missing values.")
   }
 
@@ -75,101 +75,101 @@ flexPotential <-  function(
 
 
   #### 2. propensity model ----------
-  if(estimation != "G"){
-  Pmodel = Pmodel.lists[c(1,unique(M.index[M.index!=0])+1)]
+  if (estimation != "G") {
+    Pmodel = Pmodel.lists[c(1, unique(M.index[M.index != 0]) + 1)]
 
-  pro.details<- map(Pmodel,extract_model_details)
-  pro.fit_names <- map(pro.details, ~ paste0("fl_", .x$fit_name))
-  pro.calls <- map(pro.details, "model_call")
+    pro.details <- map(Pmodel, extract_model_details)
+    pro.fit_names <- map(pro.details, ~ paste0("fl_", .x$fit_name))
+    pro.calls <- map(pro.details, "model_call")
 
 
-  pro.modelfits<- pmap(list(cum_mediators, pro.fit_names, pro.calls),
-                       function(cum_mediators, pro.fit_names, pro.calls){
-                         model_fun <- match.fun(pro.fit_names)
-                         model<-model_fun(data, X = cum_mediators,Y = A, fl_call=pro.calls)
-                         return(model)
-                       })
+    pro.modelfits <- pmap(list(cum_mediators, pro.fit_names, pro.calls),
+      function(cum_mediators, pro.fit_names, pro.calls) {
+        model_fun <- match.fun(pro.fit_names)
+        model <- model_fun(data, X = cum_mediators, Y = A, fl_call = pro.calls)
+        return(model)
+      })
 
   # P(A=1|cov_X); P(A=1|M1,cov_X); P(A=1|M1,...,MK,X)
-  gA1_Mk_X.list <- map2(cum_mediators, pro.modelfits, ~ {predict(.y, newdata = data[,.x, drop=FALSE])})
+    gA1_Mk_X.list <- map2(cum_mediators, pro.modelfits, ~ {predict(.y, newdata = data[, .x, drop = FALSE])})
   # P(A=0|cov_X); P(A=0|M1,cov_X); P(A=0|M1,...,MK,X)
-  gA0_Mk_X.list <- map(gA1_Mk_X.list, ~ {1-.x})
-}
+    gA0_Mk_X.list <- map(gA1_Mk_X.list, ~ {1 - .x})
+  }
 
   #### 3. outcome model modelO.list ----------
   # check only one
-  if(estimation !="IPW"){
-  Omodel <-  Omodel.lists[max(c(1,unique(M.index[M.index!=0])+1))]
-  out.details<-  map(Omodel,extract_model_details)
-  out.fit_names <- map(out.details, ~ paste0("fl_", .x$fit_name))
-  out.calls <- map(out.details, "model_call")
+  if (estimation != "IPW") {
+    Omodel <- Omodel.lists[max(c(1, unique(M.index[M.index != 0]) + 1))]
+    out.details <- map(Omodel, extract_model_details)
+    out.fit_names <- map(out.details, ~ paste0("fl_", .x$fit_name))
+    out.calls <- map(out.details, "model_call")
 
-  Imodel <- Imodel.lists[c(1, unique(M.index[M.index!=0])[-(K-1)]+1)]
-  iter.details<- map(Imodel,extract_model_details)
-  iter.fit_names <- map(iter.details, ~ paste0("fl_", .x$fit_name))
-  iter.calls <- map(iter.details, "model_call")
-  if(Imodel.source == "default"){iter.calls <-map(iter.calls, ~ replace_family(.x))}
+    Imodel <- Imodel.lists[c(1, unique(M.index[M.index != 0])[-(K - 1)] + 1)]
+    iter.details <- map(Imodel, extract_model_details)
+    iter.fit_names <- map(iter.details, ~ paste0("fl_", .x$fit_name))
+    iter.calls <- map(iter.details, "model_call")
+    if (Imodel.source == "default") {iter.calls <- map(iter.calls, ~ replace_family(.x))}
 
-  fit_names <- c(iter.fit_names, out.fit_names)
-  mu.calls <- c(iter.calls, out.calls)
+    fit_names <- c(iter.fit_names, out.fit_names)
+    mu.calls <- c(iter.calls, out.calls)
 
 
   # Innermost function
-  mu.all <- matrix(NA,ncol=K+1,nrow=nrow(data)) # EE..E()|A,X)|..), ...., E(Y|mk,A,x), Y
-  mu.all[,K+1] <- data[,Y]
+    mu.all <- matrix(NA, ncol = K + 1, nrow = nrow(data)) # EE..E()|A,X)|..), ...., E(Y|mk,A,x), Y
+    mu.all[, K + 1] <- data[, Y]
 
   # iterative outcome model
-  for(i in K:1){
-    data$mu <- mu.all[,i+1]
+    for (i in K:1) {
+      data$mu <- mu.all[, i + 1]
 
-    model_fun <- match.fun(fit_names[[i]])
-    modelfit <- model_fun(data, X = c(A,cum_mediators[[i]]),Y = "mu", fl_call=mu.calls[[i]])
+      model_fun <- match.fun(fit_names[[i]])
+      modelfit <- model_fun(data, X = c(A, cum_mediators[[i]]), Y = "mu", fl_call = mu.calls[[i]])
 
-    Ai_data <- if(active_s[i]==1){ A1_data }else{ A0_data }
-    mu.all[,i] <- predict(modelfit, Ai_data[,c(A,cum_mediators[[i]]), drop = FALSE])
-  }
-}
-  #### 4. calculate phi() and Pn( ) ------
-  if(estimation == "EIF"){
-  # phi() is a value for each row of EIF formula
-  phi.all <- matrix(NA,ncol=K+1,nrow=nrow(data)) # calculation from muK to mu1
-  phi.all[,1] <- mu.all[,1]
-
-
-  for (i in K:1) {
-    if(active_s[i] == 1){
-      gA_X <- gA1_Mk_X.list[[1]]
-      ratio_index = -1
-    }else{
-      gA_X <- gA0_Mk_X.list[[1]]
-      ratio_index = 1
+      Ai_data <- if (active_s[i] == 1) { A1_data } else { A0_data }
+      mu.all[, i] <- predict(modelfit, Ai_data[, c(A, cum_mediators[[i]]), drop = FALSE])
     }
+  }
+  #### 4. calculate phi() and Pn( ) ------
+  if (estimation == "EIF") {
+  # phi() is a value for each row of EIF formula
+    phi.all <- matrix(NA, ncol = K + 1, nrow = nrow(data)) # calculation from muK to mu1
+    phi.all[, 1] <- mu.all[, 1]
+
+
+    for (i in K:1) {
+      if (active_s[i] == 1) {
+        gA_X <- gA1_Mk_X.list[[1]]
+        ratio_index = -1
+      } else {
+        gA_X <- gA0_Mk_X.list[[1]]
+        ratio_index = 1
+      }
 
     # Bayes density ratio
-    product <- 1 # Initialize the product
+      product <- 1 # Initialize the product
     # Iterate through previous indices j < i
-    for (j in seq_len(i - 1)) {
-      if (active_s[i] != active_s[j]) {
-        product <- product *
-          ( (gA1_Mk_X.list[[j+1]]/gA0_Mk_X.list[[j+1]])*(gA0_Mk_X.list[[j]] / gA1_Mk_X.list[[j]]) )^(ratio_index)
+      for (j in seq_len(i - 1)) {
+        if (active_s[i] != active_s[j]) {
+          product <- product *
+            ((gA1_Mk_X.list[[j + 1]] / gA0_Mk_X.list[[j + 1]]) * (gA0_Mk_X.list[[j]] / gA1_Mk_X.list[[j]])) ^ (ratio_index)
+        }
       }
-    }
 
 
     # sub EIF function for each row
-    phi.all[,i+1] = (I == active_s[i])/gA_X*product*(mu.all[,i+1]-mu.all[,i])
-  }
-   potential_data = rowSums(phi.all)
-  }
-
-
-  if(estimation == "G"){
-    potential_data = mu.all[,1]
+      phi.all[, i + 1] = (I == active_s[i]) / gA_X * product * (mu.all[, i + 1] - mu.all[, i])
+    }
+    potential_data = rowSums(phi.all)
   }
 
-  if(estimation =="IPW"){
-    if(active_s[K] == 1){ gA_X <- gA1_Mk_X.list[[1]]; ratio_index = -1
-    }else{ gA_X <- gA0_Mk_X.list[[1]]; ratio_index = 1 }
+
+  if (estimation == "G") {
+    potential_data = mu.all[, 1]
+  }
+
+  if (estimation == "IPW") {
+    if (active_s[K] == 1) { gA_X <- gA1_Mk_X.list[[1]]; ratio_index = -1
+    } else { gA_X <- gA0_Mk_X.list[[1]]; ratio_index = 1 }
 
     # Bayes density ratio
     product <- 1 # Initialize the product
@@ -177,29 +177,29 @@ flexPotential <-  function(
     for (j in seq_len(K - 1)) {
       if (active_s[K] != active_s[j]) {
         product <- product *
-          ( (gA1_Mk_X.list[[j+1]]/gA0_Mk_X.list[[j+1]])*(gA0_Mk_X.list[[j]] / gA1_Mk_X.list[[j]]) )^(ratio_index)
+          ((gA1_Mk_X.list[[j + 1]] / gA0_Mk_X.list[[j + 1]]) * (gA0_Mk_X.list[[j]] / gA1_Mk_X.list[[j]])) ^ (ratio_index)
       }
     }
-    potential_data = (I == active_s[K])/gA_X*product*data[,Y]
+    potential_data = (I == active_s[K]) / gA_X * product * data[, Y]
   }
 
   results = data.frame(active = paste0(as.character(active), collapse = ""),
-                   value = mean(potential_data,na.rm=T)
+    value = mean(potential_data, na.rm = T)
   )
-  if(estimation == "EIF"){
-    results$SE = sqrt(var(potential_data,na.rm=T)/nrow(data))
+  if (estimation == "EIF") {
+    results$SE = sqrt(var(potential_data, na.rm = T) / nrow(data))
   }
 
   output <- list(call = cl,
-                 pathsInfo =pathsInfo,
-                 active = active,
-                 results = results,
-                 potential_data = potential_data)
-  if(!is.null(nboot)){
+    pathsInfo = pathsInfo,
+    active = active,
+    results = results,
+    potential_data = potential_data)
+  if (!is.null(nboot)) {
     boot.values <- map_dbl(seq_len(nboot),
-                          ~one_boot.potential(pathsInfo, active, flexPotential))
+      ~ one_boot.potential(pathsInfo, active, flexPotential))
     output$boot_results <- data.frame(active = results$active, value = results$value,
-                                     boot.SE = sd(boot.values), nboot = nboot)
+      boot.SE = sd(boot.values), nboot = nboot)
   }
   class(output) <- 'flexPotential'
   return(output)

@@ -1,6 +1,6 @@
 treatment_data <- function(multiple = FALSE) {
   data <- expand.grid(A = 0:1, X = c(-1, 1), U1 = c(-1, 1),
-                      U2 = c(-1, 1), E = c(-1, 1))
+    U2 = c(-1, 1), E = c(-1, 1))
   if (multiple) {
     data <- rbind(transform(data, A2 = 0), transform(data, A2 = 1))
   }
@@ -16,8 +16,8 @@ treatment_info <- function(data, A = "A", estimation = "G") {
   info <- suppressMessages(pathsInfo(
     A = A, Y = "Y", cov_x = "X", data = data,
     M.list = list(M1 = "M1", M2 = "M2"), estimation = estimation,
-    model.treatment = if (estimation != "G") ~glm(family = binomial()),
-    model.outcome = if (estimation != "IPW") ~lm()
+    model.treatment = if (estimation != "G") ~ glm(family = binomial()),
+    model.outcome = if (estimation != "IPW") ~ lm()
   ))
   info
 }
@@ -82,14 +82,14 @@ test_that("invalid numeric treatment values are rejected", {
 test_that("other treatment types and nonbinary factors are rejected", {
   data <- treatment_data()
   for (values in list(as.character(data$A), as.logical(data$A),
-                      as.complex(data$A), as.list(data$A), matrix(data$A, ncol = 1))) {
+    as.complex(data$A), as.list(data$A), matrix(data$A, ncol = 1))) {
     data$A <- values
     expect_error(treatment_info(data), "Treatment 'A' must be numeric 0/1 or a factor", fixed = TRUE)
   }
   for (values in list(factor(rep("only", 32)),
-                      factor(rep(c("a", "b"), 16), levels = c("a", "b", "c")),
-                      factor(rep(NA_character_, 32)),
-                      factor(rep(c("a", NA), 16), exclude = NULL))) {
+    factor(rep(c("a", "b"), 16), levels = c("a", "b", "c")),
+    factor(rep(NA_character_, 32)),
+    factor(rep(c("a", NA), 16), exclude = NULL))) {
     data$A <- values
     expect_error(treatment_info(data), "Treatment 'A' must be a factor with exactly two non-missing levels", fixed = TRUE)
   }
@@ -139,9 +139,9 @@ test_that("factor encoding preserves single-treatment estimates and effects", {
     expect_equal(factor_p0$potential_data, numeric_p0$potential_data, tolerance = 1e-12)
     expect_equal(factor_p1$potential_data, numeric_p1$potential_data, tolerance = 1e-12)
     expect_equal(flexEffect(factor_p1, factor_p0)$results,
-                 flexEffect(numeric_p1, numeric_p0)$results, tolerance = 1e-12)
+      flexEffect(numeric_p1, numeric_p0)$results, tolerance = 1e-12)
     expect_equal(pathsEffect(factor_info)$results,
-                 pathsEffect(numeric_info)$results, tolerance = 1e-12)
+      pathsEffect(numeric_info)$results, tolerance = 1e-12)
     if (estimation == "G") {
       # From the additive data-generating equations: 3 + 0.375*a_M1 + a_M2 + 2*a_Y.
       expect_equal(factor_p0$results$value, 3, tolerance = 1e-12)
@@ -168,7 +168,7 @@ test_that("factor encoding preserves multiple-treatment estimates and effects", 
     expect_equal(factor_p0$potential_data, numeric_p0$potential_data, tolerance = 1e-12)
     expect_equal(factor_p1$potential_data, numeric_p1$potential_data, tolerance = 1e-12)
     expect_equal(flexEffect(factor_p1, factor_p0)$results,
-                 flexEffect(numeric_p1, numeric_p0)$results, tolerance = 1e-12)
+      flexEffect(numeric_p1, numeric_p0)$results, tolerance = 1e-12)
     if (estimation == "G") {
       # A2 contributes 1 through M2 and 3 directly to Y.
       expect_equal(factor_p0$results$value, 3, tolerance = 1e-12)

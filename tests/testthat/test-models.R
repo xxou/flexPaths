@@ -12,9 +12,9 @@ test_that("lm and glm wrappers match stats on new data", {
   }
   fit <- fl_lm(data, c("X", "F"), "Y", quote(lm(formula = unused ~ X * F)))
   expect_equal(predict(fit, newdata), predict(lm(Y ~ X * F, data), newdata), tolerance = 1e-8)
-  fit <- fl_glm(data, "X", "B", quote(glm(formula = unused ~ X + I(X^2), family = binomial())))
+  fit <- fl_glm(data, "X", "B", quote(glm(formula = unused ~ X + I(X ^ 2), family = binomial())))
   expect_equal(predict(fit, newdata),
-    predict(glm(B ~ X + I(X^2), data, family = binomial()), newdata, type = "response"), tolerance = 1e-8)
+    predict(glm(B ~ X + I(X ^ 2), data, family = binomial()), newdata, type = "response"), tolerance = 1e-8)
   fit <- fl_glm(data, "X", "Y", quote(glm(family = gaussian())))
   expect_equal(predict(fit, newdata), predict(lm(Y ~ X, data), newdata), tolerance = 1e-8)
 })
@@ -52,8 +52,8 @@ test_that("SuperLearner returns finite continuous and binary predictions", {
 test_that("BART and SuperLearner run through potential outcomes and effects", {
   withr::local_seed(13)
   models <- list(
-    ~bart(ntree = 5, nskip = 10, ndpost = 20, nthread = 1, verbose = FALSE),
-    ~SuperLearner(SL.library = c("SL.mean", "SL.glm"), family = gaussian(), cvControl = list(V = 2)))
+    ~ bart(ntree = 5, nskip = 10, ndpost = 20, nthread = 1, verbose = FALSE),
+    ~ SuperLearner(SL.library = c("SL.mean", "SL.glm"), family = gaussian(), cvControl = list(V = 2)))
   for (model in models) {
     fit <- test_info(model.outcome = model)
     p0 <- flexPotential(fit, c(0, 0, 0))
@@ -72,7 +72,7 @@ test_that("a sourced user model matches built-in lm", {
   newdata <- data[1:7, ]; newdata$X <- newdata$X + 0.3
   fit <- fl_testlm(data, c("X", "M1"), "Y", quote(testlm()))
   expect_equal(predict(fit, newdata), predict(lm(Y ~ X + M1, data), newdata), tolerance = 1e-8)
-  custom <- test_info(data, model.outcome = ~testlm())
+  custom <- test_info(data, model.outcome = ~ testlm())
   builtin <- test_info(data)
   p0 <- flexPotential(custom, c(0, 0, 0))
   p1 <- flexPotential(custom, c(1, 0, 1))
@@ -86,7 +86,7 @@ test_that("a sourced user model matches built-in lm", {
 test_that("a sourced user model works in pathsEffect and bootstrap", {
   withr::local_seed(14)
   local_custom_model()
-  custom <- test_info(model.outcome = ~testlm())
+  custom <- test_info(model.outcome = ~ testlm())
   builtin <- test_info()
   for (decomposition in c("refer0", "sequential")) {
     set.seed(14)

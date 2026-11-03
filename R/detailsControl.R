@@ -4,9 +4,9 @@ reorder_list <- function(x_list) {
   # Extract the names
   names_list <- names(x_list)
 
-  if(!is.null(names_list)){
+  if (!is.null(names_list)) {
     # Separate 'cov_x' and 'M' elements
-    cov_x_name <- if("cov_x" %in% names_list) "cov_x" else character(0)
+    cov_x_name <- if ("cov_x" %in% names_list) "cov_x" else character(0)
     M_names <- names_list[grepl("^M\\d+$", names_list)]
 
     # Sort 'M' elements
@@ -17,8 +17,8 @@ reorder_list <- function(x_list) {
 
     # Reorder the list based on the new order
     reordered_list <- x_list[reordered_names]
-  }else{
-    reordered_list<- x_list
+  } else {
+    reordered_list <- x_list
   }
 
   return(reordered_list)
@@ -38,7 +38,7 @@ extract_model_details <- function(model_formula) {
   # Check if all elements in the call have names
   all_have_names <- all(names(expr)[-1] != "")
 
-  if (all_have_names==FALSE) {
+  if (all_have_names == FALSE) {
     stop("Error: All arguments must be named.")
   }
   # Return the details
@@ -117,7 +117,7 @@ simplify_active <- function(active_matrix) {
       simplified_m <- cbind(simplified_m, active_matrix[, i])
     }
   }
-  simplified_m[simplified_m==-1] <- NA
+  simplified_m[simplified_m == -1] <- NA
   return(simplified_m)
 }
 
@@ -143,10 +143,10 @@ combine_item <- function(element_list, index) {
 }
 
 # cumulate variables
-cumulate_vars<- function(input, first_null = FALSE){
-  if(first_null){
-    var.list <-c(list(NULL), Reduce(c, c(input), accumulate = TRUE)[-length(input)])
-  }else{
+cumulate_vars <- function(input, first_null = FALSE) {
+  if (first_null) {
+    var.list <- c(list(NULL), Reduce(c, c(input), accumulate = TRUE)[-length(input)])
+  } else {
     var.list <- Reduce(c, c(input), accumulate = TRUE)
   }
   return(var.list)
@@ -160,7 +160,7 @@ cumulate_vars<- function(input, first_null = FALSE){
 # a_values <- active_s.list[[3]]
 #' @import stats purrr
 #'
-prod_assign_modellist <- function(model_list,a_vars, a_values){
+prod_assign_modellist <- function(model_list, a_vars, a_values) {
   model_list = model_list[1:length(a_vars)]
   a_values = a_values[1:length(a_vars)]
 
@@ -170,38 +170,38 @@ prod_assign_modellist <- function(model_list,a_vars, a_values){
 
   # predict the model list
   pred <- pmap(list(model_list, Xa_vars, Xa_values, a_values),
-               function(model, Xa_var, Xa_value, Y_value){
+    function(model, Xa_var, Xa_value, Y_value) {
 
-                 Ai_data = model$dataX
+      Ai_data = model$dataX
                  # print( head(Ai_data))
-                 if(!is.null(Xa_var)){
-                   Ai_data[ ,Xa_var] = suppressMessages({map_dfc(Xa_value, ~rep(.x, dim(Ai_data)[1]))})
-                 }
+      if (!is.null(Xa_var)) {
+        Ai_data[, Xa_var] = suppressMessages({map_dfc(Xa_value, ~ rep(.x, dim(Ai_data)[1]))})
+      }
 
                  # print( head(Ai_data));
                  # cat('Xa_var:', Xa_var,',',"Xa_value:", Xa_value,",", "Y_value:",Y_value,'\n')
                  # print(model$model)
                  # cat("-----------------------------\n")
 
-                 predY1 <-predict(model, newdata = Ai_data )
-                 pred <- predY1*Y_value + (1-predY1)*(1-Y_value)
-               })
+      predY1 <- predict(model, newdata = Ai_data)
+      pred <- predY1 * Y_value + (1 - predY1) * (1 - Y_value)
+    })
   prod.modelpred <- reduce(pred, `*`)
   return(prod.modelpred)
 }
 
 
 # boot strap
-check_nboot <- function(nboot){
-  if(!is.null(nboot)){
-    if(length(nboot) != 1 || !is.numeric(nboot) || is.complex(nboot) ||
-       !is.finite(nboot) || nboot < 2 || nboot != floor(nboot)){
+check_nboot <- function(nboot) {
+  if (!is.null(nboot)) {
+    if (length(nboot) != 1 || !is.numeric(nboot) || is.complex(nboot) ||
+      !is.finite(nboot) || nboot < 2 || nboot != floor(nboot)) {
       stop("'nboot' must be NULL or an integer of at least 2.")
     }
   }
 }
 
-one_boot.potential <- function(pathsInfo, active, model_fun){
+one_boot.potential <- function(pathsInfo, active, model_fun) {
   index <- sample(seq_len(nrow(pathsInfo$data)), replace = TRUE)
   pathsInfo$data <- pathsInfo$data[index, , drop = FALSE]
   boot_sim <- model_fun(pathsInfo, active, nboot = NULL)
@@ -212,19 +212,19 @@ one_boot.potential <- function(pathsInfo, active, model_fun){
 #' @import stats purrr
 #' @import SuperLearner dbarts
 #' @importFrom dplyr mutate
-one_boot.pathsEffect <- function(object){
+one_boot.pathsEffect <- function(object) {
   # get the full data
   data <- NULL
   list2env(object, envir = environment())
 
   # replaced sample for boot
   index <- sample(1:dim(data)[1], replace = TRUE)
-  boot_data = data[index,]
+  boot_data = data[index, ]
 
   # call for boot_data
   object$call$data <- substitute(boot_data)
   boot_sim = eval(object$call)
-  return(boot_sim$results[,c('Path','Effect')])
+  return(boot_sim$results[, c('Path', 'Effect')])
 }
 
 # object = call_all
@@ -232,31 +232,31 @@ one_boot.pathsEffect <- function(object){
 # fit = pathsInfo
 #' @import stats purrr
 #' @import SuperLearner dbarts
-one_boot.flexEffect <- function(data, pathsInfo, call_all, index_p1, index_p0){
+one_boot.flexEffect <- function(data, pathsInfo, call_all, index_p1, index_p0) {
   # replaced sample for boot
   index <- sample(1:dim(data)[1], replace = TRUE)
-  boot_data = data[index,]
+  boot_data = data[index, ]
   pathsInfo$data <- boot_data
 
   # call for boot_data
-  object<-map(call_all, ~ {
+  object <- map(call_all, ~ {
     .x$pathsInfo <- substitute(pathsInfo)
     .x$nboot <- NULL
     return(.x)
   })
 
-  boot_sim = map_dfr(object, function(x){
+  boot_sim = map_dfr(object, function(x) {
     sim = eval(x)
-    return(sim$results[,c('active','value')])
+    return(sim$results[, c('active', 'value')])
   })
 
-  sim_p1 <- boot_sim[index_p1,]
-  sim_p0 <- boot_sim[index_p0,]
+  sim_p1 <- boot_sim[index_p1, ]
+  sim_p0 <- boot_sim[index_p0, ]
 
-  out<- data.frame(comparison_id = seq_along(index_p1),
-                   active = paste(sim_p1$active, "vs" , sim_p0$active),
-                   value1 = sim_p1$value,
-                   value0 = sim_p0$value)
+  out <- data.frame(comparison_id = seq_along(index_p1),
+    active = paste(sim_p1$active, "vs", sim_p0$active),
+    value1 = sim_p1$value,
+    value0 = sim_p0$value)
   return(out)
 }
 
@@ -268,7 +268,7 @@ one_boot.flexEffect <- function(data, pathsInfo, call_all, index_p1, index_p0){
 # input a call
 #' @import  purrr
 #'
-check_SuperLearner <- function(call){
+check_SuperLearner <- function(call) {
   # Extract the model lists from the call
   model_names <- grep("model", names(call), value = TRUE)
   model_lists <- map(model_names, ~ call[[.x]])

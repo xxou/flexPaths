@@ -40,11 +40,11 @@
 #'
 #' @example inst/examples/flexEffect-example.R
 #'
-flexEffect<-function(
-    p1 ,
-    p0 ,
-    scale = "diff", CI_level = 0.95,
-    nboot = NULL, m.cores = NULL){
+flexEffect <- function(
+  p1,
+  p0,
+  scale = "diff", CI_level = 0.95,
+  nboot = NULL, m.cores = NULL) {
 
   # environment
   Call <- match.call()
@@ -53,10 +53,10 @@ flexEffect<-function(
 
   # 1. check the input p1 and p0 -----
   ## (1) to check one input -------
-  if(is.null(p1$call)){len_p1 <- length(p1) }else{
+  if (is.null(p1$call)) {len_p1 <- length(p1) } else {
     p1 = list(p1)
     len_p1 <- length(p1)}
-  if(is.null(p0$call)){len_p0 <- length(p0)}else{
+  if (is.null(p0$call)) {len_p0 <- length(p0)} else {
     p0 = list(p0)
     len_p0 <- length(p0)}
 
@@ -74,129 +74,129 @@ flexEffect<-function(
 
   ## (2). Check that the Call components of p1, and p0 ----
   # same class flexPotential or mflexPotential
-   class_p = map_chr(c(p1, p0), ~ class(.x) )
+  class_p = map_chr(c(p1, p0), ~ class(.x))
 
-   if(length(unique(class_p))!=1){
-     stop("All elements in p1 and p0 must have the same class.")
-   }
-   if(!unique(class_p)%in% c("flexPotential","mflexPotential") ){
-     stop("All elements in p1 and p0 the class must be either 'flexPotential' or 'mflexPotential'.")
+  if (length(unique(class_p)) != 1) {
+    stop("All elements in p1 and p0 must have the same class.")
+  }
+  if (!unique(class_p) %in% c("flexPotential", "mflexPotential")) {
+    stop("All elements in p1 and p0 the class must be either 'flexPotential' or 'mflexPotential'.")
 
-   }
+  }
 
 
   # they have the pathsInfo
-  pathsInfo_p1 <- map(p1, ~.x$pathsInfo)
-  pathsInfo_p0 <- map(p0, ~.x$pathsInfo)
+  pathsInfo_p1 <- map(p1, ~ .x$pathsInfo)
+  pathsInfo_p0 <- map(p0, ~ .x$pathsInfo)
 
-  if (!all(map_lgl(pathsInfo_p1, ~identical(.x, pathsInfo_p0[[1]])))) {
+  if (!all(map_lgl(pathsInfo_p1, ~ identical(.x, pathsInfo_p0[[1]])))) {
     stop("All inputs in p1 and p0 must have the same 'pathsInfo' in their Call component.")
   }
 
   # 2. calculate effects
-  results <- map2_dfr(p1, p0, ~{
-    active <- paste(.x$results$active , "vs" ,.y$results$active)
+  results <- map2_dfr(p1, p0, ~ {
+    active <- paste(.x$results$active, "vs", .y$results$active)
 
-    if (scale == "diff"){
-    diff <- .x$potential_data - .y$potential_data
-    Effect <- mean(diff, na.rm = TRUE)
-    if(.x$pathsInfo$estimation == "EIF"){
-    SE <- sqrt(var(diff, na.rm = TRUE) / length(diff))
-    CI.lower <- Effect + qnorm((1 - CI_level) / 2) * SE
-    CI.upper <- Effect - qnorm((1 - CI_level) / 2) * SE
-    P.value <- round(2 * (1 - pnorm(abs(Effect / SE))), 4)
+    if (scale == "diff") {
+      diff <- .x$potential_data - .y$potential_data
+      Effect <- mean(diff, na.rm = TRUE)
+      if (.x$pathsInfo$estimation == "EIF") {
+        SE <- sqrt(var(diff, na.rm = TRUE) / length(diff))
+        CI.lower <- Effect + qnorm((1 - CI_level) / 2) * SE
+        CI.upper <- Effect - qnorm((1 - CI_level) / 2) * SE
+        P.value <- round(2 * (1 - pnorm(abs(Effect / SE))), 4)
 
     # Return the results as a data frame row
-    out<-data.frame(active =active,Effect = Effect, SE = SE, CI.lower = CI.lower, CI.upper = CI.upper, P.value = P.value)
-    }else{
-      out<-data.frame(active =active,Effect = Effect)
-    }
+        out <- data.frame(active = active, Effect = Effect, SE = SE, CI.lower = CI.lower, CI.upper = CI.upper, P.value = P.value)
+      } else {
+        out <- data.frame(active = active, Effect = Effect)
+      }
     }
 
-    if (scale == "risk"){
-    Effect <- mean(.x$potential_data, na.rm = TRUE)/mean(.y$potential_data, na.rm = TRUE)
+    if (scale == "risk") {
+      Effect <- mean(.x$potential_data, na.rm = TRUE) / mean(.y$potential_data, na.rm = TRUE)
     # Return the results as a data frame row
-    out<-data.frame(active =active,Effect = Effect)
+      out <- data.frame(active = active, Effect = Effect)
     }
 
-    if (scale == "oddsratio"){
+    if (scale == "oddsratio") {
       m1 <- mean(.x$potential_data, na.rm = TRUE)
       m2 <- mean(.y$potential_data, na.rm = TRUE)
-      Effect <- (m1/(1-m1))/(m2/(1-m2))
+      Effect <- (m1 / (1 - m1)) / (m2 / (1 - m2))
 
-      out<- data.frame(active =active,Effect = Effect)
+      out <- data.frame(active = active, Effect = Effect)
     }
 
     return(out) })
 
   data_raw = p1[[1]]$pathsInfo$data; pathsInfo = p1[[1]]$pathsInfo
-  out<- list(pathsInfo =pathsInfo,
-             results =arrange(results,by=active),
-             data = data_raw)
+  out <- list(pathsInfo = pathsInfo,
+    results = arrange(results, by = active),
+    data = data_raw)
 
   # 2. get the summary of identical calculation ----
   # check_SuperLearner return warning
-  if(!is.null(nboot)){
+  if (!is.null(nboot)) {
 
-  results$comparison_id <- seq_len(nrow(results))
+    results$comparison_id <- seq_len(nrow(results))
 
   # aviod replicate calculation to save time
-  call_p1 <- map(p1, ~.x$call)
-  call_p0 <- map(p0, ~.x$call)
-  call_all<-unique(c(call_p1,call_p0))
+    call_p1 <- map(p1, ~ .x$call)
+    call_p0 <- map(p0, ~ .x$call)
+    call_all <- unique(c(call_p1, call_p0))
 
-  index_p1 <- map_int(call_p1, function(index) {
-    which(map_lgl(call_all, ~ identical(.x, index)))
-  })
-  index_p0 <- map_int(call_p0, function(index) {
-    which(map_lgl(call_all, ~ identical(.x, index)))
-  })
+    index_p1 <- map_int(call_p1, function(index) {
+      which(map_lgl(call_all, ~ identical(.x, index)))
+    })
+    index_p0 <- map_int(call_p0, function(index) {
+      which(map_lgl(call_all, ~ identical(.x, index)))
+    })
 
   # bootstrap
-  if (is.numeric(m.cores)) {
-    m.cores.detected <- parallel::detectCores()
-    if(m.cores > m.cores.detected){m.cores <- m.cores.detected}
+    if (is.numeric(m.cores)) {
+      m.cores.detected <- parallel::detectCores()
+      if (m.cores > m.cores.detected) {m.cores <- m.cores.detected}
 
     # windows, m.cores = 1
-    os <- tolower(Sys.info()[['sysname']])
-    if (os == "windows") {
-      m.cores <- 1
-      message("Running on Windows. Setting cores to 1 since mclapply is not available.")
-    }
+      os <- tolower(Sys.info()[['sysname']])
+      if (os == "windows") {
+        m.cores <- 1
+        message("Running on Windows. Setting cores to 1 since mclapply is not available.")
+      }
 
     # run
-    boot.list <- parallel::mclapply(seq_len(nboot), function(i) {
-      one_boot.flexEffect(data_raw, pathsInfo, call_all, index_p1, index_p0)}, mc.cores = m.cores)
-  }else{
-    boot.list = map(seq_len(nboot),
-                    ~one_boot.flexEffect(data_raw, pathsInfo, call_all, index_p1, index_p0))
-  }
+      boot.list <- parallel::mclapply(seq_len(nboot), function(i) {
+        one_boot.flexEffect(data_raw, pathsInfo, call_all, index_p1, index_p0)}, mc.cores = m.cores)
+    } else {
+      boot.list = map(seq_len(nboot),
+        ~ one_boot.flexEffect(data_raw, pathsInfo, call_all, index_p1, index_p0))
+    }
 
-  results.combine <- map_dfr(boot.list, ~ .x , .id = "source")
-  output<- results.combine %>%
-    mutate(
-      Effect = if(scale == "diff"){
-        value1-value0
-      }else if(scale == "risk"){
-        value1/value0
-      }else if(scale == "oddsratio"){
-        (value1/(1-value1))/(value0/(1-value0))
-      }
-    ) %>%
-    group_by(comparison_id) %>%
-    summarise(
-      boot.SE = sd(Effect),
-      boot.CI.lower = quantile(Effect, probs = (1-CI_level)/2),
-      boot.CI.upper = quantile(Effect, probs = 1-(1-CI_level)/2)) %>%
-    full_join(select(results, comparison_id, active, Effect), by = join_by(comparison_id)) %>%
-    arrange(active) %>%
-    select(-comparison_id) %>%
-    mutate(nboot = nboot) %>%
-    relocate(active, Effect) %>% as.data.frame()
+    results.combine <- map_dfr(boot.list, ~.x, .id = "source")
+    output <- results.combine %>%
+      mutate(
+        Effect = if (scale == "diff") {
+          value1 - value0
+        } else if (scale == "risk") {
+          value1 / value0
+        } else if (scale == "oddsratio") {
+          (value1 / (1 - value1)) / (value0 / (1 - value0))
+        }
+      ) %>%
+      group_by(comparison_id) %>%
+      summarise(
+        boot.SE = sd(Effect),
+        boot.CI.lower = quantile(Effect, probs = (1 - CI_level) / 2),
+        boot.CI.upper = quantile(Effect, probs = 1 - (1 - CI_level) / 2)) %>%
+      full_join(select(results, comparison_id, active, Effect), by = join_by(comparison_id)) %>%
+      arrange(active) %>%
+      select(-comparison_id) %>%
+      mutate(nboot = nboot) %>%
+      relocate(active, Effect) %>% as.data.frame()
 
-  if(scale =="diff"){output$boot.P.value = round(2*(1-pnorm(abs(output$Effect)/output$boot.SE)),4)}
+    if (scale == "diff") {output$boot.P.value = round(2 * (1 - pnorm(abs(output$Effect) / output$boot.SE)), 4)}
 
-  out$boot_results <- output
+    out$boot_results <- output
 
 
   }

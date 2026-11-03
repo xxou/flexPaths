@@ -3,7 +3,7 @@ test_that("pathsInfo retains variables and accepts formulas or model lists", {
   info <- test_info(data)
   listed <- suppressMessages(pathsInfo("A", "Y", "X", data,
     M.list = list(M2 = "M2", M1 = "M1"),
-    model.treatment = list(~glm(family = binomial())), model.outcome = list(~lm())))
+    model.treatment = list(~ glm(family = binomial())), model.outcome = list(~ lm())))
   expect_s3_class(info, "pathsInfo")
   expect_identical(info$data, transform(data, A = as.numeric(A)))
   expect_identical(info$A, "A")
@@ -46,17 +46,17 @@ test_that("missing or empty covariates warn and return NULL", {
 test_that("per-stage and explicit iterative models are retained", {
   data <- test_data()
   fit <- suppressMessages(pathsInfo("A", "Y", "X", data, list(M1 = "M1", M2 = "M2"),
-    model.treatment = list(M2 = ~glm(family = binomial()), cov_x = ~glm(family = binomial()),
-                           M1 = ~glm(family = binomial())),
-    model.outcome = list(M2 = ~lm(), cov_x = ~lm(), M1 = ~lm()),
-    model.iter = list(M2 = ~lm(), M1 = ~glm())))
+    model.treatment = list(M2 = ~ glm(family = binomial()), cov_x = ~ glm(family = binomial()),
+      M1 = ~ glm(family = binomial())),
+    model.outcome = list(M2 = ~ lm(), cov_x = ~ lm(), M1 = ~ lm()),
+    model.iter = list(M2 = ~ lm(), M1 = ~ glm())))
   expect_named(fit$Omodel.lists, c("cov_x", "M1", "M2"))
   expect_named(fit$Imodel.lists, c("M1", "M2"))
   expect_identical(fit$Imodel.source, "user input")
   expect_equal(flexPotential(fit, c(1, 0, 1))$potential_data,
-               flexPotential(test_info(data), c(1, 0, 1))$potential_data, tolerance = 1e-8)
+    flexPotential(test_info(data), c(1, 0, 1))$potential_data, tolerance = 1e-8)
   fit <- suppressMessages(pathsInfo(c("A", "A2"), "Y", "X", data,
-    list("M1", "M2"), model.treatment = ~glm(), model.outcome = ~lm(), model.iter = ~lm()))
+    list("M1", "M2"), model.treatment = ~ glm(), model.outcome = ~ lm(), model.iter = ~ lm()))
   expect_length(fit$Imodel.lists, 1)
   expect_identical(fit$type, "multiple treatments")
 })
@@ -69,12 +69,12 @@ test_that("invalid variables, estimation and model counts are rejected", {
   expect_error(test_info(data, M.list = list("absent")), "must exist")
   expect_error(test_info(data, estimation = "unknown"), "must be one of")
   expect_error(pathsInfo("A", "Y", "absent", data), "must exist")
-  expect_error(test_info(data, model.outcome = list(~lm(), ~lm())), "model.outcome")
-  expect_error(test_info(data, A = c("A", "A2"), model.outcome = list(~lm(), ~lm())), "model.outcome")
+  expect_error(test_info(data, model.outcome = list(~ lm(), ~ lm())), "model.outcome")
+  expect_error(test_info(data, A = c("A", "A2"), model.outcome = list(~ lm(), ~ lm())), "model.outcome")
   expect_error(suppressMessages(pathsInfo("A", "Y", "X", data, list("M1", "M2"),
-    estimation = "G", model.outcome = ~lm(), model.iter = list(~lm(), ~lm(), ~lm()))), "model.iter")
+    estimation = "G", model.outcome = ~ lm(), model.iter = list(~ lm(), ~ lm(), ~ lm()))), "model.iter")
   expect_error(suppressMessages(pathsInfo("A", "Y", "X", data, list("M1", "M2"),
-    estimation = "IPW", model.treatment = list(~glm(), ~glm()))), "model.treatment")
+    estimation = "IPW", model.treatment = list(~ glm(), ~ glm()))), "model.treatment")
   fit <- test_info(data)
   expect_error(flexPotential(fit, c(0, 1)), "length of 'active'", fixed = TRUE)
 })
@@ -92,7 +92,7 @@ test_that("mediators and per-stage models retain their numeric time order", {
 
   models <- setNames(lapply(0:12, function(i)
     as.formula(paste0("~glm(control = glm.control(maxit = ", i + 25, "))"))),
-    c("cov_x", M))
+  c("cov_x", M))
   fit <- suppressMessages(pathsInfo("A", "Y", "X", data, rev(mediators),
     model.treatment = rev(models), model.outcome = rev(models),
     model.iter = rev(models[-1])))
@@ -110,12 +110,12 @@ test_that("single-treatment active values must be numeric 0/1", {
   for (value in c(2, -1, 0.5, NA_real_, NaN, Inf))
     expect_error(flexPotential(fit, c(0, value, 1)), "only 0 and 1")
   for (a in list(c("0", "1", "1"), factor(c(0, 1, 1)), c(FALSE, TRUE, TRUE),
-                 as.complex(c(0, 1, 1)), matrix(c(0, 1, 1), nrow = 1), list(0, 1, 1)))
+    as.complex(c(0, 1, 1)), matrix(c(0, 1, 1), nrow = 1), list(0, 1, 1)))
     expect_error(flexPotential(fit, a), "numeric vector")
   for (a in list(numeric(), c(0, 1), c(0, 1, 0, 1)))
     expect_error(flexPotential(fit, a), "length of 'active'", fixed = TRUE)
   expect_equal(flexPotential(fit, c(0L, 1L, 1L))$potential_data,
-               flexPotential(fit, c(0, 1, 1))$potential_data, tolerance = 1e-8)
+    flexPotential(fit, c(0, 1, 1))$potential_data, tolerance = 1e-8)
 })
 
 test_that("multiple-treatment active inputs have valid values and dimensions", {
@@ -126,15 +126,15 @@ test_that("multiple-treatment active inputs have valid values and dimensions", {
   for (a in list(list(), list(a1), list(a1, a2, a2)))
     expect_error(mflexPotential(fit, a), "number of treatments")
   for (a in list(list(c(0, 1), c(NA, 1)), list(a1, c(NA, 1)),
-                 list(c(0, 1, 1, 1), a2), list(numeric(), a2)))
+    list(c(0, 1, 1, 1), a2), list(numeric(), a2)))
     expect_error(mflexPotential(fit, a), "length of 'M.list' + 1", fixed = TRUE)
   for (value in c(2, -1, 0.5, NaN, Inf))
     expect_error(mflexPotential(fit, list(a1, c(NA, value, 1))), "only 0, 1 or NA")
   for (a in list(c(NA, "0", "1"), factor(a2), c(NA, FALSE, TRUE),
-                 as.complex(a2), matrix(a2, nrow = 1), list(NA, 0, 1)))
+    as.complex(a2), matrix(a2, nrow = 1), list(NA, 0, 1)))
     expect_error(mflexPotential(fit, list(a1, a)), "numeric vector")
   out <- mflexPotential(fit, list(c(0L, 1L, 1L), c(NA_integer_, 0L, 1L)))
   expect_true(is.na(out$active[2, 1]))
   expect_equal(out$potential_data, mflexPotential(fit, list(a1, a2))$potential_data,
-               tolerance = 1e-8)
+    tolerance = 1e-8)
 })

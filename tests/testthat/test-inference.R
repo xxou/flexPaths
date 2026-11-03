@@ -1,11 +1,11 @@
 test_that("G and IPW setup reminds users to bootstrap", {
   reminder <- paste("Please use bootstrapping to estimate standard errors",
-                    "in the mean or effect estimation functions.")
+    "in the mean or effect estimation functions.")
   for (estimation in c("G", "IPW", "EIF")) {
     messages <- capture.output(info <- pathsInfo("A", "Y", "X", test_data(),
       list("M1", "M2"), estimation,
-      model.treatment = if (estimation != "G") ~glm(family = binomial()),
-      model.outcome = if (estimation != "IPW") ~lm()), type = "message")
+      model.treatment = if (estimation != "G") ~ glm(family = binomial()),
+      model.outcome = if (estimation != "IPW") ~ lm()), type = "message")
     expect_identical(reminder %in% messages, estimation != "EIF")
   }
 })
@@ -29,9 +29,9 @@ test_that("direct effect inference is limited to EIF differences", {
         out <- flexEffect(p1, p0, scale = scale)
         expect_named(out$results, c("active", "Effect", inference))
         ref <- reference_effect(p1$potential_data, p0$potential_data, scale,
-                                estimation = estimation)
+          estimation = estimation)
         expect_equal(unlist(out$results[names(ref)], use.names = FALSE),
-                     unname(ref), tolerance = 1e-8)
+          unname(ref), tolerance = 1e-8)
         if (length(A) == 1) for (decomposition in c("refer0", "sequential")) {
           out <- pathsEffect(fit, decomposition = decomposition, scale = scale)
           expect_named(out$results, c("Path", "Effect", inference))

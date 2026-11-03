@@ -10,11 +10,11 @@ test_that("effect differences, SEs and intervals agree with individual scores", 
 })
 
 test_that("ratios use potential means and odds on the probability scale", {
-  fit <- test_info(Y = "B", estimation = "G", model.outcome = ~glm(family = binomial()))
+  fit <- test_info(Y = "B", estimation = "G", model.outcome = ~ glm(family = binomial()))
   p0 <- flexPotential(fit, c(0, 0, 0))
   p1 <- flexPotential(fit, c(1, 0, 1))
   expect_true(all(c(p0$results$value, p1$results$value) > 0.1 &
-                  c(p0$results$value, p1$results$value) < 0.9))
+    c(p0$results$value, p1$results$value) < 0.9))
   for (scale in c("risk", "oddsratio")) {
     ref <- reference_effect(p1$potential_data, p0$potential_data, scale)
     expect_equal(flexEffect(p1, p0, scale = scale)$results$Effect, unname(ref), tolerance = 1e-8)
@@ -35,9 +35,9 @@ test_that("list comparisons retain labels, values and intervals after reordering
       expect_equal(rows[[name]], rep(ref[[name]], nrow(rows)), tolerance = 1e-8)
   }
   expect_equal(flexEffect(list(p1, p2), list(p0, p0))$results,
-               flexEffect(list(p2, p1), p0)$results, tolerance = 1e-8)
+    flexEffect(list(p2, p1), p0)$results, tolerance = 1e-8)
   expect_equal(flexEffect(p0, list(p1, p2))$results$Effect,
-               -flexEffect(list(p2, p1), p0)$results$Effect, tolerance = 1e-8)
+    -flexEffect(list(p2, p1), p0)$results$Effect, tolerance = 1e-8)
 })
 
 test_that("both decompositions agree with independently calculated path contrasts", {

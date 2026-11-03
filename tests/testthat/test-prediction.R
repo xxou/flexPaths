@@ -65,7 +65,7 @@ test_that("the installed template can be sourced as a working user model", {
   newdata <- data[1:7, ]; newdata$X <- newdata$X + 0.3
   model <- fl_template(data, c("X", "M1"), "Y", quote(template()))
   expect_equal(predict(model, newdata), predict(lm(Y ~ X + M1, data), newdata), tolerance = 1e-8)
-  fit <- test_info(data, estimation = "G", model.outcome = ~template())
+  fit <- test_info(data, estimation = "G", model.outcome = ~ template())
   expect_equal(flexPotential(fit, c(1, 0, 1))$potential_data,
     reference_single(data, c(1, 0, 1), "G"), tolerance = 1e-8)
   expect_equal(pathsEffect(fit)$results$Effect,

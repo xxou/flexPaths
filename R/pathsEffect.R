@@ -57,9 +57,9 @@
 #' @example inst/examples/pathsEffect-example.R
 #'
 #'
-pathsEffect<-function(
-    pathsInfo , decomposition = "refer0", scale = "diff",
-    CI_level = 0.95 , nboot = NULL, m.cores = NULL){
+pathsEffect <- function(
+  pathsInfo, decomposition = "refer0", scale = "diff",
+  CI_level = 0.95, nboot = NULL, m.cores = NULL) {
   # evironment
   Call <- match.call()
   # Variables populated by list2env().
@@ -69,35 +69,35 @@ pathsEffect<-function(
   # Column names used in dplyr expressions.
   Path <- Effect <- NULL
 
-  if(type != "single treatment"){
+  if (type != "single treatment") {
     stop("This function is only used for single treatment")
   }
   #### PSE decomposition -----
-  if(decomposition == "refer0"){
-    out<- refer0_effect(data = data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
-                        CI_level = CI_level, scale = scale, estimation =estimation,
-                        Pmodel.lists = Pmodel.lists,
-                        Omodel.lists = Omodel.lists,
-                        Imodel.lists = Imodel.lists,
-                        Imodel.source = Imodel.source)
+  if (decomposition == "refer0") {
+    out <- refer0_effect(data = data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
+      CI_level = CI_level, scale = scale, estimation = estimation,
+      Pmodel.lists = Pmodel.lists,
+      Omodel.lists = Omodel.lists,
+      Imodel.lists = Imodel.lists,
+      Imodel.source = Imodel.source)
   }
-  if(decomposition == "sequential"){
-    out<- sequential_effect(data = data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
-                            CI_level = CI_level, scale = scale, estimation =estimation,
-                            Pmodel.lists = Pmodel.lists,
-                            Omodel.lists = Omodel.lists,
-                            Imodel.lists = Imodel.lists,
-                            Imodel.source = Imodel.source)
+  if (decomposition == "sequential") {
+    out <- sequential_effect(data = data, A = A, Y = Y, cov_x = cov_x, M.list = M.list,
+      CI_level = CI_level, scale = scale, estimation = estimation,
+      Pmodel.lists = Pmodel.lists,
+      Omodel.lists = Omodel.lists,
+      Imodel.lists = Imodel.lists,
+      Imodel.source = Imodel.source)
   }
 
 
   #### bootstrap ------
-  if(is.numeric(nboot)){
+  if (is.numeric(nboot)) {
      # check_SuperLearner return warning
 
     if (is.numeric(m.cores)) {
       m.cores.detected <- parallel::detectCores()
-      if(m.cores > m.cores.detected){m.cores <- m.cores.detected}
+      if (m.cores > m.cores.detected) {m.cores <- m.cores.detected}
 
       # windows, m.cores = 1
       os <- tolower(Sys.info()[['sysname']])
@@ -108,23 +108,23 @@ pathsEffect<-function(
 
       boot.list <- parallel::mclapply(seq_len(nboot), function(i) {
         one_boot.pathsEffect(out)}, mc.cores = m.cores)
-    }else{
-      boot.list = purrr::map(seq_len(nboot), ~one_boot.pathsEffect(out))
+    } else {
+      boot.list = purrr::map(seq_len(nboot), ~ one_boot.pathsEffect(out))
     }
 
-    results.combine <- purrr::map_dfr(boot.list, ~ .x , .id = "source")
-    output<- results.combine %>%
+    results.combine <- purrr::map_dfr(boot.list, ~.x, .id = "source")
+    output <- results.combine %>%
       group_by(Path) %>%
       summarise(
-        boot.SE = sd(Effect,na.rm = T),
-        boot.CI.lower = quantile(Effect, probs = (1-CI_level)/2,na.rm = T),
-        boot.CI.upper = quantile(Effect, probs = 1-(1-CI_level)/2,na.rm = T)) %>%
+        boot.SE = sd(Effect, na.rm = T),
+        boot.CI.lower = quantile(Effect, probs = (1 - CI_level) / 2, na.rm = T),
+        boot.CI.upper = quantile(Effect, probs = 1 - (1 - CI_level) / 2, na.rm = T)) %>%
       mutate(Effect = out$results$Effect[match(Path, out$results$Path)],
              # p value for risk and ratio???
-             nboot = nboot) %>%
+        nboot = nboot) %>%
       relocate(Effect, .after = Path) %>% as.data.frame()
 
-    if(scale =="diff"){output$boot.P.value = round(2*(1-pnorm(abs(output$Effect)/output$boot.SE)),4)}
+    if (scale == "diff") {output$boot.P.value = round(2 * (1 - pnorm(abs(output$Effect) / output$boot.SE)), 4)}
     out$boot_results <- output
   }
 

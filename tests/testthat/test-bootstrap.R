@@ -28,7 +28,7 @@ test_that("flexEffect bootstrap agrees with an independent row-resampling loop",
         row <- out[out$active == labels[i], ]
         expect_equal(row$boot.SE, sd(ref[i, ]), tolerance = 1e-8)
         expect_equal(c(row$boot.CI.lower, row$boot.CI.upper),
-                     unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
+          unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
         expect_equal(row$nboot, 10)
       }
     }
@@ -54,7 +54,7 @@ test_that("pathsEffect bootstrap agrees with independent path resampling", {
         expect_equal(row$Effect, out$results$Effect[i], tolerance = 1e-8)
         expect_equal(row$boot.SE, sd(ref[i, ]), tolerance = 1e-8)
         expect_equal(c(row$boot.CI.lower, row$boot.CI.upper),
-                     unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
+          unname(quantile(ref[i, ], c(0.025, 0.975))), tolerance = 1e-8)
       }
     }
   }
@@ -81,7 +81,7 @@ test_that("multiple-treatment bootstrap agrees with independent refits", {
       })
       expect_equal(out$boot_results$boot.SE, sd(ref), tolerance = 1e-8)
       expect_equal(c(out$boot_results$boot.CI.lower, out$boot_results$boot.CI.upper),
-                   unname(quantile(ref, c(0.025, 0.975))), tolerance = 1e-8)
+        unname(quantile(ref, c(0.025, 0.975))), tolerance = 1e-8)
       expect_identical("boot.P.value" %in% names(out$boot_results), scale == "diff")
     }
   }
@@ -113,7 +113,7 @@ test_that("repeated comparisons do not change bootstrap uncertainty", {
 test_that("a user model also works in the bootstrap refits", {
   withr::local_seed(24)
   local_custom_model()
-  custom <- test_info(model.outcome = ~testlm())
+  custom <- test_info(model.outcome = ~ testlm())
   builtin <- test_info()
   p0 <- flexPotential(custom, c(0, 0, 0))
   p1 <- flexPotential(custom, c(1, 0, 1))

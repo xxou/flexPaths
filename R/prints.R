@@ -1,10 +1,10 @@
 
 #' @export
-print.pathsInfo <- function(x, ...){
+print.pathsInfo <- function(x, ...) {
   cat("\n")
   cat("Paths Parameters")
   cat("\n\n")
-  cat(x$type,":",x$A,"; outcome:", x$Y,"; covariates:", x$cov_x)
+  cat(x$type, ":", x$A, "; outcome:", x$Y, "; covariates:", x$cov_x)
   cat("\n\n")
   cat("mediators:")
   cat("\n\n")
@@ -16,7 +16,7 @@ print.pathsInfo <- function(x, ...){
 print.pathsEffect <- function(x, ...) {
   cat("\n")
   cat("Causal Paths Analysis: ")
-  cat(x$decomposition,"; scale:", x$scale, "; estimation:", x$estimation)
+  cat(x$decomposition, "; scale:", x$scale, "; estimation:", x$estimation)
   cat("\n\n")
 
   # Print function call
@@ -25,12 +25,12 @@ print.pathsEffect <- function(x, ...) {
   cat("\n\n")
 
   # print results
-  if(is.null( x$boot_results)){
-  cat("Causal Paths Estimates: \n\n")
-  print(x$results)
-  cat("\n\n")}
+  if (is.null(x$boot_results)) {
+    cat("Causal Paths Estimates: \n\n")
+    print(x$results)
+    cat("\n\n")}
 
-  if(!is.null( x$boot_results)){
+  if (!is.null(x$boot_results)) {
     cat("boot strap results: \n\n")
     print(x$boot_results)
     cat("\n\n")
@@ -53,12 +53,12 @@ print.flexPotential <- function(x, ...) {
 
   cat("Causal Paths Analysis: \n")
   cat("mean counterfactual outcome for flexible path \n")
-  cat("estimation:", x$pathsInfo$estimation,"\n\n")
+  cat("estimation:", x$pathsInfo$estimation, "\n\n")
 
 
-  if(is.null(x$boot_results)){
+  if (is.null(x$boot_results)) {
     print(x$results, ...)
-  }else{
+  } else {
     cat("boot strap results: \n\n")
     print(x$boot_results, ...)
   }
@@ -78,18 +78,18 @@ print.mflexPotential <- function(x, ...) {
 
   cat("Causal Paths Analysis: \n")
   cat("mean counterfactual outcome for flexible path \n")
-  cat("estimation:", x$pathsInfo$estimation,"\n\n")
+  cat("estimation:", x$pathsInfo$estimation, "\n\n")
 
 
-    cat("mutiple treatment matrix: \n")
-    print(x$active)
-    cat("\n\n")
+  cat("mutiple treatment matrix: \n")
+  print(x$active)
+  cat("\n\n")
 
 
 
-  if(is.null(x$boot_results)){
+  if (is.null(x$boot_results)) {
     print(x$results, ...)
-  }else{
+  } else {
     cat("boot strap results: \n\n")
     print(x$boot_results, ...)
   }
@@ -108,12 +108,12 @@ print.flexEffect <- function(x, ...) {
   cat("\n\n")
 
   # print results
-  if(is.null( x$boot_results)){
+  if (is.null(x$boot_results)) {
     cat("Causal Paths Estimates: \n\n")
     print(x$results)
     cat("\n\n")}
 
-  if(!is.null( x$boot_results)){
+  if (!is.null(x$boot_results)) {
     cat("boot strap results: \n\n")
     print(x$boot_results)
     cat("\n\n")

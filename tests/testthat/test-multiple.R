@@ -1,8 +1,8 @@
 test_that("multiple-treatment G respects temporal order and analytic means", {
   fit <- test_info(balanced_data(TRUE), A = c("A", "A2"), estimation = "G")
   active <- list(list(c(0, 0, 0), c(NA, 0, 0)),
-                 list(c(1, 1, 1), c(NA, 1, 1)),
-                 list(c(0, 1, 1), c(NA, 0, 1)))
+    list(c(1, 1, 1), c(NA, 1, 1)),
+    list(c(0, 1, 1), c(NA, 0, 1)))
   for (i in seq_along(active)) {
     out <- mflexPotential(fit, active[[i]])
     expect_s3_class(out, "mflexPotential")
